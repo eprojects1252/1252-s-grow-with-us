@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Search, ShoppingBag, UserRound, Menu, X, ChevronDown, ArrowRight,
+  Search, ShoppingBag, UserRound, Menu, X, ChevronDown, ArrowRight, MapPin,
   Sparkles, Truck, ShieldCheck, Headphones, Smartphone, Zap, Heart,
   Plus, Minus, Trash2, CreditCard, Clock3, CheckCircle2,
   ChevronRight, Grid2X2, LogIn
@@ -56,6 +56,7 @@ const money = (n: number) => "₹" + n.toLocaleString("en-IN");
 export default function Storefront() {
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [pincode, setPincode] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -88,13 +89,31 @@ export default function Storefront() {
   return (
     <main>
       <div className="announcement"><Sparkles size={14}/> Welcome to a smarter way to shop <span> | </span> Discover something wonderful today</div>
-      <header className="header">
-        <button className="icon-btn mobile-only" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Open menu">{mobileMenu ? <X/> : <Menu/>}</button>
-        <a className="brand" href="#"><span className="brand-mark">A</span><span>SRI AMIRTHAA<small>SHOPPING, REIMAGINED</small></span></a>
-        <div className={`search-shell ${searchOpen ? "search-shell-open" : ""} ${query ? "has-query" : ""}`}><span className="search-particle particle-one"/><span className="search-particle particle-two"/><span className="search-particle particle-three"/><button className="search-toggle" aria-label={searchOpen ? "Close search" : "Open search"} onClick={() => { if (searchOpen) { setSearchOpen(false); setQuery(""); } else setSearchOpen(true); }}>{searchOpen ? <X size={19}/> : <Search size={20}/>}</button><div className="search-field-wrap"><input ref={searchInputRef} value={query} onChange={e => setQuery(e.target.value)} onFocus={() => setSearchOpen(true)} placeholder="Search products, brands and more..." tabIndex={searchOpen ? 0 : -1}/>{query && <button className="search-clear" aria-label="Clear search" onClick={() => {setQuery("");searchInputRef.current?.focus();}}><X size={15}/></button>}</div><kbd>⌘ K</kbd></div>
-        <div className="header-actions">
-          <button className="action-link" onClick={() => setAuthOpen(true)}><UserRound size={20}/><span>Account</span></button>
-          <button className="action-link cart-trigger" onClick={() => setCartOpen(true)}><ShoppingBag size={20}/><span>Cart</span>{cartCount > 0 && <b>{cartCount}</b>}</button>
+      <header className="header header-v2">
+        <div className="website-switcher" aria-label="Main websites">
+          <button className="website-tab website-tab-active" type="button"><span className="website-logo-placeholder">Logo 1</span></button>
+          <button className="website-tab" type="button"><span className="website-logo-placeholder">Logo 2</span></button>
+          <button className="website-tab" type="button"><span className="website-logo-placeholder">Logo 3</span></button>
+        </div>
+        <div className="location-search-row">
+          <button className="icon-btn mobile-only menu-trigger" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Open menu">{mobileMenu ? <X/> : <Menu/>}</button>
+          <div className={`location-details ${searchOpen ? "location-details-hidden" : ""}`}>
+            <MapPin size={21} />
+            <label htmlFor="customer-pincode">Deliver to</label>
+            <input id="customer-pincode" inputMode="numeric" maxLength={6} value={pincode} onChange={e => setPincode(e.target.value.replace(/\\D/g,"").slice(0,6))} placeholder="Enter PIN code" aria-label="Delivery PIN code"/>
+          </div>
+          <div className={`search-shell ${searchOpen ? "search-shell-open" : ""} ${query ? "has-query" : ""}`}>
+            <span className="search-particle particle-one"/><span className="search-particle particle-two"/><span className="search-particle particle-three"/>
+            <button className="search-toggle" aria-label={searchOpen ? "Close search" : "Open search"} onClick={() => { if (searchOpen) { setSearchOpen(false); setQuery(""); } else setSearchOpen(true); }}>
+              {searchOpen ? <X size={20}/> : <Search size={21}/>}
+            </button>
+            <div className="search-field-wrap"><input ref={searchInputRef} value={query} onChange={e => setQuery(e.target.value)} onFocus={() => setSearchOpen(true)} placeholder="Search products, brands and more..." tabIndex={searchOpen ? 0 : -1}/>{query && <button className="search-clear" aria-label="Clear search" onClick={() => {setQuery("");searchInputRef.current?.focus();}}><X size={15}/></button>}</div>
+            <kbd>⌘ K</kbd>
+          </div>
+          <div className="header-actions header-actions-v2">
+            <button className="action-link account-trigger" onClick={() => setAuthOpen(true)}><UserRound size={20}/><span>Account</span></button>
+            <button className="action-link cart-trigger" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><ShoppingBag size={21}/><span>Cart</span>{cartCount > 0 && <b>{cartCount}</b>}</button>
+          </div>
         </div>
       </header>
 
