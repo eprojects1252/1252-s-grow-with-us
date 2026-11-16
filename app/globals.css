@@ -19,7 +19,15 @@
   .particle-cloud{position:absolute;inset:-7px;pointer-events:none;opacity:0}
   .particle-cloud i{position:absolute;width:3px;height:3px;border-radius:50%;background:#35c9b9;box-shadow:0 0 7px #35c9b9;opacity:0}
   .particle-cloud i:nth-child(1){left:3px;top:12px}.particle-cloud i:nth-child(2){left:8px;top:1px}.particle-cloud i:nth-child(3){left:50%;top:-3px}.particle-cloud i:nth-child(4){right:6px;top:3px}.particle-cloud i:nth-child(5){right:0;top:14px}.particle-cloud i:nth-child(6){right:8px;bottom:0}.particle-cloud i:nth-child(7){left:9px;bottom:0}.particle-cloud i:nth-child(8){left:0;top:17px}
-  .mobile-bottom-item.active .particle-cloud{opacity:1}
+  .mobile-bottom-item.active .particle-cloud{opacity:0}
+  .nav-particle-flight{position:absolute;z-index:3;top:16px;width:1px;height:1px;pointer-events:none;animation:particleTravel .72s cubic-bezier(.22,.75,.28,1) forwards}
+  .nav-particle-flight i{position:absolute;left:0;top:0;width:4px;height:4px;border-radius:50%;background:#39d9c8;box-shadow:0 0 7px #39d9c8,0 0 13px #39d9c888;animation:particleBurst .72s ease-out both}
+  .nav-particle-flight i:nth-child(3n){background:#b6fff5;width:3px;height:3px;animation-delay:.04s}
+  .nav-particle-flight i:nth-child(3n + 1){animation-delay:.08s}
+  .nav-particle-flight i:nth-child(3n + 2){animation-delay:.13s}
+  .nav-particle-flight i:nth-child(1){--px:-8px;--py:-7px}.nav-particle-flight i:nth-child(2){--px:5px;--py:-10px}.nav-particle-flight i:nth-child(3){--px:12px;--py:-4px}.nav-particle-flight i:nth-child(4){--px:9px;--py:8px}.nav-particle-flight i:nth-child(5){--px:-4px;--py:11px}.nav-particle-flight i:nth-child(6){--px:-13px;--py:4px}.nav-particle-flight i:nth-child(7){--px:-2px;--py:-14px}.nav-particle-flight i:nth-child(8){--px:14px;--py:3px}.nav-particle-flight i:nth-child(9){--px:-11px;--py:-10px}.nav-particle-flight i:nth-child(10){--px:3px;--py:14px}.nav-particle-flight i:nth-child(11){--px:16px;--py:-9px}.nav-particle-flight i:nth-child(12){--px:-16px;--py:10px}
+  @keyframes particleTravel{from{left:var(--from,0%)}to{left:var(--to)}}
+  @keyframes particleBurst{0%{opacity:0;transform:translate(0,0) scale(.3)}20%{opacity:1}100%{opacity:0;transform:translate(var(--px),var(--py)) scale(.1)}}
   .mobile-bottom-item.active .particle-cloud i{animation:particleGather .85s ease-out both}
   .mobile-bottom-item.active .particle-cloud i:nth-child(2){animation-delay:.05s}.mobile-bottom-item.active .particle-cloud i:nth-child(3){animation-delay:.1s}.mobile-bottom-item.active .particle-cloud i:nth-child(4){animation-delay:.15s}.mobile-bottom-item.active .particle-cloud i:nth-child(5){animation-delay:.2s}.mobile-bottom-item.active .particle-cloud i:nth-child(6){animation-delay:.25s}.mobile-bottom-item.active .particle-cloud i:nth-child(7){animation-delay:.3s}.mobile-bottom-item.active .particle-cloud i:nth-child(8){animation-delay:.35s}
   @keyframes particleGather{0%{opacity:0;transform:translate(0,0) scale(.4)}35%{opacity:1;transform:translate(0,0) scale(1.4)}100%{opacity:0;transform:translate(var(--gather-x,0),var(--gather-y,0)) scale(.2)}}
