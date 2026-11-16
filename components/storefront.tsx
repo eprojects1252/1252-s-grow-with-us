@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search, ShoppingBag, UserRound, Menu, X, ChevronDown, ArrowRight,
   Sparkles, Truck, ShieldCheck, Headphones, Smartphone, Zap, Heart,
@@ -55,6 +55,12 @@ const money = (n: number) => "₹" + n.toLocaleString("en-IN");
 
 export default function Storefront() {
   const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -85,7 +91,7 @@ export default function Storefront() {
       <header className="header">
         <button className="icon-btn mobile-only" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Open menu">{mobileMenu ? <X/> : <Menu/>}</button>
         <a className="brand" href="#"><span className="brand-mark">A</span><span>SRI AMIRTHAA<small>SHOPPING, REIMAGINED</small></span></a>
-        <div className="search"><Search size={19}/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search for products, brands and more..."/><kbd>⌘ K</kbd></div>
+        <div className={`search-shell ${searchOpen ? "search-shell-open" : ""} ${query ? "has-query" : ""}`}><span className="search-particle particle-one"/><span className="search-particle particle-two"/><span className="search-particle particle-three"/><button className="search-toggle" aria-label={searchOpen ? "Close search" : "Open search"} onClick={() => { if (searchOpen) { setSearchOpen(false); setQuery(""); } else setSearchOpen(true); }}>{searchOpen ? <X size={19}/> : <Search size={20}/>}</button><div className="search-field-wrap"><input ref={searchInputRef} value={query} onChange={e => setQuery(e.target.value)} onFocus={() => setSearchOpen(true)} placeholder="Search products, brands and more..." tabIndex={searchOpen ? 0 : -1}/>{query && <button className="search-clear" aria-label="Clear search" onClick={() => {setQuery("");searchInputRef.current?.focus();}}><X size={15}/></button>}</div><kbd>⌘ K</kbd></div>
         <div className="header-actions">
           <button className="action-link" onClick={() => setAuthOpen(true)}><UserRound size={20}/><span>Account</span></button>
           <button className="action-link cart-trigger" onClick={() => setCartOpen(true)}><ShoppingBag size={20}/><span>Cart</span>{cartCount > 0 && <b>{cartCount}</b>}</button>
