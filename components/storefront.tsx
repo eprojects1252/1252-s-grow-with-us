@@ -116,7 +116,7 @@ export default function Storefront() {
             <kbd>⌘ K</kbd>
           </div>
           <div className="header-actions header-actions-v2">
-            <button className="action-link account-trigger" onClick={() => window.location.assign("/login")}><UserRound size={20}/><span>Account</span></button>
+            <button className="action-link account-trigger" onClick={() => window.location.assign("/login")}><UserRound size={20}/><span>Login</span></button>
             <button className="action-link cart-trigger" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><ShoppingBag size={21}/><span>Cart</span>{cartCount > 0 && <b>{cartCount}</b>}</button>
           </div>
         </div>
