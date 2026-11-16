@@ -38,3 +38,22 @@
  @keyframes particleHop{0%,100%{opacity:.18;transform:translate(0,0) scale(.55)}18%{opacity:1;transform:translate(calc(var(--x)*.35),calc(var(--y)*.45 - 8px)) scale(1.15)}42%{opacity:.9;transform:translate(var(--x),var(--y)) scale(.82)}68%{opacity:1;transform:translate(calc(var(--x)*.65),calc(var(--y)*.35 + 7px)) scale(1.1)}88%{opacity:.35;transform:translate(calc(var(--x)*.2),calc(var(--y)*.15)) scale(.65)}}
 }
 @media(prefers-reduced-motion:reduce){.mobile-bottom-item,.nav-particle-flight,.nav-particle-flight i{animation:none!important;transition:none!important}}
+
+
+/* Add-to-cart feedback and floating cart summary */
+.add-btn{transition:background .22s ease,color .22s ease,border-color .22s ease,transform .22s ease}
+.add-btn:active{transform:scale(.97)}
+.add-btn.add-btn-added{background:linear-gradient(120deg,#159b78,#28b58d);border-color:#159b78;color:#fff;box-shadow:0 5px 16px rgba(21,155,120,.2);animation:addConfirmPop .38s ease}
+@keyframes addConfirmPop{0%{transform:scale(.94)}55%{transform:scale(1.035)}100%{transform:scale(1)}}
+.cart-float-bar{position:fixed;z-index:45;left:50%;bottom:24px;transform:translateX(-50%);width:min(440px,calc(100vw - 32px));min-height:70px;padding:10px 12px;display:flex;align-items:center;gap:11px;border:1px solid rgba(255,255,255,.72);border-radius:20px;background:rgba(247,252,251,.84);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);box-shadow:0 16px 44px rgba(27,48,62,.19),inset 0 1px 0 rgba(255,255,255,.9);animation:cartFloatIn .42s cubic-bezier(.2,.8,.2,1) both}
+.cart-float-product{width:46px;height:46px;flex:0 0 46px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#e4f8f1,#e9f1ff);box-shadow:inset 0 1px 0 #fff}
+.cart-float-product span{font-size:25px;filter:drop-shadow(0 3px 4px rgba(50,70,80,.15))}
+.cart-float-copy{min-width:0;flex:1}
+.cart-float-copy strong,.cart-float-copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-float-copy strong{font-size:11px;color:#26374a;font-weight:800}
+.cart-float-copy small{font-size:10px;color:#7d8995;margin-top:4px}
+.cart-float-view{height:42px;padding:0 14px;border:0;border-radius:13px;background:linear-gradient(120deg,#167e78,#27a99a);color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;font-weight:750;white-space:nowrap;box-shadow:0 6px 16px rgba(22,126,120,.2);transition:transform .2s ease,box-shadow .2s ease}
+.cart-float-view:hover{transform:translateY(-2px);box-shadow:0 9px 20px rgba(22,126,120,.27)}
+@keyframes cartFloatIn{from{opacity:0;transform:translate(-50%,18px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@media(max-width:650px){.cart-float-bar{bottom:94px;width:calc(100vw - 24px);min-height:64px;padding:8px 9px;border-radius:17px;gap:8px}.cart-float-product{width:42px;height:42px;flex-basis:42px}.cart-float-view{height:39px;padding:0 11px;font-size:10px}.cart-float-copy strong{font-size:10px}.cart-float-copy small{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.add-btn.add-btn-added,.cart-float-bar{animation:none!important}.add-btn,.cart-float-view{transition:none!important}}
