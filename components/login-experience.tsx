@@ -17,7 +17,14 @@ export default function LoginExperience({ initialMode = "login" }: { initialMode
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setNotice("Sri Amirthaa ID secure authentication will be connected after backend setup.");
+    const data = new FormData(event.currentTarget);
+    if (mode === "signup" && data.get("password") !== data.get("confirmPassword")) {
+      setNotice("Passwords do not match. Please check both password fields.");
+      return;
+    }
+    setNotice(mode === "signup"
+      ? "Your email sign-up form is ready. Account creation will activate after the secure database and authentication are connected."
+      : "Secure sign-in will activate after Sri Amirthaa ID authentication is connected.");
   }
 
   return (
@@ -36,14 +43,14 @@ export default function LoginExperience({ initialMode = "login" }: { initialMode
         <div className="auth-v7-inner">
           <header className="auth-v7-heading">
             <h1>{mode === "login" ? <>Welcome <em>Back</em></> : <>Create <em>Account</em></>}</h1>
-            <p>{mode === "login" ? "Enter your credentials to access your secure account" : "Join us today to access your secure workspace"}</p>
+            <p>{mode === "login" ? "Enter your credentials to access your secure account" : "Create your account using your email address"}</p>
           </header>
 
           <form className="auth-v7-form" onSubmit={handleSubmit}>
             {mode === "signup" && (
               <label className="auth-v7-field">
                 <span>Full Name</span>
-                <div className="auth-v7-input"><UserRound size={15} /><input name="name" autoComplete="name" placeholder="Alex Johnson" required /></div>
+                <div className="auth-v7-input"><UserRound size={15} /><input name="name" autoComplete="name" placeholder="Your full name" required /></div>
               </label>
             )}
 
@@ -65,7 +72,7 @@ export default function LoginExperience({ initialMode = "login" }: { initialMode
                 </label>
                 <label className="auth-v7-field">
                   <span>Confirm Password</span>
-                  <div className="auth-v7-input"><LockKeyhole size={15} /><input name="confirmPassword" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="••••••••" minLength={8} required /><Eye size={15} className="auth-v7-muted-eye" /></div>
+                  <div className="auth-v7-input"><LockKeyhole size={15} /><input name="confirmPassword" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Re-enter your password" minLength={8} required /><button type="button" className="auth-v7-eye" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div>
                 </label>
               </div>
             )}
