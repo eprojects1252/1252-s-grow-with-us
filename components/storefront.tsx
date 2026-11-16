@@ -100,7 +100,7 @@ export default function Storefront() {
           <div className={`location-details ${searchOpen ? "location-details-hidden" : ""}`}>
             <MapPin size={21} />
             <label htmlFor="customer-pincode">Deliver to</label>
-            <input id="customer-pincode" inputMode="numeric" maxLength={6} value={pincode} onChange={e => setPincode(e.target.value.replace(/\\D/g,"").slice(0,6))} placeholder="Enter PIN code" aria-label="Delivery PIN code"/>
+            <input id="customer-pincode" inputMode="numeric" maxLength={6} value={pincode} onChange={e => setPincode(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="Enter PIN code" aria-label="Delivery PIN code"/>
           </div>
           <div className={`search-shell ${searchOpen ? "search-shell-open" : ""} ${query ? "has-query" : ""}`}>
             <span className="search-particle particle-one"/><span className="search-particle particle-two"/><span className="search-particle particle-three"/>
