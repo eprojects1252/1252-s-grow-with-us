@@ -47,6 +47,6 @@ export default function GlobalMobileNav() {
  };
  return <nav className="mobile-bottom-nav" aria-label="Main navigation">
   {flight && <span key={flight.key} className="nav-particle-flight" style={{left:`${10+flight.from*20}%`,["--start" as string]:`${10+flight.from*20}%`,["--to" as string]:`${10+flight.to*20}%`} as React.CSSProperties} aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i}/>)}</span>}
-  {tabs.map(({label,href,icon:Icon})=><button key={label} type="button" className={`mobile-bottom-item ${active===label?"active":""}`} onClick={()=>navigate(label,href)} aria-label={label} aria-current={active===label?"page":undefined}><span className="bottom-icon-wrap"><Icon size={20}/></span><span className="bottom-label">{label}</span></button>)}
+  {tabs.map(({label,href,icon:Icon})=><button key={label} type="button" className={`mobile-bottom-item ${active===label?"active":""}`} onClick={()=>navigate(label,href)} aria-label={label} aria-current={active===label?"page":undefined}><span className="bottom-icon-wrap"><Icon size={20}/>{active===label && <span className="nav-active-sparkles" aria-hidden="true">{Array.from({length:10},(_,i)=><i key={i}/>)}</span>}</span><span className="bottom-label">{label}</span></button>)}
  </nav>;
 }
