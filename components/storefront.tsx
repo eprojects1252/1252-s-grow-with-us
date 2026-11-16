@@ -72,6 +72,14 @@ export default function Storefront() {
   const [email, setEmail] = useState("");
   const [selectedSub, setSelectedSub] = useState("");
   const [activeBottomTab, setActiveBottomTab] = useState("Home");
+  const [particleFlight, setParticleFlight] = useState<{ from: number; to: number; key: number } | null>(null);
+  const selectBottomTab = (label: string) => {
+    const tabs = ["Home", "Offers", "My Account", "Favorite", "Orders"];
+    const from = tabs.indexOf(activeBottomTab);
+    const to = tabs.indexOf(label);
+    if (from !== to) setParticleFlight({ from, to, key: Date.now() });
+    setActiveBottomTab(label);
+  };
 
   const filtered = useMemo(() => products.filter(p =>
     (activeCategory === "All" || p.category === activeCategory) &&
@@ -142,12 +150,13 @@ export default function Storefront() {
 
 
       <nav className="mobile-bottom-nav" aria-label="Main navigation">
+        {particleFlight && <span key={particleFlight.key} className="nav-particle-flight" style={{ left: `${10 + particleFlight.from * 20}%`, ["--to" as string]: `${10 + particleFlight.to * 20}%` } as React.CSSProperties} aria-hidden="true">{Array.from({ length: 12 }, (_, i) => <i key={i}/>)}</span>}
         {[
-          { label: "Home", icon: <House size={20}/>, action: () => { setActiveBottomTab("Home"); window.scrollTo({ top: 0, behavior: "smooth" }); } },
-          { label: "Offers", icon: <Tag size={20}/>, action: () => { setActiveBottomTab("Offers"); window.location.href = "/offers"; } },
-          { label: "My Account", icon: <UserRound size={20}/>, action: () => { setActiveBottomTab("My Account"); setAuthOpen(true); } },
-          { label: "Favorite", icon: <Heart size={20}/>, action: () => { setActiveBottomTab("Favorite"); window.location.href = "/favorites"; } },
-          { label: "Orders", icon: <Package size={20}/>, action: () => { setActiveBottomTab("Orders"); window.location.href = "/orders"; } },
+          { label: "Home", icon: <House size={20}/>, action: () => { selectBottomTab("Home"); window.scrollTo({ top: 0, behavior: "smooth" }); } },
+          { label: "Offers", icon: <Tag size={20}/>, action: () => { selectBottomTab("Offers"); window.location.href = "/offers"; } },
+          { label: "My Account", icon: <UserRound size={20}/>, action: () => { selectBottomTab("My Account"); setAuthOpen(true); } },
+          { label: "Favorite", icon: <Heart size={20}/>, action: () => { selectBottomTab("Favorite"); window.location.href = "/favorites"; } },
+          { label: "Orders", icon: <Package size={20}/>, action: () => { selectBottomTab("Orders"); window.location.href = "/orders"; } },
         ].map((item) => (
           <button key={item.label} type="button" className={`mobile-bottom-item ${activeBottomTab === item.label ? "active" : ""}`} onClick={item.action} aria-label={item.label}>
             <span className="bottom-icon-wrap">{item.icon}<span className="particle-cloud" aria-hidden="true">{Array.from({ length: 8 }, (_, i) => <i key={i}/>)}</span></span>
