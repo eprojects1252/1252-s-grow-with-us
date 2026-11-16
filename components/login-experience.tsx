@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, LockKeyhole, UserRound, ArrowRight, Chrome } from "lucide-react";
+import { Eye, EyeOff, Mail, LockKeyhole, UserRound, ArrowRight } from "lucide-react";
 
 export default function LoginExperience({ initialMode = "login" }: { initialMode?: "login" | "signup" }) {
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
@@ -17,81 +17,82 @@ export default function LoginExperience({ initialMode = "login" }: { initialMode
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setNotice("Your form is ready. Secure Sri Amirthaa ID authentication will be enabled after backend integration.");
+    setNotice("Sri Amirthaa ID secure authentication will be connected after backend setup.");
   }
 
   return (
-    <main className="auth-scene">
-      <div className="auth-orbit auth-orbit-one" />
-      <div className="auth-orbit auth-orbit-two" />
-      <div className="auth-gold-ribbon auth-gold-ribbon-one" />
-      <div className="auth-gold-ribbon auth-gold-ribbon-two" />
-      <Link className="auth-brand" href="/">
-        <span className="auth-brand-mark">1252</span>
-        <span><strong>GROW WITH US</strong><small>Shop Everything. Grow With Us.</small></span>
-      </Link>
+    <main className="auth-v7">
+      <div className="auth-v7-backdrop" aria-hidden="true">
+        <span className="auth-metal-band auth-metal-band-a" />
+        <span className="auth-metal-band auth-metal-band-b" />
+        <span className="auth-metal-band auth-metal-band-c" />
+        <span className="auth-metal-band auth-metal-band-d" />
+        <span className="auth-metal-glint" />
+      </div>
 
-      <section className="auth-card-wrap">
-        <div className="auth-card">
-          <div className="auth-card-glow" />
-          <div className="auth-tabs" role="tablist" aria-label="Account access">
-            <button type="button" className={mode === "login" ? "auth-tab active" : "auth-tab"} onClick={() => switchMode("login")}>Sign In</button>
-            <button type="button" className={mode === "signup" ? "auth-tab active" : "auth-tab"} onClick={() => switchMode("signup")}>Create Account</button>
-          </div>
+      <section className={mode === "signup" ? "auth-v7-card auth-v7-card-signup" : "auth-v7-card"} aria-label={mode === "login" ? "Sign in" : "Create account"}>
+        <span className="auth-v7-corner auth-v7-corner-top" aria-hidden="true" />
+        <span className="auth-v7-corner auth-v7-corner-bottom" aria-hidden="true" />
+        <div className="auth-v7-inner">
+          <header className="auth-v7-heading">
+            <h1>{mode === "login" ? <>Welcome <em>Back</em></> : <>Create <em>Account</em></>}</h1>
+            <p>{mode === "login" ? "Enter your credentials to access your secure account" : "Join us today to access your secure workspace"}</p>
+          </header>
 
-          <div className="auth-heading">
-            <span className="auth-eyebrow">SRI AMIRTHAA ID</span>
-            <h1>{mode === "login" ? "Welcome Back" : "Create Account"}</h1>
-            <p>{mode === "login" ? "Sign in to continue your journey with us." : "One account. More ways to grow with us."}</p>
-          </div>
-
-          <form className="auth-form" onSubmit={handleSubmit}>
+          <form className="auth-v7-form" onSubmit={handleSubmit}>
             {mode === "signup" && (
-              <label className="auth-field">
+              <label className="auth-v7-field">
                 <span>Full Name</span>
-                <div className="auth-input-wrap"><UserRound size={17} /><input name="name" autoComplete="name" placeholder="Enter your full name" required /></div>
+                <div className="auth-v7-input"><UserRound size={15} /><input name="name" autoComplete="name" placeholder="Alex Johnson" required /></div>
               </label>
             )}
-            <label className="auth-field">
+
+            <label className="auth-v7-field">
               <span>Email Address</span>
-              <div className="auth-input-wrap"><Mail size={17} /><input name="email" type="email" autoComplete="email" placeholder="you@example.com" required /></div>
+              <div className="auth-v7-input"><Mail size={15} /><input name="email" type="email" autoComplete="email" placeholder="name@domain.com" required /></div>
             </label>
-            {mode === "signup" && (
-              <label className="auth-field">
-                <span>Mobile Number</span>
-                <div className="auth-input-wrap"><span className="auth-country-code">+91</span><input name="mobile" type="tel" inputMode="numeric" autoComplete="tel" placeholder="Enter mobile number" pattern="[0-9]{10}" required /></div>
+
+            {mode === "login" ? (
+              <label className="auth-v7-field">
+                <span>Password</span>
+                <div className="auth-v7-input"><LockKeyhole size={15} /><input name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="••••••••••" minLength={8} required /><button type="button" className="auth-v7-eye" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div>
               </label>
-            )}
-            <label className="auth-field">
-              <span>Password</span>
-              <div className="auth-input-wrap"><LockKeyhole size={17} /><input name="password" type={showPassword ? "text" : "password"} autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder="Enter your password" minLength={8} required /><button className="auth-eye" type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
-            </label>
-            {mode === "signup" && (
-              <label className="auth-field">
-                <span>Confirm Password</span>
-                <div className="auth-input-wrap"><LockKeyhole size={17} /><input name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Confirm your password" minLength={8} required /></div>
-              </label>
+            ) : (
+              <div className="auth-v7-password-row">
+                <label className="auth-v7-field">
+                  <span>Password</span>
+                  <div className="auth-v7-input"><LockKeyhole size={15} /><input name="password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="••••••••" minLength={8} required /><button type="button" className="auth-v7-eye" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></div>
+                </label>
+                <label className="auth-v7-field">
+                  <span>Confirm Password</span>
+                  <div className="auth-v7-input"><LockKeyhole size={15} /><input name="confirmPassword" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="••••••••" minLength={8} required /><Eye size={15} className="auth-v7-muted-eye" /></div>
+                </label>
+              </div>
             )}
 
             {mode === "login" ? (
-              <div className="auth-options"><label className="auth-remember"><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} /> <span>Remember me</span></label><button type="button" className="auth-text-button" onClick={() => setNotice("Password recovery will be available after secure authentication is connected.")}>Forgot Password?</button></div>
+              <div className="auth-v7-options">
+                <label><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} /><span>Remember me</span></label>
+                <button type="button" onClick={() => setNotice("Password recovery will be available after Sri Amirthaa ID authentication is connected.")}>Forgot password?</button>
+              </div>
             ) : (
-              <label className="auth-remember auth-terms"><input type="checkbox" required /> <span>I agree to the <Link href="/terms">Terms &amp; Conditions</Link> and <Link href="/privacy">Privacy Policy</Link>.</span></label>
+              <label className="auth-v7-terms"><input type="checkbox" required /><span>I agree to the <Link href="/terms">Terms</Link> &amp; <Link href="/privacy">Privacy Policy</Link></span></label>
             )}
 
-            <button className="auth-submit" type="submit">{mode === "login" ? "Sign In" : "Create Account"} <ArrowRight size={17} /></button>
-            {notice && <p className="auth-notice" role="status">{notice}</p>}
+            <button className="auth-v7-submit" type="submit">{mode === "login" ? "Sign In" : "Create Account"} <ArrowRight size={15} /></button>
+            {notice && <p className="auth-v7-notice" role="status">{notice}</p>}
           </form>
 
-          <div className="auth-divider"><span /> <small>OR CONTINUE WITH</small> <span /></div>
-          <div className="auth-socials">
-            <button type="button" onClick={() => setNotice("Google sign-in will be enabled after provider authentication setup.")}><Chrome size={17} /> Google</button>
-            <button type="button" onClick={() => setNotice("Apple sign-in will be enabled after provider authentication setup.")}><span className="auth-apple">●</span> Apple</button>
+          <div className="auth-v7-divider"><span />OR CONTINUE WITH<span /></div>
+          <div className="auth-v7-socials">
+            <button type="button" onClick={() => setNotice("Google sign-in will be enabled after provider authentication setup.")}><b className="auth-google-g">G</b> Google</button>
+            <button type="button" onClick={() => setNotice("Apple sign-in will be enabled after provider authentication setup.")}><b className="auth-apple-mark">●</b> Apple</button>
           </div>
-          <p className="auth-switch">{mode === "login" ? "New to 1252's Grow With Us?" : "Already have an account?"} <button type="button" onClick={() => switchMode(mode === "login" ? "signup" : "login")}>{mode === "login" ? "Create account" : "Sign in"}</button></p>
+          <p className="auth-v7-switch">{mode === "login" ? "Don't have an account?" : "Already have an account?"} <button type="button" onClick={() => switchMode(mode === "login" ? "signup" : "login")}>{mode === "login" ? "Sign Up" : "Sign In"}</button></p>
         </div>
       </section>
-      <footer className="auth-footer">Supporting By Sri Amirthaa Groups 1252 <span>•</span> Managing By K² Techtron Team</footer>
+
+      <Link className="auth-v7-home" href="/" aria-label="Back to 1252's Grow With Us">1252's <strong>GROW WITH US</strong></Link>
     </main>
   );
 }
