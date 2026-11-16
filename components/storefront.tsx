@@ -150,7 +150,7 @@ export default function Storefront() {
 
 
       <nav className="mobile-bottom-nav" aria-label="Main navigation">
-        {particleFlight && <span key={particleFlight.key} className="nav-particle-flight" style={{ left: `${10 + particleFlight.from * 20}%`, ["--to" as string]: `${10 + particleFlight.to * 20}%` } as React.CSSProperties} aria-hidden="true">{Array.from({ length: 12 }, (_, i) => <i key={i}/>)}</span>}
+        {particleFlight && <span key={particleFlight.key} className="nav-particle-flight" style={{ left: `${10 + particleFlight.from * 20}%`, ["--start" as string]: `${10 + particleFlight.from * 20}%`, ["--to" as string]: `${10 + particleFlight.to * 20}%` } as React.CSSProperties} aria-hidden="true">{Array.from({ length: 12 }, (_, i) => <i key={i}/>)}</span>}
         {[
           { label: "Home", icon: <House size={20}/>, action: () => { selectBottomTab("Home"); window.scrollTo({ top: 0, behavior: "smooth" }); } },
           { label: "Offers", icon: <Tag size={20}/>, action: () => { selectBottomTab("Offers"); window.location.href = "/offers"; } },
