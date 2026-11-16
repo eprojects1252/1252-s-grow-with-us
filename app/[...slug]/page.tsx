@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LoginExperience from "@/components/login-experience";
 
 type PageInfo = { title: string; description: string; section: string };
 
@@ -26,7 +27,7 @@ const pages: Record<string, PageInfo> = {
 export default async function StructurePage({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;
   const route = slug[0] ?? "";
-  const info = pages[route] ?? {
+  if (route === "login") return <LoginExperience initialMode="login" />;\n  if (route === "signup") return <LoginExperience initialMode="signup" />;\n\n  const info = pages[route] ?? {
     title: slug.map((part) => decodeURIComponent(part).replace(/-/g, " ")).join(" / "),
     description: "This page is part of the website structure. Its complete content and functionality will be added in the design and integration phases.",
     section: "Website",
