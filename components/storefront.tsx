@@ -64,6 +64,8 @@ export default function Storefront() {
   }, [searchOpen]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [justAddedId, setJustAddedId] = useState<number | null>(null);
+  const [lastAddedProduct, setLastAddedProduct] = useState<Product | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -78,10 +80,15 @@ export default function Storefront() {
     (p.name.toLowerCase().includes(query.toLowerCase()) || p.category.toLowerCase().includes(query.toLowerCase()))
   ), [query, activeCategory]);
 
-  const addToCart = (p: Product) => setCart(prev => {
-    const found = prev.find(i => i.id === p.id);
-    return found ? prev.map(i => i.id === p.id ? { ...i, qty: i.qty + 1 } : i) : [...prev, { ...p, qty: 1 }];
-  });
+  const addToCart = (p: Product) => {
+    setCart(prev => {
+      const found = prev.find(i => i.id === p.id);
+      return found ? prev.map(i => i.id === p.id ? { ...i, qty: i.qty + 1 } : i) : [...prev, { ...p, qty: 1 }];
+    });
+    setLastAddedProduct(p);
+    setJustAddedId(p.id);
+    window.setTimeout(() => setJustAddedId(current => current === p.id ? null : current), 1350);
+  };
   const updateQty = (id: number, delta: number) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + delta } : i).filter(i => i.qty > 0));
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
@@ -151,13 +158,19 @@ export default function Storefront() {
       <section className="products-section wrap" id="products">
         <div className="section-heading"><div><span className="eyebrow">HANDPICKED FOR YOU</span><h2>{activeCategory === "All" ? "Popular right now" : activeCategory}</h2><p>{selectedSub ? `Browsing ${selectedSub}` : "A few things we think you'll love."}</p></div><button className="outline-btn" onClick={() => {setActiveCategory("All");setSelectedSub("");}}>View all products <ArrowRight size={15}/></button></div>
         <div className="filter-row"><span>{filtered.length} products shown</span><button onClick={() => {setActiveCategory("All");setQuery("");}}>Clear filters <X size={13}/></button></div>
-        {filtered.length ? <div className="product-grid">{filtered.map(p => <article className="product-card" key={p.id}><div className={`product-art ${p.color}`}><span className="product-tag">{p.tag}</span><button className="heart-btn" aria-label="Save item"><Heart size={17}/></button><div>{p.emoji}</div></div><div className="product-info"><span className="product-category">{p.category}</span><h3>{p.name}</h3><div className="rating">★ {p.rating} <small> · Customer favourite</small></div><div className="price-row"><strong>{money(p.price)}</strong><del>{money(p.oldPrice)}</del><span>{Math.round((1-p.price/p.oldPrice)*100)}% off</span></div><button className="add-btn" onClick={() => addToCart(p)}><Plus size={16}/> Add to cart</button></div></article>)}</div> : <div className="empty-state"><Search/><h3>No products found</h3><p>Try another search or explore all products.</p><button className="primary-btn" onClick={() => {setQuery("");setActiveCategory("All");}}>Show all products</button></div>}
+        {filtered.length ? <div className="product-grid">{filtered.map(p => <article className="product-card" key={p.id}><div className={`product-art ${p.color}`}><span className="product-tag">{p.tag}</span><button className="heart-btn" aria-label="Save item"><Heart size={17}/></button><div>{p.emoji}</div></div><div className="product-info"><span className="product-category">{p.category}</span><h3>{p.name}</h3><div className="rating">★ {p.rating} <small> · Customer favourite</small></div><div className="price-row"><strong>{money(p.price)}</strong><del>{money(p.oldPrice)}</del><span>{Math.round((1-p.price/p.oldPrice)*100)}% off</span></div><button className={`add-btn ${justAddedId === p.id ? "add-btn-added" : ""}`} onClick={() => addToCart(p)}>{justAddedId === p.id ? <><CheckCircle2 size={16}/> Added</> : <><Plus size={16}/> Add to cart</>}</button></div></article>)}</div> : <div className="empty-state"><Search/><h3>No products found</h3><p>Try another search or explore all products.</p><button className="primary-btn" onClick={() => {setQuery("");setActiveCategory("All");}}>Show all products</button></div>}
       </section>
 
       <section className="recharge-banner wrap"><div className="recharge-icon"><Smartphone size={34}/></div><div><span className="eyebrow">QUICK & CONVENIENT</span><h2>Recharge, without the hassle.</h2><p>Submit your mobile recharge request. Our team will process it manually after payment confirmation.</p></div><button className="primary-btn" onClick={() => setRechargeOpen(true)}>Recharge now <ArrowRight size={17}/></button></section>
 
       <footer className="footer"><div className="footer-main"><div className="brand footer-brand"><span className="brand-mark">A</span><span>SRI AMIRTHAA<small>SHOPPING, REIMAGINED</small></span></div><p>A more thoughtful place for all the things you need and love.</p><div className="footer-links"><a href="#products">Shop</a><a href="#products">Categories</a><button onClick={() => setRechargeOpen(true)}>Recharge</button><a href="/admin">Admin</a></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} Sri Amirthaa. All rights reserved.</span><span>Built for a better everyday.</span></div></footer>
 
+
+      {cart.length > 0 && <div className="cart-float-bar" role="status" aria-live="polite">
+        <div className="cart-float-product"><span>{lastAddedProduct?.emoji || "🛍️"}</span></div>
+        <div className="cart-float-copy"><strong>{lastAddedProduct ? "Added to your cart" : "Your cart is ready"}</strong><small>{cartCount} {cartCount === 1 ? "item" : "items"} · {money(subtotal)}</small></div>
+        <button className="cart-float-view" onClick={() => setCartOpen(true)}>View cart <ArrowRight size={16}/></button>
+      </div>}
 
       {cartOpen && <div className="overlay" onClick={() => setCartOpen(false)}><aside className="drawer" onClick={e => e.stopPropagation()}><div className="drawer-head"><div><span className="eyebrow">YOUR SELECTION</span><h2>Shopping cart ({cartCount})</h2></div><button className="icon-btn" onClick={() => setCartOpen(false)}><X/></button></div>{cart.length ? <><div className="cart-items">{cart.map(i => <div className="cart-item" key={i.id}><div className={`cart-emoji ${i.color}`}>{i.emoji}</div><div className="cart-item-info"><b>{i.name}</b><strong>{money(i.price)}</strong><div className="qty"><button onClick={() => updateQty(i.id,-1)}><Minus size={13}/></button><span>{i.qty}</span><button onClick={() => updateQty(i.id,1)}><Plus size={13}/></button><button className="remove" onClick={() => updateQty(i.id,-i.qty)}><Trash2 size={14}/></button></div></div></div>)}</div><div className="cart-summary"><div><span>Subtotal</span><b>{money(subtotal)}</b></div><small>Shipping and taxes calculated at checkout.</small><button className="primary-btn full" onClick={() => {setCartOpen(false);setAuthOpen(true);}}>Continue to checkout <ArrowRight size={16}/></button></div></> : <div className="empty-state"><ShoppingBag/><h3>Your cart is waiting</h3><p>Add something lovely to get started.</p></div>}</aside></div>}
 
