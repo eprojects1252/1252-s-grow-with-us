@@ -211,3 +211,6 @@ html,body{max-width:100%;overflow-x:clip}
  @keyframes activeSparkle{0%,100%{opacity:0;transform:translate(-50%,-50%) translate(var(--sx),var(--sy)) scale(.45)}35%{opacity:1;transform:translate(-50%,-50%) translate(var(--sx),var(--sy)) scale(1.25)}65%{opacity:.65;transform:translate(-50%,-50%) translate(calc(var(--sx)*.82),calc(var(--sy)*.82)) scale(.8)}}
 }
 @media(prefers-reduced-motion:reduce){.nav-active-sparkles i{animation:none;opacity:.6}}
+
+.customer-dash-profile{min-width:0}.customer-dash-profile>div{min-width:0;flex:1}.customer-dash-profile-login{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;padding:8px 15px;border-radius:9px;background:linear-gradient(180deg,#ffe928,#f1d000);color:#17140a;text-decoration:none;font-size:10px;font-weight:850;box-shadow:0 3px 12px #f3d40030}.customer-dash-profile-login:hover{filter:brightness(1.04);transform:translateY(-1px)}
+@media(max-width:520px){.customer-dash-profile-login{padding:8px 12px}.customer-dash-profile{gap:8px}}
