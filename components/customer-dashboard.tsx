@@ -48,12 +48,12 @@ export default function CustomerDashboard() {
     <main className="customer-dashboard">
       <header className="customer-dash-header">
         <div><span className="customer-dash-kicker">1252'S GROW WITH US</span><h1>My Account</h1><p>Your account, shopping and membership space.</p></div>
-        <Link href="/" className="customer-dash-shop-link">Continue Shopping <ArrowUpRight size={15}/></Link>
+        <div className="customer-dash-header-actions"><Link href="/login" className="customer-dash-login-link"><UserRound size={15}/> Login</Link><Link href="/" className="customer-dash-shop-link">Continue Shopping <ArrowUpRight size={15}/></Link></div>
       </header>
 
       <div className="customer-dash-layout">
         <aside className="customer-dash-sidebar" aria-label="Customer account menu">
-          <div className="customer-dash-profile"><span className="customer-dash-avatar"><UserRound size={23}/></span><div><small>WELCOME</small><strong>My Account</strong></div></div>
+          <div className="customer-dash-profile"><span className="customer-dash-avatar"><UserRound size={23}/></span><div><small>WELCOME</small><strong>My Account</strong></div><Link href="/login" className="customer-dash-profile-login">Login</Link></div>
           <nav>
             {sections.map(section => {
               const ItemIcon = section.icon;
