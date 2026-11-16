@@ -5,7 +5,7 @@ import {
   Search, ShoppingBag, UserRound, Menu, X, ChevronDown, ArrowRight,
   Sparkles, Truck, ShieldCheck, Headphones, Smartphone, Zap, Heart,
   Plus, Minus, Trash2, CreditCard, Clock3, CheckCircle2, Package,
-  ChevronRight, Grid2X2, Tag, LogIn, House, Heart, UserRound
+  ChevronRight, Grid2X2, Tag, LogIn, House
 } from "lucide-react";
 
 type Product = { id: number; name: string; category: string; price: number; oldPrice: number; rating: string; tag: string; emoji: string; color: string };
