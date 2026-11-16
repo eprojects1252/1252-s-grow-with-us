@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search, ShoppingBag, UserRound, Menu, X, ChevronDown, ArrowRight,
   Sparkles, Truck, ShieldCheck, Headphones, Smartphone, Zap, Heart,
-  Plus, Minus, Trash2, CreditCard, Clock3, CheckCircle2, Package,
-  ChevronRight, Grid2X2, Tag, LogIn, House
+  Plus, Minus, Trash2, CreditCard, Clock3, CheckCircle2,
+  ChevronRight, Grid2X2, LogIn
 } from "lucide-react";
 
 type Product = { id: number; name: string; category: string; price: number; oldPrice: number; rating: string; tag: string; emoji: string; color: string };
@@ -71,23 +71,6 @@ export default function Storefront() {
   const [rechargeSent, setRechargeSent] = useState(false);
   const [email, setEmail] = useState("");
   const [selectedSub, setSelectedSub] = useState("");
-  const [activeBottomTab, setActiveBottomTab] = useState("Home");
-  const [particleFlight, setParticleFlight] = useState<{ from: number; to: number; key: number } | null>(null);
-  const selectBottomTab = (label: string, afterSelect: () => void) => {
-    const tabs = ["Home", "Offers", "My Account", "Favorite", "Orders"];
-    const from = tabs.indexOf(activeBottomTab);
-    const to = tabs.indexOf(label);
-    if (from === to) {
-      afterSelect();
-      return;
-    }
-    setParticleFlight({ from, to, key: Date.now() });
-    window.setTimeout(() => {
-      setActiveBottomTab(label);
-      setParticleFlight(null);
-      afterSelect();
-    }, 2200);
-  };
 
   const filtered = useMemo(() => products.filter(p =>
     (activeCategory === "All" || p.category === activeCategory) &&
@@ -156,22 +139,6 @@ export default function Storefront() {
 
       <footer className="footer"><div className="footer-main"><div className="brand footer-brand"><span className="brand-mark">A</span><span>SRI AMIRTHAA<small>SHOPPING, REIMAGINED</small></span></div><p>A more thoughtful place for all the things you need and love.</p><div className="footer-links"><a href="#products">Shop</a><a href="#products">Categories</a><button onClick={() => setRechargeOpen(true)}>Recharge</button><a href="/admin">Admin</a></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} Sri Amirthaa. All rights reserved.</span><span>Built for a better everyday.</span></div></footer>
 
-
-      <nav className="mobile-bottom-nav" aria-label="Main navigation">
-        {particleFlight && <span key={particleFlight.key} className="nav-particle-flight" style={{ left: `${10 + particleFlight.from * 20}%`, ["--start" as string]: `${10 + particleFlight.from * 20}%`, ["--to" as string]: `${10 + particleFlight.to * 20}%` } as React.CSSProperties} aria-hidden="true">{Array.from({ length: 12 }, (_, i) => <i key={i}/>)}</span>}
-        {[
-          { label: "Home", icon: <House size={20}/>, action: () => selectBottomTab("Home", () => window.scrollTo({ top: 0, behavior: "smooth" })) },
-          { label: "Offers", icon: <Tag size={20}/>, action: () => selectBottomTab("Offers", () => { window.location.href = "/offers"; }) },
-          { label: "My Account", icon: <UserRound size={20}/>, action: () => selectBottomTab("My Account", () => setAuthOpen(true)) },
-          { label: "Favorite", icon: <Heart size={20}/>, action: () => selectBottomTab("Favorite", () => { window.location.href = "/favorites"; }) },
-          { label: "Orders", icon: <Package size={20}/>, action: () => selectBottomTab("Orders", () => { window.location.href = "/orders"; }) },
-        ].map((item) => (
-          <button key={item.label} type="button" className={`mobile-bottom-item ${activeBottomTab === item.label ? "active" : ""}`} onClick={item.action} aria-label={item.label}>
-            <span className="bottom-icon-wrap">{item.icon}<span className="particle-cloud" aria-hidden="true">{Array.from({ length: 8 }, (_, i) => <i key={i}/>)}</span></span>
-            <span className="bottom-label">{item.label}</span>
-          </button>
-        ))}
-      </nav>
 
       {cartOpen && <div className="overlay" onClick={() => setCartOpen(false)}><aside className="drawer" onClick={e => e.stopPropagation()}><div className="drawer-head"><div><span className="eyebrow">YOUR SELECTION</span><h2>Shopping cart ({cartCount})</h2></div><button className="icon-btn" onClick={() => setCartOpen(false)}><X/></button></div>{cart.length ? <><div className="cart-items">{cart.map(i => <div className="cart-item" key={i.id}><div className={`cart-emoji ${i.color}`}>{i.emoji}</div><div className="cart-item-info"><b>{i.name}</b><strong>{money(i.price)}</strong><div className="qty"><button onClick={() => updateQty(i.id,-1)}><Minus size={13}/></button><span>{i.qty}</span><button onClick={() => updateQty(i.id,1)}><Plus size={13}/></button><button className="remove" onClick={() => updateQty(i.id,-i.qty)}><Trash2 size={14}/></button></div></div></div>)}</div><div className="cart-summary"><div><span>Subtotal</span><b>{money(subtotal)}</b></div><small>Shipping and taxes calculated at checkout.</small><button className="primary-btn full" onClick={() => {setCartOpen(false);setAuthOpen(true);}}>Continue to checkout <ArrowRight size={16}/></button></div></> : <div className="empty-state"><ShoppingBag/><h3>Your cart is waiting</h3><p>Add something lovely to get started.</p></div>}</aside></div>}
 
