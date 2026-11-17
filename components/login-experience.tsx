@@ -3,12 +3,35 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Mail, LockKeyhole, UserRound, ArrowRight } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
 
 export default function LoginExperience({ initialMode = "login" }: { initialMode?: "login" | "signup" }) {
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [notice, setNotice] = useState("");
   const [remember, setRemember] = useState(true);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function handleGoogleSignIn() {
+    setNotice("");
+    setGoogleLoading(true);
+    try {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+      if (!url || !key) {
+        throw new Error("Google Login setup is incomplete. Please configure the Supabase environment variables.");
+      }
+      const supabase = createClient(url, key);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) throw error;
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Unable to start Google sign-in. Please try again.");
+      setGoogleLoading(false);
+    }
+  }
 
   function switchMode(next: "login" | "signup") {
     setMode(next);
@@ -92,7 +115,7 @@ export default function LoginExperience({ initialMode = "login" }: { initialMode
 
           <div className="auth-v7-divider"><span />OR CONTINUE WITH<span /></div>
           <div className="auth-v7-socials">
-            <button type="button" onClick={() => setNotice("Google sign-in will be enabled after provider authentication setup.")}><b className="auth-google-g">G</b> Google</button>
+            <button type="button" onClick={handleGoogleSignIn} disabled={googleLoading}><b className="auth-google-g">G</b> {googleLoading ? "Connecting..." : "Continue with Google"}</button>
             <button type="button" onClick={() => setNotice("Apple sign-in will be enabled after provider authentication setup.")}><b className="auth-apple-mark">●</b> Apple</button>
           </div>
           <p className="auth-v7-switch">{mode === "login" ? "Don't have an account?" : "Already have an account?"} <button type="button" onClick={() => switchMode(mode === "login" ? "signup" : "login")}>{mode === "login" ? "Sign Up" : "Sign In"}</button></p>
