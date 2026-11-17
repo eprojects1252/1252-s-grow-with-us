@@ -30,7 +30,8 @@ export default function GlobalMobileNav() {
       </button>
       <nav className="global-sidebar-links">
         {items.map(({label,href,icon:Icon}) => {
-          const active = href === "/" ? pathname === "/" : pathname.startsWith(href.split(/[?#]/)[0]);
+          const basePath = href.startsWith("/?") || href.startsWith("/#") ? "/" : href.split(/[?#]/)[0];
+          const active = pathname === basePath;
           return <button key={label} type="button" className={`global-sidebar-link ${active ? "is-active" : ""}`} onClick={() => href.includes("#") ? (router.push(href), href.includes("#products") && setTimeout(() => document.getElementById("products")?.scrollIntoView({behavior:"smooth"}),150)) : router.push(href)} aria-label={label} title={label}>
             <Icon size={20}/><span>{label}</span><i>{label}</i>
           </button>;
