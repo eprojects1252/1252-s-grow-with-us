@@ -62,6 +62,13 @@ export default function Storefront() {
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
+
+  useEffect(() => {
+    const requestedCategory = new URLSearchParams(window.location.search).get("category");
+    if (requestedCategory === "Electronics") setActiveCategory("Electronics");
+    if (requestedCategory === "Fashion") setActiveCategory("Fashion – Men");
+    if (requestedCategory === "Home Appliances") setActiveCategory("Home Appliances");
+  }, []);
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [justAddedId, setJustAddedId] = useState<number | null>(null);
@@ -123,7 +130,7 @@ export default function Storefront() {
         <div><Headphones/><span><b>Customer support</b><small>Here when you need us</small></span></div>
       </section>
 
-      <section className="quick-cats wrap">
+      <section className="quick-cats wrap" id="categories">
         <div className="section-heading"><div><span className="eyebrow">A WORLD OF CHOICE</span><h2>Explore categories</h2></div><button className="text-btn" onClick={() => setCategoryOpen(true)}>View all categories <ArrowRight size={16}/></button></div>
         <div className="quick-cat-row">{categories.slice(0, 9).map(c => <button className={`quick-cat ${activeCategory === c.name ? "selected" : ""}`} key={c.name} onClick={() => {setActiveCategory(c.name);setSelectedSub("");}}><span>{c.icon}</span><b>{c.name}</b></button>)}</div>
       </section>
@@ -134,7 +141,7 @@ export default function Storefront() {
         {filtered.length ? <div className="product-grid">{filtered.map(p => <article className="product-card" key={p.id}><div className={`product-art ${p.color}`}><span className="product-tag">{p.tag}</span><button className="heart-btn" aria-label="Save item"><Heart size={17}/></button><div>{p.emoji}</div></div><div className="product-info"><span className="product-category">{p.category}</span><h3>{p.name}</h3><div className="rating">★ {p.rating} <small> · Customer favourite</small></div><div className="price-row"><strong>{money(p.price)}</strong><del>{money(p.oldPrice)}</del><span>{Math.round((1-p.price/p.oldPrice)*100)}% off</span></div><button className={`add-btn ${justAddedId === p.id ? "add-btn-added" : ""}`} onClick={() => addToCart(p)}>{justAddedId === p.id ? <><CheckCircle2 size={16}/> Added</> : <><Plus size={16}/> Add to cart</>}</button></div></article>)}</div> : <div className="empty-state"><Search/><h3>No products found</h3><p>Try another search or explore all products.</p><button className="primary-btn" onClick={() => {setQuery("");setActiveCategory("All");}}>Show all products</button></div>}
       </section>
 
-      <section className="recharge-banner wrap"><div className="recharge-icon"><Smartphone size={34}/></div><div><span className="eyebrow">QUICK & CONVENIENT</span><h2>Recharge, without the hassle.</h2><p>Submit your mobile recharge request. Our team will process it manually after payment confirmation.</p></div><button className="primary-btn" onClick={() => setRechargeOpen(true)}>Recharge now <ArrowRight size={17}/></button></section>
+      <section className="recharge-banner wrap" id="recharge"><div className="recharge-icon"><Smartphone size={34}/></div><div><span className="eyebrow">QUICK & CONVENIENT</span><h2>Recharge, without the hassle.</h2><p>Submit your mobile recharge request. Our team will process it manually after payment confirmation.</p></div><button className="primary-btn" onClick={() => setRechargeOpen(true)}>Recharge now <ArrowRight size={17}/></button></section>
 
       <footer className="footer"><div className="footer-main"><div className="brand footer-brand"><span className="brand-mark">A</span><span>SRI AMIRTHAA<small>SHOPPING, REIMAGINED</small></span></div><p>A more thoughtful place for all the things you need and love.</p><div className="footer-links"><a href="#products">Shop</a><a href="#products">Categories</a><button onClick={() => setRechargeOpen(true)}>Recharge</button><a href="/admin">Admin</a></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} Sri Amirthaa. All rights reserved.</span><span>Built for a better everyday.</span></div></footer>
 
