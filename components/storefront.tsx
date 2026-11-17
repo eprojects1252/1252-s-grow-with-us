@@ -116,12 +116,12 @@ export default function Storefront() {
         </button>
         <div className="sidebar-tools">
           <div className="sidebar-tool sidebar-pincode">
-            <span className="sidebar-icon"><MapPin size={20}/></span>
+            <button className="sidebar-icon" type="button" onClick={() => setSidebarExpanded(true)} aria-label="Expand to enter PIN code"><MapPin size={20}/></button>
             <div className="sidebar-tool-content"><label htmlFor="sidebar-pincode">Deliver to · PIN code</label><input id="sidebar-pincode" inputMode="numeric" maxLength={6} value={pincode} onChange={e => setPincode(e.target.value.replace(/\\D/g,"").slice(0,6))} placeholder="Enter 6-digit PIN"/></div>
             <span className="sidebar-tooltip">Pincode</span>
           </div>
           <div className="sidebar-tool sidebar-search">
-            <button className="sidebar-icon" type="button" aria-label="Search products" onClick={() => setSearchOpen(value => !value)}><Search size={20}/></button>
+            <button className="sidebar-icon" type="button" aria-label="Search products" onClick={() => {setSidebarExpanded(true);setSearchOpen(true);}}><Search size={20}/></button>
             <div className="sidebar-tool-content"><label htmlFor="sidebar-search-input">Search products</label><div className="sidebar-search-input-wrap"><input id="sidebar-search-input" ref={searchInputRef} value={query} onChange={e => setQuery(e.target.value)} placeholder="Search products..." onFocus={() => setSearchOpen(true)}/>{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={14}/></button>}</div></div>
             <span className="sidebar-tooltip">Search</span>
           </div>
