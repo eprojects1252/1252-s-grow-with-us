@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
         setMessage("Authentication configuration is missing. Please contact support.");
         return;
       }
-      const supabase = createClient(url, key);
+      const supabase = createClient(url, key, { auth: { detectSessionInUrl: false } });
       const code = new URLSearchParams(window.location.search).get("code");
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
