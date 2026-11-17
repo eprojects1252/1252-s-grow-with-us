@@ -101,7 +101,6 @@ export default function Storefront() {
 
   return (
     <main>
-      <div className="announcement"><Sparkles size={14}/> Welcome to a smarter way to shop <span> | </span> Discover something wonderful today</div>
       <header className="header header-v2">
         <div className="website-switcher" aria-label="Main websites">
           <button className="website-tab website-tab-active" type="button" aria-label="1252's Grow With Us"><img className="website-logo-image" src="/images/1252-logo.png" alt="1252's Grow With Us" /></button>
