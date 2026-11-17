@@ -310,3 +310,27 @@ body:has(.mobile-bottom-nav){padding-left:76px}
 @media(prefers-reduced-motion:reduce){
   .store-sidebar,.mobile-bottom-nav,.mobile-bottom-item{transition:none!important}
 }
+
+
+/* One shared, fixed left sidebar across every route. Buttons stay stationary; only the panel width changes. */
+.global-store-sidebar{position:fixed;z-index:500;left:10px;top:118px;bottom:12px;width:62px;display:flex;flex-direction:column;gap:10px;padding:9px 7px;overflow:hidden;border:1px solid #ffffffc9;border-radius:20px;background:linear-gradient(150deg,#ffffffed,#eaf5f5e8 55%,#e9edffed);backdrop-filter:blur(22px) saturate(1.35);-webkit-backdrop-filter:blur(22px) saturate(1.35);box-shadow:0 16px 42px #24364a20;transition:width .34s cubic-bezier(.22,.75,.25,1),padding .25s ease}
+.global-store-sidebar-expanded{width:226px}
+.global-sidebar-expand{flex:0 0 42px;width:100%;display:flex;align-items:center;justify-content:center;gap:11px;border:1px solid #ffffffc9;border-radius:12px;background:#ffffffa8;color:#53667b;cursor:pointer}
+.global-sidebar-expand span{display:none;font-size:11px;font-weight:750;white-space:nowrap}
+.global-store-sidebar-expanded .global-sidebar-expand{justify-content:flex-start;padding:0 11px}
+.global-store-sidebar-expanded .global-sidebar-expand span{display:inline}
+.global-sidebar-links{display:grid;grid-auto-rows:minmax(42px,auto);gap:4px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.global-sidebar-link{position:relative;min-width:0;width:100%;min-height:42px;display:flex;align-items:center;justify-content:center;gap:12px;padding:5px;border:1px solid transparent;border-radius:12px;background:transparent;color:#53677b;text-decoration:none;cursor:pointer;white-space:nowrap}
+.global-sidebar-link:hover,.global-sidebar-link.is-active{background:#ffffffc4;border-color:#ffffffdf;color:#168f88}
+.global-sidebar-link>svg{flex:0 0 20px}
+.global-sidebar-link span{display:none;font-size:11px;font-weight:700}
+.global-store-sidebar-expanded .global-sidebar-link{justify-content:flex-start;padding:5px 10px}
+.global-store-sidebar-expanded .global-sidebar-link span{display:block}
+.global-sidebar-link i{position:absolute;left:52px;top:50%;transform:translateY(-50%);padding:7px 9px;border-radius:8px;background:#233247ef;color:white;font-size:10px;font-style:normal;opacity:0;pointer-events:none}
+.global-sidebar-link:hover i{opacity:1}
+.global-store-sidebar-expanded .global-sidebar-link i{display:none}
+body{padding-left:78px}
+.mobile-bottom-nav{display:none!important}
+.store-sidebar{display:none!important}
+@media(max-width:650px){.global-store-sidebar{top:118px;bottom:9px;left:7px;width:56px;padding:7px 5px;border-radius:18px}.global-store-sidebar-expanded{width:min(218px,calc(100vw - 14px))}body{padding-left:68px}}
+@media(prefers-reduced-motion:reduce){.global-store-sidebar{transition:none!important}}
