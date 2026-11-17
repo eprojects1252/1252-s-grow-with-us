@@ -334,3 +334,6 @@ body{padding-left:78px}
 .store-sidebar{display:none!important}
 @media(max-width:650px){.global-store-sidebar{top:118px;bottom:9px;left:7px;width:56px;padding:7px 5px;border-radius:18px}.global-store-sidebar-expanded{width:min(218px,calc(100vw - 14px))}body{padding-left:68px}}
 @media(prefers-reduced-motion:reduce){.global-store-sidebar{transition:none!important}}
+
+/* The shared sidebar reserves one consistent gutter; avoid a second nested main gutter. */
+main,main:has(.store-sidebar-expanded){padding-left:0!important}
