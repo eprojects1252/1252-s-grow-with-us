@@ -27,6 +27,7 @@ export default function GlobalMobileNav() {
  const timer = useRef<ReturnType<typeof setTimeout>|null>(null);
  const active = activeTabForPath(pathname);
  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+ if (pathname === "/") return null;
  const navigate = (label:string, href:string) => {
   const from = tabs.findIndex(tab => tab.label === active);
   const to = tabs.findIndex(tab => tab.label === label);
