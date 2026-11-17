@@ -122,7 +122,7 @@ export default function Storefront() {
           </div>
           <div className="sidebar-tool sidebar-search">
             <button className="sidebar-icon" type="button" aria-label="Search products" onClick={() => setSearchOpen(value => !value)}><Search size={20}/></button>
-            <div className="sidebar-tool-content"><label htmlFor="sidebar-search-input">Search products</label><div className="sidebar-search-input-wrap"><input id="sidebar-search-input" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search products..." onFocus={() => setSearchOpen(true)}/>{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={14}/></button>}</div></div>
+            <div className="sidebar-tool-content"><label htmlFor="sidebar-search-input">Search products</label><div className="sidebar-search-input-wrap"><input id="sidebar-search-input" ref={searchInputRef} value={query} onChange={e => setQuery(e.target.value)} placeholder="Search products..." onFocus={() => setSearchOpen(true)}/>{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={14}/></button>}</div></div>
             <span className="sidebar-tooltip">Search</span>
           </div>
           <button className="sidebar-tool sidebar-cart" type="button" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}>
