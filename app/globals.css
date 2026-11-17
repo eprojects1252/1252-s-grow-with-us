@@ -381,3 +381,15 @@ body{padding-left:78px}
   body{padding-left:66px}
 }
 @media(prefers-reduced-motion:reduce){.global-store-sidebar{transition:none!important}}
+
+
+/* Final polish requested: sidebar inset within the site frame, remove announcement strip and footer tail gap. */
+.announcement{display:none!important}
+.global-store-sidebar{left:10px!important;top:10px!important;bottom:10px!important;border-left:1px solid #ffffffb8!important;border-radius:19px!important}
+body{padding-bottom:0!important}
+.footer{padding-bottom:18px!important;margin-bottom:0!important}
+@media(max-width:650px){
+  .global-store-sidebar{left:8px!important;top:8px!important;bottom:8px!important;border-radius:18px!important}
+  body{padding-bottom:0!important}
+  .footer{padding-bottom:16px!important;margin-bottom:0!important}
+}
