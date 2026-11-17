@@ -117,7 +117,7 @@ export default function Storefront() {
         <div className="sidebar-tools">
           <div className="sidebar-tool sidebar-pincode">
             <button className="sidebar-icon" type="button" onClick={() => setSidebarExpanded(true)} aria-label="Expand to enter PIN code"><MapPin size={20}/></button>
-            <div className="sidebar-tool-content"><label htmlFor="sidebar-pincode">Deliver to · PIN code</label><input id="sidebar-pincode" inputMode="numeric" maxLength={6} value={pincode} onChange={e => setPincode(e.target.value.replace(/\\D/g,"").slice(0,6))} placeholder="Enter 6-digit PIN"/></div>
+            <div className="sidebar-tool-content"><label htmlFor="sidebar-pincode">Deliver to · PIN code</label><input id="sidebar-pincode" inputMode="numeric" maxLength={6} value={pincode} onChange={e => setPincode(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="Enter 6-digit PIN"/></div>
             <span className="sidebar-tooltip">Pincode</span>
           </div>
           <div className="sidebar-tool sidebar-search">
