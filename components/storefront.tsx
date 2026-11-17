@@ -99,63 +99,13 @@ export default function Storefront() {
         <div className="website-switcher" aria-label="Main websites">
           <button className="website-tab website-tab-active" type="button" aria-label="1252's Grow With Us"><img className="website-logo-image" src="/images/1252-logo.png" alt="1252's Grow With Us" /></button>
           <button className="website-tab" type="button"><span className="website-logo-placeholder">Logo 2</span></button>
-          <button className="website-tab" type="button"><span className="website-logo-placeholder">Logo 3</span></button>
         </div>
         <div className="location-search-row header-login-row">
-          <button className="icon-btn mobile-only menu-trigger" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Open menu">{mobileMenu ? <X/> : <Menu/>}</button>
           <div className="header-actions header-actions-v2">
             <button className="action-link account-trigger" onClick={() => window.location.assign("/login")}><UserRound size={20}/><span>Login</span></button>
           </div>
         </div>
       </header>
-
-      <aside className={`store-sidebar ${sidebarExpanded ? "store-sidebar-expanded" : ""}`} aria-label="Store navigation">
-        <button className="sidebar-expand" type="button" onClick={() => setSidebarExpanded(value => !value)} aria-label={sidebarExpanded ? "Collapse sidebar" : "Expand sidebar"} title={sidebarExpanded ? "Collapse sidebar" : "Expand sidebar"}>
-          {sidebarExpanded ? <PanelLeftClose size={19}/> : <PanelLeftOpen size={19}/>}
-          <span>{sidebarExpanded ? "Collapse" : "Expand menu"}</span>
-        </button>
-        <div className="sidebar-tools">
-          <div className="sidebar-tool sidebar-pincode">
-            <button className="sidebar-icon" type="button" onClick={() => setSidebarExpanded(true)} aria-label="Expand to enter PIN code"><MapPin size={20}/></button>
-            <div className="sidebar-tool-content"><label htmlFor="sidebar-pincode">Deliver to · PIN code</label><input id="sidebar-pincode" inputMode="numeric" maxLength={6} value={pincode} onChange={e => setPincode(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="Enter 6-digit PIN"/></div>
-            <span className="sidebar-tooltip">Pincode</span>
-          </div>
-          <div className="sidebar-tool sidebar-search">
-            <button className="sidebar-icon" type="button" aria-label="Search products" onClick={() => {setSidebarExpanded(true);setSearchOpen(true);}}><Search size={20}/></button>
-            <div className="sidebar-tool-content"><label htmlFor="sidebar-search-input">Search products</label><div className="sidebar-search-input-wrap"><input id="sidebar-search-input" ref={searchInputRef} value={query} onChange={e => setQuery(e.target.value)} placeholder="Search products..." onFocus={() => setSearchOpen(true)}/>{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={14}/></button>}</div></div>
-            <span className="sidebar-tooltip">Search</span>
-          </div>
-          <button className="sidebar-tool sidebar-cart" type="button" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}>
-            <span className="sidebar-icon"><ShoppingBag size={20}/>{cartCount > 0 && <b>{cartCount}</b>}</span><span className="sidebar-tool-label">Cart</span><span className="sidebar-tooltip">Cart</span>
-          </button>
-        </div>
-        <div className="sidebar-divider"/>
-        <nav className="sidebar-navigation" aria-label="Main menu">
-          <button className="sidebar-nav-item sidebar-nav-category" type="button" onClick={() => setCategoryOpen(value => !value)}><Grid2X2 size={19}/><span>All Categories</span><ChevronDown size={15} className={categoryOpen ? "sidebar-chevron-open" : ""}/><i>All Categories</i></button>
-          <button className="sidebar-nav-item" type="button" onClick={() => {setActiveCategory("All");setSelectedSub("");setCategoryOpen(false);}}><HomeIcon size={19}/><span>Home</span><i>Home</i></button>
-          <button className="sidebar-nav-item" type="button" onClick={() => {setRechargeOpen(true);setCategoryOpen(false);}}><Zap size={19}/><span>Recharge &amp; Bills</span><i>Recharge &amp; Bills</i></button>
-          <button className="sidebar-nav-item" type="button" onClick={() => {setActiveCategory("Electronics");setCategoryOpen(false);}}><Monitor size={19}/><span>Electronics</span><i>Electronics</i></button>
-          <button className="sidebar-nav-item" type="button" onClick={() => {setActiveCategory("Fashion – Men");setCategoryOpen(false);}}><Shirt size={19}/><span>Fashion</span><i>Fashion</i></button>
-          <button className="sidebar-nav-item" type="button" onClick={() => {setActiveCategory("Home Appliances");setCategoryOpen(false);}}><House size={19}/><span>Home Appliances</span><i>Home Appliances</i></button>
-          <a className="sidebar-nav-item" href="/admin"><LogIn size={19}/><span>Admin Demo</span><i>Admin Demo</i></a>
-        </nav>
-        <div className="sidebar-divider sidebar-account-divider"/>
-        <nav className="sidebar-navigation sidebar-account-navigation" aria-label="Account navigation">
-          <a className="sidebar-nav-item" href="/offers"><Tag size={19}/><span>Offers</span><i>Offers</i></a>
-          <a className="sidebar-nav-item" href="/account"><UserRound size={19}/><span>My Account</span><i>My Account</i></a>
-          <a className="sidebar-nav-item" href="/favorites"><Heart size={19}/><span>Favorite</span><i>Favorite</i></a>
-          <a className="sidebar-nav-item" href="/orders"><Package size={19}/><span>Orders</span><i>Orders</i></a>
-        </nav>
-      </aside>
-      <nav className={`nav mobile-store-nav ${mobileMenu ? "nav-open" : ""}`}>
-        <button className="nav-category" onClick={() => setCategoryOpen(!categoryOpen)}><Grid2X2 size={16}/> All Categories <ChevronDown size={15}/></button>
-        <button onClick={() => {setActiveCategory("All");setSelectedSub("");}}>Home</button>
-        <button onClick={() => setRechargeOpen(true)}><Zap size={15}/> Recharge &amp; Bills</button>
-        <button onClick={() => setActiveCategory("Electronics")}>Electronics</button>
-        <button onClick={() => setActiveCategory("Fashion – Men")}>Fashion</button>
-        <button onClick={() => setActiveCategory("Home Appliances")}>Home Appliances</button>
-        <a href="/admin">Admin Demo</a>
-      </nav>
 
       {categoryOpen && <section className="mega-menu">
         <div className="mega-head"><div><span className="eyebrow">EXPLORE OUR STORE</span><h3>Shop by category</h3></div><button className="icon-btn" onClick={() => setCategoryOpen(false)}><X/></button></div>
