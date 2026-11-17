@@ -5,7 +5,7 @@ import {
   Search, ShoppingBag, UserRound, Menu, X, ChevronDown, ArrowRight, MapPin,
   Sparkles, Truck, ShieldCheck, Headphones, Smartphone, Zap, Heart,
   Plus, Minus, Trash2, CreditCard, Clock3, CheckCircle2,
-  ChevronRight, Grid2X2, LogIn
+  ChevronRight, Grid2X2, LogIn, Home as HomeIcon, Monitor, Shirt, House, PanelLeftClose, PanelLeftOpen
 } from "lucide-react";
 
 type Product = { id: number; name: string; category: string; price: number; oldPrice: number; rating: string; tag: string; emoji: string; color: string };
@@ -69,6 +69,7 @@ export default function Storefront() {
   const [cartOpen, setCartOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [rechargeOpen, setRechargeOpen] = useState(false);
   const [rechargeSent, setRechargeSent] = useState(false);
   const [selectedSub, setSelectedSub] = useState("");
@@ -100,32 +101,49 @@ export default function Storefront() {
           <button className="website-tab" type="button"><span className="website-logo-placeholder">Logo 2</span></button>
           <button className="website-tab" type="button"><span className="website-logo-placeholder">Logo 3</span></button>
         </div>
-        <div className="location-search-row">
+        <div className="location-search-row header-login-row">
           <button className="icon-btn mobile-only menu-trigger" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Open menu">{mobileMenu ? <X/> : <Menu/>}</button>
-          <div className={`location-details ${searchOpen ? "location-details-hidden" : ""}`}>
-            <MapPin size={21} />
-            <label htmlFor="customer-pincode">Deliver to</label>
-            <input id="customer-pincode" inputMode="numeric" maxLength={6} value={pincode} onChange={e => setPincode(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="Enter PIN code" aria-label="Delivery PIN code"/>
-          </div>
-          <div className={`search-shell ${searchOpen ? "search-shell-open" : ""} ${query ? "has-query" : ""}`}>
-            <span className="search-particle particle-one"/><span className="search-particle particle-two"/><span className="search-particle particle-three"/>
-            <button className="search-toggle" aria-label={searchOpen ? "Close search" : "Open search"} onClick={() => { if (searchOpen) { setSearchOpen(false); setQuery(""); } else setSearchOpen(true); }}>
-              {searchOpen ? <X size={20}/> : <Search size={21}/>}
-            </button>
-            <div className="search-field-wrap"><input ref={searchInputRef} value={query} onChange={e => setQuery(e.target.value)} onFocus={() => setSearchOpen(true)} placeholder="Search products, brands and more..." tabIndex={searchOpen ? 0 : -1}/>{query && <button className="search-clear" aria-label="Clear search" onClick={() => {setQuery("");searchInputRef.current?.focus();}}><X size={15}/></button>}</div>
-            <kbd>⌘ K</kbd>
-          </div>
           <div className="header-actions header-actions-v2">
             <button className="action-link account-trigger" onClick={() => window.location.assign("/login")}><UserRound size={20}/><span>Login</span></button>
-            <button className="action-link cart-trigger" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}><ShoppingBag size={21}/><span>Cart</span>{cartCount > 0 && <b>{cartCount}</b>}</button>
           </div>
         </div>
       </header>
 
-      <nav className={`nav ${mobileMenu ? "nav-open" : ""}`}>
+      <aside className={`store-sidebar ${sidebarExpanded ? "store-sidebar-expanded" : ""}`} aria-label="Store navigation">
+        <button className="sidebar-expand" type="button" onClick={() => setSidebarExpanded(value => !value)} aria-label={sidebarExpanded ? "Collapse sidebar" : "Expand sidebar"} title={sidebarExpanded ? "Collapse sidebar" : "Expand sidebar"}>
+          {sidebarExpanded ? <PanelLeftClose size={19}/> : <PanelLeftOpen size={19}/>}
+          <span>{sidebarExpanded ? "Collapse" : "Expand menu"}</span>
+        </button>
+        <div className="sidebar-tools">
+          <div className="sidebar-tool sidebar-pincode">
+            <span className="sidebar-icon"><MapPin size={20}/></span>
+            <div className="sidebar-tool-content"><label htmlFor="sidebar-pincode">Deliver to · PIN code</label><input id="sidebar-pincode" inputMode="numeric" maxLength={6} value={pincode} onChange={e => setPincode(e.target.value.replace(/\\D/g,"").slice(0,6))} placeholder="Enter 6-digit PIN"/></div>
+            <span className="sidebar-tooltip">Pincode</span>
+          </div>
+          <div className="sidebar-tool sidebar-search">
+            <button className="sidebar-icon" type="button" aria-label="Search products" onClick={() => setSearchOpen(value => !value)}><Search size={20}/></button>
+            <div className="sidebar-tool-content"><label htmlFor="sidebar-search-input">Search products</label><div className="sidebar-search-input-wrap"><input id="sidebar-search-input" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search products..." onFocus={() => setSearchOpen(true)}/>{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X size={14}/></button>}</div></div>
+            <span className="sidebar-tooltip">Search</span>
+          </div>
+          <button className="sidebar-tool sidebar-cart" type="button" onClick={() => setCartOpen(true)} aria-label={`Cart, ${cartCount} items`}>
+            <span className="sidebar-icon"><ShoppingBag size={20}/>{cartCount > 0 && <b>{cartCount}</b>}</span><span className="sidebar-tool-label">Cart</span><span className="sidebar-tooltip">Cart</span>
+          </button>
+        </div>
+        <div className="sidebar-divider"/>
+        <nav className="sidebar-navigation" aria-label="Main menu">
+          <button className="sidebar-nav-item sidebar-nav-category" type="button" onClick={() => setCategoryOpen(value => !value)}><Grid2X2 size={19}/><span>All Categories</span><ChevronDown size={15} className={categoryOpen ? "sidebar-chevron-open" : ""}/><i>All Categories</i></button>
+          <button className="sidebar-nav-item" type="button" onClick={() => {setActiveCategory("All");setSelectedSub("");setCategoryOpen(false);}}><HomeIcon size={19}/><span>Home</span><i>Home</i></button>
+          <button className="sidebar-nav-item" type="button" onClick={() => {setRechargeOpen(true);setCategoryOpen(false);}}><Zap size={19}/><span>Recharge &amp; Bills</span><i>Recharge &amp; Bills</i></button>
+          <button className="sidebar-nav-item" type="button" onClick={() => {setActiveCategory("Electronics");setCategoryOpen(false);}}><Monitor size={19}/><span>Electronics</span><i>Electronics</i></button>
+          <button className="sidebar-nav-item" type="button" onClick={() => {setActiveCategory("Fashion – Men");setCategoryOpen(false);}}><Shirt size={19}/><span>Fashion</span><i>Fashion</i></button>
+          <button className="sidebar-nav-item" type="button" onClick={() => {setActiveCategory("Home Appliances");setCategoryOpen(false);}}><House size={19}/><span>Home Appliances</span><i>Home Appliances</i></button>
+          <a className="sidebar-nav-item" href="/admin"><LogIn size={19}/><span>Admin Demo</span><i>Admin Demo</i></a>
+        </nav>
+      </aside>
+      <nav className={`nav mobile-store-nav ${mobileMenu ? "nav-open" : ""}`}>
         <button className="nav-category" onClick={() => setCategoryOpen(!categoryOpen)}><Grid2X2 size={16}/> All Categories <ChevronDown size={15}/></button>
         <button onClick={() => {setActiveCategory("All");setSelectedSub("");}}>Home</button>
-        <button onClick={() => setRechargeOpen(true)}><Zap size={15}/> Recharge & Bills</button>
+        <button onClick={() => setRechargeOpen(true)}><Zap size={15}/> Recharge &amp; Bills</button>
         <button onClick={() => setActiveCategory("Electronics")}>Electronics</button>
         <button onClick={() => setActiveCategory("Fashion – Men")}>Fashion</button>
         <button onClick={() => setActiveCategory("Home Appliances")}>Home Appliances</button>
