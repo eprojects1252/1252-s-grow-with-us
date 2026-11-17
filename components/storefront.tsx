@@ -5,7 +5,7 @@ import {
   Search, ShoppingBag, UserRound, Menu, X, ChevronDown, ArrowRight, MapPin,
   Sparkles, Truck, ShieldCheck, Headphones, Smartphone, Zap, Heart,
   Plus, Minus, Trash2, CreditCard, Clock3, CheckCircle2,
-  ChevronRight, Grid2X2, LogIn, Home as HomeIcon, Monitor, Shirt, House, PanelLeftClose, PanelLeftOpen
+  ChevronRight, Grid2X2, LogIn, Home as HomeIcon, Monitor, Shirt, House, PanelLeftClose, PanelLeftOpen, Tag, Package
 } from "lucide-react";
 
 type Product = { id: number; name: string; category: string; price: number; oldPrice: number; rating: string; tag: string; emoji: string; color: string };
@@ -138,6 +138,13 @@ export default function Storefront() {
           <button className="sidebar-nav-item" type="button" onClick={() => {setActiveCategory("Fashion – Men");setCategoryOpen(false);}}><Shirt size={19}/><span>Fashion</span><i>Fashion</i></button>
           <button className="sidebar-nav-item" type="button" onClick={() => {setActiveCategory("Home Appliances");setCategoryOpen(false);}}><House size={19}/><span>Home Appliances</span><i>Home Appliances</i></button>
           <a className="sidebar-nav-item" href="/admin"><LogIn size={19}/><span>Admin Demo</span><i>Admin Demo</i></a>
+        </nav>
+        <div className="sidebar-divider sidebar-account-divider"/>
+        <nav className="sidebar-navigation sidebar-account-navigation" aria-label="Account navigation">
+          <a className="sidebar-nav-item" href="/offers"><Tag size={19}/><span>Offers</span><i>Offers</i></a>
+          <a className="sidebar-nav-item" href="/account"><UserRound size={19}/><span>My Account</span><i>My Account</i></a>
+          <a className="sidebar-nav-item" href="/favorites"><Heart size={19}/><span>Favorite</span><i>Favorite</i></a>
+          <a className="sidebar-nav-item" href="/orders"><Package size={19}/><span>Orders</span><i>Orders</i></a>
         </nav>
       </aside>
       <nav className={`nav mobile-store-nav ${mobileMenu ? "nav-open" : ""}`}>
