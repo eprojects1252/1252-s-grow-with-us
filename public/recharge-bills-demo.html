@@ -176,14 +176,13 @@ const STATUS_TEXT = {
 };
 
 /* ---------- BILLS & RECHARGES ---------- */
-function BillsCategories({ onOpen, onAdmin }) {
+function BillsCategories({ onOpen }) {
   const [query, setQuery] = useState("");
   return (
     <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100">
       <div className="px-4 pt-5 pb-4 space-y-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold text-slate-900">Bills & Recharges</h1>
-          <GlassBtn label="Admin" onClick={onAdmin}><Ico name="admin" className="w-5 h-5" /></GlassBtn>
         </div>
         <div className="relative">
           <Ico name="search" className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -555,52 +554,6 @@ function DthProviders({ onBack }) {
   );
 }
 
-/* ---------- ADMIN DASHBOARD ---------- */
-function AdminPanel({ orders, onVerify, onBack }) {
-  const pending = orders.filter(o => o.status === "awaiting_verification").length;
-  const dupes = orders.filter(o => o.status === "duplicate").length;
-  const verifiedTotal = orders.filter(o => o.status === "verified").reduce((s, o) => s + o.price, 0);
-  const utrCount = utr => orders.filter(o => o.utr && o.utr === utr).length;
-
-  return (
-    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100 p-4 space-y-4">
-      <div className="flex items-center gap-4">
-        <GlassBtn onClick={onBack} label="Back"><Ico name="arrowLeft" /></GlassBtn>
-        <h1 className="text-lg font-semibold">Admin dashboard</h1>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {[["Today's orders", orders.length], ["To verify", pending], ["Duplicates", dupes], ["Verified ₹", verifiedTotal]].map(([label, val]) => (
-          <div key={label} className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-md p-4">
-            <p className="text-xs text-slate-500">{label}</p>
-            <p className="text-2xl font-semibold mt-1">{val}</p>
-          </div>
-        ))}
-      </div>
-
-      <h2 className="text-sm text-slate-600 pt-2">Orders</h2>
-      {orders.length === 0 && <p className="text-sm text-slate-500">No orders yet.</p>}
-      {[...orders].reverse().map(o => (
-        <div key={o.id} className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-md p-4 space-y-2">
-          <div className="flex justify-between items-start gap-2">
-            <div>
-              <p className="font-medium">+91 {o.mobile} · ₹{o.price}</p>
-              <p className="text-xs text-slate-500">{o.operatorName} · {o.method}</p>
-            </div>
-            <Pill tone={STATUS_TEXT[o.status][1]}>{STATUS_TEXT[o.status][0]}</Pill>
-          </div>
-          {o.utr && (
-            <p className="text-xs text-slate-600">UTR: {o.utr}{utrCount(o.utr) > 1 && <span className="text-red-600 font-medium"> · used {utrCount(o.utr)} times</span>}</p>
-          )}
-          {o.status === "awaiting_verification" && (
-            <button onClick={() => onVerify(o.id)} className="text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl shadow">Verify payment</button>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 /* ---------- ELECTRICITY: DISCOM DATA (from BEE list, 62 entries) ---------- */
 const ELEC_DISCOMS = [
   ["Himachal Pradesh State Electricity Board Limited", "Himachal Pradesh"],
@@ -829,23 +782,10 @@ function App() {
     setActiveOrderId(id);
     setTimeout(() => updateOrder(id, { status: "awaiting_verification" }), 3000);
   };
-
-  // Admin verify: duplicate UTR check against orders already verified
-  const verifyOrder = (id) => {
-    const target = orders.find(o => o.id === id);
-    const dup = target.utr && orders.some(o => o.id !== id && o.utr === target.utr && o.status === "verified");
-    updateOrder(id, { status: dup ? "duplicate" : "verified" });
-  };
-
   const recentNumbers = [...orders].reverse()
     .filter(o => o.status === "verified")
     .map(o => ({ mobile: o.mobile, operatorKey: OPERATORS.find(op => op.name === o.operatorName)?.key }))
-    .filter((r, i, arr) => arr.findIndex(x => x.mobile === r.mobile) === i);
-
-  if (view === "admin") {
-    return <AdminPanel orders={orders} onVerify={verifyOrder} onBack={() => setView("categories")} />;
-  }
-  if (view === "operators") {
+    .filter((r, i, arr) => arr.findIndex(x => x.mobile === r.mobile) === i);  if (view === "operators") {
     return <OperatorList onBack={() => setView("categories")} onPick={op => { setOperator(op); setView("link"); }} />;
   }
   if (view === "link" && operator) {
@@ -890,7 +830,7 @@ function App() {
   if (view === "dth") {
     return <DthProviders onBack={() => setView("categories")} />;
   }
-  return <BillsCategories onAdmin={() => setView("admin")} onOpen={name => {
+  return <BillsCategories onOpen={name => {
     if (name === "Mobile recharge") setView("operators");
     else if (name === "DTH / Cable TV") setView("dth");
     else if (name === "Electricity") setView("elec-state");
