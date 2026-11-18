@@ -7,7 +7,7 @@ import { PanelLeftClose, PanelLeftOpen, House, Tag, UserRound, Heart, Package, G
 const items = [
   { label: "Home", href: "/", icon: House },
   { label: "All Categories", href: "/#categories", icon: Grid2X2 },
-  { label: "Recharge & Bills", href: "/#recharge", icon: Zap },
+  { label: "Recharge & Bills", href: "/recharge-bills", icon: Zap },
   { label: "Electronics", href: "/?category=Electronics#products", icon: Monitor },
   { label: "Fashion", href: "/?category=Fashion#products", icon: Shirt },
   { label: "Home Appliances", href: "/?category=Home%20Appliances#products", icon: HomeIcon },
