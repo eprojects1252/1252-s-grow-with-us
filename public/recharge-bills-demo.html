@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Recharges</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+</head>
+<body class="bg-slate-100">
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+
+/* ---------- MOCK DATA (admin / API later) ---------- */
+const OPERATORS = [
+  { key: "jio", name: "Reliance Jio", short: "Jio", color: "from-blue-500 to-blue-700" },
+  { key: "airtel", name: "Bharti Airtel", short: "A", color: "from-red-500 to-red-700" },
+  { key: "vi", name: "Vodafone Idea", short: "Vi", color: "from-rose-500 to-red-700" },
+  { key: "bsnl", name: "Bharat Sanchar Nigam Limited", short: "BSNL", color: "from-indigo-600 to-blue-900" },
+  { key: "mtnl", name: "Mahanagar Telephone Nigam Limited", short: "MTNL", color: "from-orange-400 to-orange-600" },
+];
+
+const CIRCLES = [
+  "Andhra Pradesh & Telangana", "Assam", "Bihar & Jharkhand", "Delhi", "Gujarat", "Haryana",
+  "Himachal Pradesh", "Jammu & Kashmir", "Karnataka", "Kerala", "Kolkata", "Madhya Pradesh & Chhattisgarh",
+  "Maharashtra & Goa", "Mumbai", "North East", "Odisha", "Punjab", "Rajasthan", "Tamil Nadu",
+  "Uttar Pradesh (East)", "Uttar Pradesh (West)", "West Bengal",
+];
+
+const AIRTEL_PLANS = [
+  { price: 399, data: "Unlimited 4G + 5G", validity: "28 days", calls: "Unlimited", sms: "100/day", cat: "Fully Unlimited (4G+5G)", benefits: ["Unlimited 4G + 5G data", "Unlimited 5G Data", "Adobe Express Premium (12 months)", "Free Hellotunes", "Airtel Safe"], details: "Better choice over Rs.199 to Rs.349 packs." },
+  { price: 449, data: "Unlimited 4G + 5G", validity: "28 days", calls: "Unlimited Local, STD", sms: "100/day", cat: "Fully Unlimited (4G+5G)", benefits: ["Unlimited 4G + 5G data", "Adobe Express Premium"], details: "Unlimited data with local and STD calls." },
+  { price: 1099, data: "Unlimited 4G+5G", validity: "84 days", calls: "Unlimited", sms: "100/day", cat: "Fully Unlimited (4G+5G)", benefits: ["Free Hellotunes", "Airtel Safe", "Unlimited 4G + 5G data"], details: "84 days unlimited plan." },
+  { price: 3999, data: "Unlimited 4G+5G", validity: "365 days", calls: "Unlimited", sms: "100/day", cat: "Fully Unlimited (4G+5G)", benefits: ["Unlimited 4G + 5G data", "Airtel Safe"], details: "Annual unlimited plan." },
+];
+
+const JIO_PLANS = [
+  { price: 300, data: "NA", validity: "Till 5th Sep 2027", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["Benefits of Jio Prime Pass"], details: "" },
+  { price: 1000, data: "NA", validity: "365 days", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["JioShield - Kids/Elders"], details: "" },
+  { price: 500, data: "Unlimited 5G + 2 GB/day", validity: "28 days", calls: "Unlimited", sms: "NA", cat: "OTT & entertainment", benefits: ["JioStar & more"], details: "" },
+  { price: 200, data: "Unlimited 5G + 30GB", validity: "28 days", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["15 OTT Apps & 10+ more"], details: "" },
+  { price: 55, data: "3 GB", validity: "30 days", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["Access 1000+ live TV channels"], details: "" },
+  { price: 3599, data: "Unlimited 5G + 2.5 GB/day", validity: "365 days", calls: "Unlimited", sms: "NA", cat: "OTT & entertainment", benefits: ["Unlimited True 5G"], details: "" },
+  { price: 459, data: "Unlimited 5G + 2 GB/day", validity: "28 days", calls: "Unlimited", sms: "NA", cat: "OTT & entertainment", benefits: ["Unlimited True 5G"], details: "" },
+  { price: 175, data: "10 GB", validity: "28 days", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["ETV & more"], details: "" },
+  { price: 99, data: "JioHome Pass", validity: "7 days", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["JioHome Booking Pass"], details: "" },
+  { price: 149, data: "10 GB", validity: "30 days", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["JioHotstar Mobile"], details: "" },
+  { price: 100, data: "6 GB", validity: "30 days", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["JioHotstar Mobile"], details: "" },
+  { price: 79, data: "3 GB", validity: "30 days", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["JioHotstar Mobile"], details: "" },
+  { price: 195, data: "15 GB", validity: "30 days", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["JioHotstar Mobile"], details: "" },
+  { price: 399, data: "Unlimited 5G + 2.5 GB/day", validity: "28 days", calls: "Unlimited", sms: "NA", cat: "OTT & entertainment", benefits: ["Unlimited True 5G"], details: "" },
+  { price: 545, data: "Unlimited 5G + 2 GB/day", validity: "28 days", calls: "Unlimited", sms: "NA", cat: "OTT & entertainment", benefits: ["Unlimited True 5G"], details: "" },
+  { price: 445, data: "Unlimited 5G + 2 GB/day", validity: "28 days", calls: "Unlimited", sms: "NA", cat: "OTT & entertainment", benefits: ["ETV & more"], details: "" },
+  { price: 103, data: "5 GB", validity: "28 days", calls: "NA", sms: "NA", cat: "OTT & entertainment", benefits: ["Fancode & more"], details: "" },
+];
+
+const VI_PLANS = [
+  { price: 26, data: "1.5 GB", validity: "1 day", calls: "NA", sms: "NA", cat: "Today's offer", benefits: ["Get 1.5 GB data for 1 day (expires at 11:59 PM)"], details: "No service validity." },
+  { price: 48, data: "6 GB", validity: "3 days", calls: "NA", sms: "NA", cat: "Today's offer", benefits: ["Add-on data pack: 6 GB for 3 days"], details: "No service validity." },
+  { price: 33, data: "2 GB", validity: "2 days", calls: "NA", sms: "NA", cat: "Today's offer", benefits: ["Add-on data pack: 2 GB valid for 2 days"], details: "No service validity." },
+  { price: 49, data: "Unlimited", validity: "1 day", calls: "NA", sms: "NA", cat: "Today's offer", benefits: ["Add-on data pack: unlimited data for 1 day (till 11:59 PM)"], details: "" },
+  { price: 610, data: "Unlimited", validity: "56 days", calls: "Unlimited", sms: "NA", cat: "Today's offer", benefits: ["NonStop Hero"], details: "" },
+  { price: 649, data: "2 GB/day", validity: "56 days", calls: "Unlimited", sms: "NA", cat: "Today's offer", benefits: ["Half-day unlimited data (12 AM - 12 PM)"], details: "" },
+  { price: 348, data: "50 GB", validity: "28 days", calls: "NA", sms: "NA", cat: "Today's offer", benefits: ["Get 50 GB data, validity 28 days"], details: "" },
+  { price: 230, data: "30 GB", validity: "28 days", calls: "NA", sms: "NA", cat: "Today's offer", benefits: ["Spotify Premium & more"], details: "" },
+  { price: 435, data: "Unlimited", validity: "28 days", calls: "Unlimited", sms: "NA", cat: "Unlimited 4G+5G", benefits: ["Spotify Premium & more"], details: "" },
+  { price: 399, data: "Unlimited", validity: "28 days", calls: "Unlimited", sms: "NA", cat: "Unlimited 4G+5G", benefits: ["NonStop Hero & more"], details: "" },
+  { price: 3900, data: "Unlimited", validity: "365 days", calls: "Unlimited", sms: "NA", cat: "Unlimited 4G+5G", benefits: ["NonStop Hero & more"], details: "" },
+  { price: 380, data: "Unlimited", validity: "28 days", calls: "Unlimited", sms: "NA", cat: "Unlimited 4G+5G", benefits: ["NonStop Hero & more"], details: "" },
+  { price: 449, data: "Unlimited 5G & 4G", validity: "28 days", calls: "Unlimited", sms: "NA", cat: "Unlimited 4G+5G", benefits: ["NonStop Hero & more"], details: "" },
+  { price: 700, data: "Unlimited", validity: "56 days", calls: "Unlimited", sms: "NA", cat: "Unlimited 4G+5G", benefits: ["NonStop Hero & more"], details: "" },
+  { price: 1050, data: "Unlimited", validity: "84 days", calls: "Unlimited", sms: "NA", cat: "Unlimited 4G+5G", benefits: ["NonStop Hero & more"], details: "" },
+  { price: 2180, data: "Unlimited", validity: "180 days", calls: "Unlimited", sms: "NA", cat: "Unlimited 4G+5G", benefits: ["NonStop Hero & more"], details: "" },
+  { price: 1599, data: "Unlimited 5G & 4G", validity: "84 days", calls: "Unlimited", sms: "NA", cat: "Unlimited 4G+5G", benefits: ["NonStop Hero & more"], details: "" },
+  { price: 200, data: "30 GB", validity: "28 days", calls: "NA", sms: "NA", cat: "Add on data", benefits: ["Unlimited 5G Data & more"], details: "" },
+];
+
+const getPlans = (key) => key === "jio" ? JIO_PLANS : key === "airtel" ? AIRTEL_PLANS : key === "vi" ? VI_PLANS : [];
+
+const DTH_SUGGESTED = ["Tata Play DTH (formerly Tata Sky)", "Airtel Digital TV", "D2H", "Sun Direct", "Dish TV"];
+const DTH_ALL = ["ACT Digital TV", "Airtel Digital TV", "Alka Vishwadarshan", "Amrita Cable Networks", "Angel Cable And Broadband Service", "Ansari Cable TV", "Arihant Network (TV)", "Aryan Cable Network", "Asianet Digital TV", "Ayyappa Swamy Siti Cable Network", "BCN Digital", "Badanganj Cable Network", "Bapi Electric & Cable Network", "CCNDS Cable", "CaTv", "CableGuy", "Channel Vision Cable", "Cochin Cable Vision", "D2H", "Deotech Cable Networks"];
+
+const CATEGORY_GROUPS = [
+  { title: "Recharge", items: [["Mobile recharge", "phone"], ["DTH / Cable TV", "tv"], ["Google Play", "play"], ["FASTag recharge", "car"], ["NCMC recharge", "train"], ["EV recharge", "plug"]] },
+  { title: "Utility bills", items: [["Electricity", "bulb"], ["Broadband / Landline", "wifi"], ["Postpaid mobile", "smartphone"], ["Water", "droplet"], ["Piped gas", "flame"], ["Education", "book"], ["Gas cylinder booking", "gauge"], ["Prepaid utilities", "clock"]] },
+  { title: "Finance & tax", items: [["LIC / Insurance", "shield"], ["Loan EMI", "file"], ["Credit cards", "card"], ["Gold locker", "leaf"], ["Municipal tax / service", "building"], ["NPS", "coins"], ["Traffic challan", "alert"]] },
+  { title: "More", items: [["Subscriptions", "film"], ["Housing society", "home"], ["Donation", "heart"], ["Clubs & associations", "users"], ["Gift cards", "gift"], ["Rental", "key"], ["Fleet card recharge", "receipt"]] },
+];
+
+/* ---------- ICONS (stroke SVG, glass style) ---------- */
+const ICON = {
+  phone: ["M7 2h10v20H7z", "M11 18h2", "M12.5 6l-2.5 4h3l-2.5 4"],
+  tv: ["M3 5h18v12H3z", "M8 21h8", "M12 17v4"],
+  play: ["M6 4l14 8-14 8z"],
+  car: ["M3 13l2-6h14l2 6v5H3z", "M6 18v2", "M18 18v2"],
+  train: ["M6 3h12v13H6z", "M6 16l-2 5", "M18 16l2 5", "M6 10h12"],
+  plug: ["M9 2v5", "M15 2v5", "M7 7h10v4a5 5 0 01-10 0z", "M12 16v6"],
+  bulb: ["M9 18h6", "M10 22h4", "M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"],
+  wifi: ["M2 9a15 15 0 0120 0", "M5 12.5a10 10 0 0114 0", "M8.5 16a5 5 0 017 0", "M12 20h.01"],
+  smartphone: ["M7 2h10v20H7z", "M11 18h2"],
+  droplet: ["M12 2.7S5 10 5 15a7 7 0 0014 0c0-5-7-12.3-7-12.3z"],
+  flame: ["M12 2c1 4 6 6 6 12a6 6 0 01-12 0c0-3 2-5 3-7 1 2 2 3 3 3 0-3-1-5 0-8z"],
+  book: ["M4 4h12a4 4 0 014 4v12H8a4 4 0 01-4-4z", "M4 4v12"],
+  gauge: ["M7 4c0-1.1 2.2-2 5-2s5 .9 5 2v16c0 1.1-2.2 2-5 2s-5-.9-5-2z", "M7 4c0 1.1 2.2 2 5 2s5-.9 5-2", "M9 10h6", "M9 14h6"],
+  clock: ["M12 2a10 10 0 100 20 10 10 0 000-20z", "M12 7v5l3 2"],
+  shield: ["M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z", "M9 12l2 2 4-4"],
+  file: ["M14 2H6v20h12V8z", "M14 2v6h6", "M9 13h6", "M9 17h6"],
+  card: ["M2 6h20v12H2z", "M2 10h20"],
+  leaf: ["M11 20A7 7 0 019.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z", "M2 21c0-3 1.9-5.4 5.1-6"],
+  building: ["M3 21h18", "M5 21V7l7-4 7 4v14", "M9 9h.01", "M9 13h.01", "M15 9h.01", "M15 13h.01"],
+  coins: ["M12 3a9 9 0 100 18 9 9 0 000-18z", "M12 7v10", "M9.5 9.5h4a1.5 1.5 0 010 3h-3a1.5 1.5 0 000 3h4"],
+  alert: ["M8 2h8v20H8z", "M12 6h.01", "M12 11h.01", "M12 16h.01"],
+  film: ["M2 2h20v20H2z", "M7 2v20", "M17 2v20", "M2 12h20"],
+  home: ["M3 11l9-8 9 8", "M5 10v11h14V10"],
+  heart: ["M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 000-7.8z"],
+  users: ["M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2", "M9 11a4 4 0 100-8 4 4 0 000 8z", "M23 21v-2a4 4 0 00-3-3.9", "M16 3.1a4 4 0 010 7.8"],
+  gift: ["M20 12v10H4V12", "M2 7h20v5H2z", "M12 22V7", "M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z", "M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"],
+  key: ["M21 2l-2 2", "M11.4 12.6a5.5 5.5 0 11-7.8 7.8 5.5 5.5 0 017.8-7.8z", "M15.5 7.5l3 3L22 7l-3-3"],
+  receipt: ["M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z", "M8 8h8", "M8 12h8", "M8 16h5"],
+  signal: ["M2 20h.01", "M7 20v-4", "M12 20v-8", "M17 20V8", "M22 20V4"],
+  search: ["M11 19a8 8 0 100-16 8 8 0 000 16z", "M21 21l-4.3-4.3"],
+  arrowLeft: ["M19 12H5", "M12 19l-7-7 7-7"],
+  arrowRight: ["M5 12h14", "M12 5l7 7-7 7"],
+  chevronDown: ["M6 9l6 6 6-6"],
+  edit: ["M12 20h9", "M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"],
+  trash: ["M3 6h18", "M8 6V4h8v2", "M6 6l1 14h10l1-14"],
+  more: ["M12 5h.01", "M12 12h.01", "M12 19h.01"],
+  check: ["M20 6L9 17l-5-5"],
+  admin: ["M3 3h7v9H3z", "M14 3h7v5h-7z", "M14 12h7v9h-7z", "M3 16h7v5H3z"],
+};
+
+const Ico = ({ name, className = "w-5 h-5", stroke = 2 }) => (
+  <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    {(ICON[name] || []).map((d, i) => <path key={i} d={d} />)}
+  </svg>
+);
+
+/* Glass pieces */
+const GlassBtn = ({ onClick, label, children, className = "" }) => (
+  <button aria-label={label} onClick={onClick}
+    className={`w-10 h-10 shrink-0 rounded-full bg-white/50 backdrop-blur-xl border border-white/70 shadow-md text-slate-800 flex items-center justify-center transition active:scale-95 hover:bg-white/80 ${className}`}>
+    {children}
+  </button>
+);
+const GlassTile = ({ icon, label, onClick }) => (
+  <button onClick={onClick}
+    className="rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-lg p-3 min-h-[104px] flex flex-col items-center justify-center gap-2 text-center text-xs text-slate-800 transition active:scale-95 hover:bg-white/80">
+    <span className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-400/30 to-indigo-500/30 border border-white/80 shadow-inner flex items-center justify-center text-indigo-700">
+      <Ico name={icon} className="w-5 h-5" />
+    </span>
+    <span className="leading-tight">{label}</span>
+  </button>
+);
+const ArrowButton = () => (
+  <span className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-md shrink-0">
+    <Ico name="arrowRight" className="w-4 h-4" />
+  </span>
+);
+const Logo = ({ op, size = "w-11 h-11", text = "text-sm" }) => (
+  <div className={`${size} rounded-full bg-gradient-to-br ${op.color} text-white flex items-center justify-center font-bold ${text} shadow-md shrink-0`}>{op.short}</div>
+);
+const Pill = ({ tone, children }) => {
+  const t = { blue: "bg-blue-100 text-blue-700", green: "bg-green-100 text-green-700", amber: "bg-amber-100 text-amber-800", red: "bg-red-100 text-red-700", slate: "bg-slate-100 text-slate-700" };
+  return <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${t[tone]}`}>{children}</span>;
+};
+
+const STATUS_TEXT = {
+  processing: ["Processing (2–5 min)", "blue"],
+  awaiting_verification: ["Awaiting admin verification", "amber"],
+  verified: ["Recharge verified ✓", "green"],
+  duplicate: ["Rejected: duplicate UTR", "red"],
+};
+
+/* ---------- BILLS & RECHARGES ---------- */
+function BillsCategories({ onOpen, onAdmin }) {
+  const [query, setQuery] = useState("");
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100">
+      <div className="px-4 pt-5 pb-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-slate-900">Bills & Recharges</h1>
+          <GlassBtn label="Admin" onClick={onAdmin}><Ico name="admin" className="w-5 h-5" /></GlassBtn>
+        </div>
+        <div className="relative">
+          <Ico name="search" className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search by name"
+            className="w-full rounded-full bg-white/60 backdrop-blur border border-white/80 shadow-sm pl-11 pr-4 py-2.5 text-sm outline-none focus:border-blue-400" />
+        </div>
+      </div>
+      <div className="px-4 pb-8 space-y-6">
+        {CATEGORY_GROUPS.map(g => {
+          const items = g.items.filter(([n]) => n.toLowerCase().includes(query.toLowerCase()));
+          if (!items.length) return null;
+          return (
+            <section key={g.title}>
+              <h2 className="text-sm text-slate-600 mb-3">{g.title}</h2>
+              <div className="grid grid-cols-3 gap-3">
+                {items.map(([name, icon]) => <GlassTile key={name} label={name} icon={icon} onClick={() => onOpen(name)} />)}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- OPERATOR LIST ---------- */
+function OperatorList({ onBack, onPick }) {
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100">
+      <div className="flex items-center gap-4 px-4 py-4">
+        <GlassBtn onClick={onBack} label="Back"><Ico name="arrowLeft" /></GlassBtn>
+        <h1 className="text-lg font-semibold">Mobile recharge</h1>
+      </div>
+      <ul className="px-4 space-y-3">
+        {OPERATORS.map(op => (
+          <li key={op.key}>
+            <button onClick={() => onPick(op)} className="w-full flex items-center gap-4 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-md p-4 text-left active:scale-[0.99] transition">
+              <Logo op={op} />
+              <span className="flex-1 text-base text-slate-900">{op.name}</span>
+              <ArrowButton />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ---------- PLAN DETAILS → PAYMENT ---------- */
+function PlanDetails({ plan, operator, account, onBack, onProceed }) {
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100 flex flex-col">
+      <div className="sticky top-0 z-10 flex items-center gap-4 px-4 py-4 bg-white/40 backdrop-blur-xl border-b border-white/70">
+        <GlassBtn onClick={onBack} label="Back"><Ico name="arrowLeft" /></GlassBtn>
+        <h2 className="text-lg font-semibold">Plan details</h2>
+      </div>
+      <div className="p-4 space-y-5 flex-1">
+        <p className="text-sm text-slate-600">{operator.name} · +91 {account.mobile}</p>
+        <div className="rounded-3xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-lg overflow-hidden">
+          <div className="flex justify-between p-4 border-b border-slate-200"><span className="text-slate-500">Plan price</span><span className="text-2xl font-semibold">₹{plan.price}</span></div>
+          <div className="grid grid-cols-2 gap-4 p-4 text-sm">
+            <div><p className="text-slate-500">Data</p><p className="font-medium">{plan.data}</p></div>
+            <div><p className="text-slate-500">Validity</p><p className="font-medium">{plan.validity}</p></div>
+            <div><p className="text-slate-500">Calls</p><p className="font-medium">{plan.calls}</p></div>
+            <div><p className="text-slate-500">SMS</p><p className="font-medium">{plan.sms}</p></div>
+          </div>
+        </div>
+        <div>
+          <h4 className="font-semibold mb-2">Extra benefits ({plan.benefits.length})</h4>
+          <ul className="space-y-2">
+            {plan.benefits.map((b, i) => (
+              <li key={i} className="flex gap-3 items-center rounded-2xl bg-white/60 backdrop-blur border border-white/80 px-3 py-2">
+                <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-300 to-orange-400 text-white flex items-center justify-center text-sm">★</span>
+                <span className="text-sm">{b}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {plan.details && <p className="text-sm text-slate-600">{plan.details}</p>}
+      </div>
+      <div className="p-4 border-t border-white/70 bg-white/40 backdrop-blur-xl">
+        <button onClick={() => onProceed(plan)} className="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white py-3.5 rounded-2xl font-medium shadow-lg">Proceed to recharge</button>
+      </div>
+    </div>
+  );
+}
+
+function PaymentScreen({ order, onBack, onSubmit }) {
+  const [method, setMethod] = useState("UPI QR (DigiPay)");
+  const [utr, setUtr] = useState("");
+  const [error, setError] = useState("");
+  const submitted = !!order;
+
+  const pay = () => {
+    if (method.startsWith("UPI") && utr.trim().length < 6) return setError("Enter the UPI transaction ID (UTR)");
+    setError("");
+    onSubmit({ method, utr: method.startsWith("UPI") ? utr.trim() : "" });
+  };
+
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100 p-4 space-y-5">
+      <div className="flex items-center gap-4">
+        <GlassBtn onClick={onBack} label="Back"><Ico name="arrowLeft" /></GlassBtn>
+        <h2 className="text-lg font-semibold">Payment</h2>
+      </div>
+      <div className="rounded-3xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-lg p-4">
+        <p className="text-sm text-slate-600">{order ? order.operatorName : ""} · +91 {order ? order.mobile : ""}</p>
+        <p className="text-2xl font-semibold">₹{order ? order.price : ""}</p>
+        <p className="text-sm text-slate-600">{order ? `${order.data} · ${order.validity}` : ""}</p>
+      </div>
+
+      {!submitted ? (
+        <>
+          <div className="space-y-2">
+            {["UPI QR (DigiPay)", "Manual cash (to admin)"].map(m => (
+              <label key={m} className="flex items-center gap-3 rounded-2xl bg-white/60 backdrop-blur border border-white/80 p-3 cursor-pointer">
+                <input type="radio" checked={method === m} onChange={() => setMethod(m)} />
+                <span className="text-sm">{m}</span>
+              </label>
+            ))}
+          </div>
+          {method.startsWith("UPI") ? (
+            <div className="space-y-3">
+              <div className="mx-auto w-44 h-44 rounded-3xl bg-white/70 border-2 border-dashed border-slate-300 flex items-center justify-center text-xs text-slate-500">UPI QR placeholder</div>
+              <input value={utr} onChange={e => { setUtr(e.target.value.replace(/\s/g, "")); setError(""); }} placeholder="UPI transaction ID (UTR)"
+                className="w-full rounded-2xl bg-white/70 border border-white/80 px-4 py-3 text-sm outline-none focus:border-blue-400" />
+            </div>
+          ) : (
+            <p className="text-sm text-slate-600 rounded-2xl bg-amber-50/80 border border-amber-100 p-3">Hand over ₹{order ? order.price : ""} to the admin, then tap below.</p>
+          )}
+          {error && <p className="text-xs text-red-600">{error}</p>}
+          <button onClick={pay} className="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white py-3.5 rounded-2xl font-medium shadow-lg">I have paid</button>
+        </>
+      ) : (
+        <div className="rounded-3xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-lg p-4 space-y-3">
+          <h4 className="font-semibold">Status</h4>
+          <Pill tone={STATUS_TEXT[order.status][1]}>{STATUS_TEXT[order.status][0]}</Pill>
+          {order.utr && <p className="text-xs text-slate-500">UTR: {order.utr}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- PLAN BROWSER ---------- */
+function PlanBrowser({ account, operator, onPlanPick }) {
+  const [q, setQ] = useState("");
+  const allPlans = getPlans(operator.key);
+  const tabs = [...new Set(allPlans.map(p => p.cat))];
+  const [tab, setTab] = useState(tabs[0]);
+
+  const list = allPlans.filter(p => p.cat === tab &&
+    (q === "" || String(p.price).includes(q.replace(/\D/g, "")) || p.data.toLowerCase().includes(q.toLowerCase())));
+
+  return (
+    <div>
+      <div className="p-4">
+        <div className="relative">
+          <Ico name="search" className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search for a plan or enter amount"
+            className="w-full rounded-full bg-white/70 backdrop-blur border border-white/80 shadow-sm pl-11 pr-5 py-3 text-sm outline-none focus:border-blue-400" />
+        </div>
+      </div>
+      {tabs.length > 0 && (
+        <div className="flex gap-2 px-4 pb-3 overflow-x-auto">
+          {tabs.map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-3.5 py-1.5 rounded-full text-sm whitespace-nowrap border transition ${tab === t ? "bg-blue-600 text-white border-blue-600 shadow" : "bg-white/60 backdrop-blur text-slate-600 border-white/80"}`}>{t}</button>
+          ))}
+        </div>
+      )}
+      <div className="p-4 pt-1 space-y-3">
+        {tabs.length === 0 && <p className="text-sm text-slate-500 text-center py-10">{operator.name} plans will be added from the admin side.</p>}
+        {tabs.length > 0 && list.length === 0 && <p className="text-sm text-slate-500 text-center py-10">No plans found.</p>}
+        {list.map(p => (
+          <button key={p.price + "-" + p.validity + "-" + p.cat} onClick={() => onPlanPick(p)}
+            className="w-full text-left rounded-3xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-md p-4 active:scale-[0.99] transition">
+            <div className="flex items-center gap-4">
+              <div className="text-3xl font-semibold w-28 shrink-0">₹{p.price.toLocaleString("en-IN")}</div>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm flex-1">
+                <dt className="text-slate-500">Data</dt><dd>{p.data}</dd>
+                <dt className="text-slate-500">Validity</dt><dd>{p.validity}</dd>
+                <dt className="text-slate-500">Calls</dt><dd className="truncate">{p.calls}</dd>
+              </dl>
+              <ArrowButton />
+            </div>
+            <div className="mt-3 pt-3 border-t border-white/80 text-xs text-slate-500 flex justify-between gap-2">
+              <span>{p.benefits.length} benefit{p.benefits.length > 1 ? "s" : ""}</span>
+              <span className="truncate">{p.benefits[0]}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- LINK MOBILE NUMBER PAGE ---------- */
+function LinkAccountPage({ operator, accounts, recentNumbers, onBack, onLink, onEditAccount, onRemoveAccount, onPlanPick }) {
+  const [dropOpen, setDropOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [mobile, setMobile] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [circle, setCircle] = useState("");
+  const [error, setError] = useState("");
+  const mine = accounts.filter(a => a.operatorKey === operator.key);
+  const selected = mine.find(a => a.id === selectedId) || mine[0];
+
+  const submit = () => {
+    if (!/^[6-9]\d{9}$/.test(mobile)) return setError("Enter a valid 10-digit mobile number");
+    if (accounts.some(a => a.mobile === mobile && a.operatorKey === operator.key)) return setError("This number is already linked");
+    if (!circle) return setError("Select circle");
+    const acc = { id: Date.now(), operatorKey: operator.key, mobile, nickname: nickname.trim(), circle };
+    onLink(acc);
+    setSelectedId(acc.id);
+    setMobile(""); setNickname(""); setCircle(""); setError(""); setModalOpen(false); setDropOpen(true);
+  };
+
+  const recents = recentNumbers.filter(r => r.operatorKey === operator.key).slice(0, 3);
+
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100 relative">
+      <div className="flex items-center gap-4 px-4 py-4">
+        <GlassBtn onClick={onBack} label="Back"><Ico name="arrowLeft" /></GlassBtn>
+        <Logo op={operator} />
+        <h1 className="text-lg font-semibold flex-1">{operator.name} Prepaid</h1>
+        <GlassBtn label="More"><Ico name="more" /></GlassBtn>
+      </div>
+
+      {recents.length > 0 && (
+        <div className="px-4 pb-2">
+          <p className="text-xs text-slate-500 mb-2">Recent</p>
+          <div className="flex gap-2 overflow-x-auto">
+            {recents.map(r => (
+              <button key={r.mobile} onClick={() => { const a = mine.find(x => x.mobile === r.mobile); if (a) { setSelectedId(a.id); } else { setMobile(r.mobile); setModalOpen(true); } }}
+                className="shrink-0 px-3 py-1.5 rounded-full bg-white/70 backdrop-blur border border-white/80 shadow-sm text-sm">+91 {r.mobile}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="relative px-4 py-3">
+        <button onClick={() => mine.length && setDropOpen(o => !o)}
+          className="w-full flex items-center justify-between rounded-2xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-md px-4 py-3.5 text-lg text-slate-900">
+          <span>{selected ? `+91 ${selected.mobile}` : "No accounts linked"}</span>
+          {mine.length > 0 && <span className={`w-8 h-8 rounded-full bg-white/80 border border-white shadow flex items-center justify-center text-slate-700 transition-transform ${dropOpen ? "rotate-180" : ""}`}><Ico name="chevronDown" className="w-4 h-4" /></span>}
+        </button>
+
+        {dropOpen && mine.length > 0 && (
+          <div className="absolute left-4 right-4 top-full mt-2 z-20 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/70 shadow-xl p-2">
+            {mine.map(a => (
+              <div key={a.id} className="flex items-center gap-2 px-2 py-2 rounded-xl hover:bg-white/70">
+                <button onClick={() => { setSelectedId(a.id); setDropOpen(false); }} className="flex-1 text-left text-sm text-slate-900">
+                  +91 {a.mobile}
+                  {a.nickname && <span className="block text-xs text-slate-500">{a.nickname}</span>}
+                </button>
+                <GlassBtn label="Edit" className="!w-8 !h-8 text-blue-700" onClick={() => { setDropOpen(false); onEditAccount(a); }}><Ico name="edit" className="w-4 h-4" /></GlassBtn>
+                <GlassBtn label="Unlink" className="!w-8 !h-8 text-red-600" onClick={() => { if (confirm("Unlink this number?")) { setDropOpen(false); onRemoveAccount(a.id); } }}><Ico name="trash" className="w-4 h-4" /></GlassBtn>
+              </div>
+            ))}
+            <button onClick={() => { setDropOpen(false); setModalOpen(true); }} className="w-full text-left px-3 py-3 mt-1 rounded-xl text-sm text-blue-700 border-t border-white/70">+ Link another number</button>
+          </div>
+        )}
+      </div>
+
+      {mine.length === 0 && (
+        <div className="flex flex-col items-center text-center px-8 pt-20 gap-4">
+          <Logo op={operator} size="w-28 h-28" text="text-2xl" />
+          <h2 className="text-2xl font-medium">{operator.name} Prepaid</h2>
+          <p className="text-sm text-slate-600">Link your {operator.name} Prepaid mobile number to view plans and recharge now</p>
+          <button onClick={() => setModalOpen(true)} className="text-blue-600 font-medium text-base pt-4">Link mobile number</button>
+        </div>
+      )}
+
+      {selected && <PlanBrowser key={selected.id} account={selected} operator={operator} onPlanPick={onPlanPick} />}
+
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/25 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="w-full max-w-sm rounded-3xl bg-white/80 backdrop-blur-xl border border-white/70 shadow-2xl p-5 space-y-4">
+            <h3 className="text-lg font-semibold">Link mobile number</h3>
+            <div className="flex gap-2">
+              <div className="rounded-xl px-3 py-3 text-sm text-slate-600 bg-white/70 border border-white/80">+91</div>
+              <input autoFocus value={mobile} inputMode="numeric" placeholder="Mobile number"
+                onChange={e => { setMobile(e.target.value.replace(/\D/g, "").slice(0, 10)); setError(""); }}
+                className="flex-1 rounded-xl px-3 py-3 text-sm bg-white/70 border border-white/80 outline-none focus:border-blue-400" />
+            </div>
+            <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="Nickname (optional)"
+              className="w-full rounded-xl px-3 py-3 text-sm bg-white/70 border border-white/80 outline-none focus:border-blue-400" />
+            <select value={circle} onChange={e => { setCircle(e.target.value); setError(""); }}
+              className="w-full rounded-xl px-3 py-3 text-sm bg-white/70 border border-white/80 outline-none focus:border-blue-400">
+              <option value="">Select circle</option>
+              {CIRCLES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            {error && <p className="text-xs text-red-600">{error}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => { setModalOpen(false); setError(""); }} className="flex-1 rounded-xl py-2.5 text-sm bg-white/70 border border-white/80">Cancel</button>
+              <button onClick={submit} className="flex-1 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl py-2.5 text-sm">Link</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- ACCOUNT EDIT FORM ---------- */
+function AccountForm({ account, operator, onBack, onSave }) {
+  const [nickname, setNickname] = useState(account.nickname);
+  const [circle, setCircle] = useState(account.circle);
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100 flex flex-col">
+      <div className="flex items-center gap-4 px-4 py-4">
+        <GlassBtn onClick={onBack} label="Back"><Ico name="arrowLeft" /></GlassBtn>
+        <h1 className="text-lg font-semibold">Edit number</h1>
+      </div>
+      <div className="flex items-center gap-4 px-4 pb-6">
+        <Logo op={operator} size="w-14 h-14" text="text-sm" />
+        <p className="text-xl text-slate-900">+91 {account.mobile}</p>
+      </div>
+      <div className="px-4 space-y-4">
+        <input value={nickname} onChange={e => setNickname(e.target.value)} placeholder="Nickname"
+          className="w-full rounded-2xl bg-white/70 border border-white/80 px-4 py-4 text-base outline-none focus:border-blue-400" />
+        <select value={circle} onChange={e => setCircle(e.target.value)}
+          className="w-full rounded-2xl bg-white/70 border border-white/80 px-4 py-4 text-base outline-none focus:border-blue-400">
+          {CIRCLES.map(c => <option key={c} value={c}>{operator.name} Prepaid - {c}</option>)}
+        </select>
+      </div>
+      <div className="mt-auto px-4 pb-6 pt-8">
+        <button disabled={!circle} onClick={() => onSave({ ...account, nickname: nickname.trim(), circle })}
+          className="w-full bg-gradient-to-r from-blue-500 to-blue-700 disabled:from-slate-300 disabled:to-slate-300 text-white py-4 rounded-2xl font-medium">Save</button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- DTH / CABLE PROVIDERS ---------- */
+function DthProviders({ onBack }) {
+  const [q, setQ] = useState("");
+  const match = n => n.toLowerCase().includes(q.toLowerCase());
+  const Row = ({ name }) => (
+    <button onClick={() => alert(name + " - next step")} className="w-full flex items-center gap-4 px-4 py-3 text-left">
+      <span className="w-11 h-11 rounded-full bg-white/70 border border-white/80 shadow-sm flex items-center justify-center text-xs font-bold text-slate-600 shrink-0">{name.charAt(0)}</span>
+      <span className="flex-1 text-sm text-slate-900">{name}</span>
+      <ArrowButton />
+    </button>
+  );
+  const sugg = DTH_SUGGESTED.filter(match);
+  const all = DTH_ALL.filter(match);
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100">
+      <div className="flex items-center gap-3 px-4 py-4">
+        <GlassBtn onClick={onBack} label="Back"><Ico name="arrowLeft" /></GlassBtn>
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search DTH / cable provider"
+          className="flex-1 rounded-full bg-white/70 border border-white/80 px-4 py-2 text-sm outline-none focus:border-blue-400" />
+      </div>
+      {sugg.length > 0 && (
+        <section>
+          <h2 className="px-4 pt-3 pb-2 text-sm text-slate-600">Suggested</h2>
+          {sugg.map(n => <Row key={"s-" + n} name={n} />)}
+        </section>
+      )}
+      <section>
+        <h2 className="px-4 pt-4 pb-2 text-sm text-slate-600">All DTH / cable providers</h2>
+        {all.length === 0 && <p className="px-4 py-6 text-sm text-slate-500">No provider found.</p>}
+        {all.map(n => <Row key={"a-" + n} name={n} />)}
+      </section>
+    </div>
+  );
+}
+
+/* ---------- ADMIN DASHBOARD ---------- */
+function AdminPanel({ orders, onVerify, onBack }) {
+  const pending = orders.filter(o => o.status === "awaiting_verification").length;
+  const dupes = orders.filter(o => o.status === "duplicate").length;
+  const verifiedTotal = orders.filter(o => o.status === "verified").reduce((s, o) => s + o.price, 0);
+  const utrCount = utr => orders.filter(o => o.utr && o.utr === utr).length;
+
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100 p-4 space-y-4">
+      <div className="flex items-center gap-4">
+        <GlassBtn onClick={onBack} label="Back"><Ico name="arrowLeft" /></GlassBtn>
+        <h1 className="text-lg font-semibold">Admin dashboard</h1>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        {[["Today's orders", orders.length], ["To verify", pending], ["Duplicates", dupes], ["Verified ₹", verifiedTotal]].map(([label, val]) => (
+          <div key={label} className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-md p-4">
+            <p className="text-xs text-slate-500">{label}</p>
+            <p className="text-2xl font-semibold mt-1">{val}</p>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="text-sm text-slate-600 pt-2">Orders</h2>
+      {orders.length === 0 && <p className="text-sm text-slate-500">No orders yet.</p>}
+      {[...orders].reverse().map(o => (
+        <div key={o.id} className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-md p-4 space-y-2">
+          <div className="flex justify-between items-start gap-2">
+            <div>
+              <p className="font-medium">+91 {o.mobile} · ₹{o.price}</p>
+              <p className="text-xs text-slate-500">{o.operatorName} · {o.method}</p>
+            </div>
+            <Pill tone={STATUS_TEXT[o.status][1]}>{STATUS_TEXT[o.status][0]}</Pill>
+          </div>
+          {o.utr && (
+            <p className="text-xs text-slate-600">UTR: {o.utr}{utrCount(o.utr) > 1 && <span className="text-red-600 font-medium"> · used {utrCount(o.utr)} times</span>}</p>
+          )}
+          {o.status === "awaiting_verification" && (
+            <button onClick={() => onVerify(o.id)} className="text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl shadow">Verify payment</button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ---------- ELECTRICITY: DISCOM DATA (from BEE list, 62 entries) ---------- */
+const ELEC_DISCOMS = [
+  ["Himachal Pradesh State Electricity Board Limited", "Himachal Pradesh"],
+  ["Tata Power Delhi Distribution Limited", "Delhi"],
+  ["BSES Rajdhani Power Limited", "Delhi"],
+  ["BSES Yamuna Power Limited", "Delhi"],
+  ["New Delhi Municipal Corporation", "Delhi"],
+  ["Uttar Haryana Bijli Vitran Nigam", "Haryana"],
+  ["Dakshin Haryana Bijli Vitran Nigam", "Haryana"],
+  ["Uttarakhand Power Corporation Limited", "Uttarakhand"],
+  ["Punjab State Power Corporation Limited", "Punjab"],
+  ["Purvanchal Vidyut Vitran Nigam Ltd.", "Uttar Pradesh"],
+  ["Paschimanchal Vidyut Vitran Nigam Limited", "Uttar Pradesh"],
+  ["Madhyanchal Vidyut Vitran Nigam Limited", "Uttar Pradesh"],
+  ["Dhakshinachal Vidyut Vitran Nigam Limited", "Uttar Pradesh"],
+  ["Electricity Department, UT of Chandigarh", "Chandigarh"],
+  ["Power Development Department", "Jammu & Kashmir"],
+  ["Manipur State Power Distribution Company Ltd", "Manipur"],
+  ["Department of Power, Arunachal Pradesh", "Arunachal Pradesh"],
+  ["Department of Power, Nagaland", "Nagaland"],
+  ["Sikkim Power Development Corporation Limited", "Sikkim"],
+  ["Meghalaya Energy Distribution Corporation Limited", "Meghalaya"],
+  ["Power & Electricity Department, Government of Mizoram", "Mizoram"],
+  ["North Bihar Power Distribution Company Limited", "Bihar"],
+  ["South Bihar Power Distribution Company Limited", "Bihar"],
+  ["Assam Power Distribution Company Limited", "Assam"],
+  ["Tripura State Electricity Corporation Limited", "Tripura"],
+  ["Kerala State Electricity Board Limited", "Kerala"],
+  ["Chamundeshwari Electricity Supply Corporation Limited", "Karnataka"],
+  ["Gulbarga Electricity Supply Company Limited", "Karnataka"],
+  ["Bangalore Electricity Supply Company Limited", "Karnataka"],
+  ["Mangalore Electricity Supply Company Limited", "Karnataka"],
+  ["Hubli Electricity Supply Company Limited", "Karnataka"],
+  ["Telangana State Southern Power Distribution Company Ltd", "Telangana"],
+  ["Telangana State Northern Power Distribution Company Ltd", "Telangana"],
+  ["Electricity Department, UT of Lakshadweep", "Lakshadweep"],
+  ["Electricity Department, UT of Puducherry", "Puducherry"],
+  ["Electricity Department, UT of Andaman & Nicobar", "Andaman & Nicobar"],
+  ["Southern Power Distribution Company of A.P. Limited", "Andhra Pradesh"],
+  ["Andhra Pradesh Eastern Power Distribution Company Ltd", "Andhra Pradesh"],
+  ["Tamil Nadu Generation & Distribution Corporation Limited", "Tamil Nadu"],
+  ["Uttar Gujarat Vij Company Limited", "Gujarat"],
+  ["Madhya Gujarat Vij Company Limited", "Gujarat"],
+  ["Paschim Gujarat Vij Company Limited", "Gujarat"],
+  ["Dakshin Gujarat Vij Company Limited", "Gujarat"],
+  ["Electricity Department, Government of Goa", "Goa"],
+  ["Madhya Pradesh Madhya Kshetra Vidyut Vitran Company Limited", "Madhya Pradesh"],
+  ["MP Paschim Kshetra Vidyut Vitran Company Limited", "Madhya Pradesh"],
+  ["MP Poorv Kshetra Vidyut Vitran Company Limited", "Madhya Pradesh"],
+  ["Jaipur Vidyut Vitran Nigam Limited", "Rajasthan"],
+  ["Ajmer Vidyut Vitran Nigam Limited", "Rajasthan"],
+  ["Jodhpur Vidyut Vitran Nigam Limited", "Rajasthan"],
+  ["Maharashtra State Electricity Distribution Co. Ltd.", "Maharashtra"],
+  ["Brihanmumbai Electric Supply Company", "Maharashtra"],
+  ["Chhattisgarh State Power Distribution Company Ltd.", "Chhattisgarh"],
+  ["Dadra & Nagar Haveli Power Distribution Corporation Ltd", "Dadra & Nagar Haveli"],
+  ["Electricity Department, UT of Daman & Diu", "Daman & Diu"],
+  ["West Bengal State Electricity Distribution Company Limited", "West Bengal"],
+  ["Durgapur Project Limited", "West Bengal"],
+  ["Jharkhand Bijli Vitran Nigam Limited", "Jharkhand"],
+  ["North Eastern Supply Company Limited", "Odisha"],
+  ["Southern Electricity Supply Company Limited", "Odisha"],
+  ["Central Electricity Supply Company Limited", "Odisha"],
+  ["Western Electricity Supply Company of Odisha Limited", "Odisha"],
+].map(([name, state]) => ({ name, state }));
+
+const PAGE_BG = "max-w-md mx-auto min-h-screen bg-gradient-to-b from-sky-100 via-white to-indigo-100";
+
+const Header = ({ title, onBack, right }) => (
+  <div className="flex items-center gap-4 px-4 py-4">
+    <GlassBtn onClick={onBack} label="Back"><Ico name="arrowLeft" /></GlassBtn>
+    <h1 className="text-base font-semibold flex-1">{title}</h1>
+    {right}
+  </div>
+);
+
+const GlassRow = ({ onClick, title, sub }) => (
+  <button onClick={onClick} className="w-full flex items-center gap-4 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-md p-4 mb-3 text-left active:scale-[0.99] transition">
+    <div className="flex-1 min-w-0">
+      <p className="text-sm text-slate-900">{title}</p>
+      {sub && <p className="text-xs text-slate-500 mt-0.5">{sub}</p>}
+    </div>
+    <ArrowButton />
+  </button>
+);
+
+/* Step 1: state */
+function ElecStates({ onBack, onPick }) {
+  const [q, setQ] = useState("");
+  const states = [...new Set(ELEC_DISCOMS.map(d => d.state))].sort()
+    .filter(s => s.toLowerCase().includes(q.toLowerCase()));
+  return (
+    <div className={PAGE_BG}>
+      <Header title="Electricity - select state" onBack={onBack} />
+      <div className="px-4 pb-3">
+        <div className="relative">
+          <Ico name="search" className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search state"
+            className="w-full rounded-full bg-white/70 backdrop-blur border border-white/80 shadow-sm pl-11 pr-4 py-2.5 text-sm outline-none focus:border-blue-400" />
+        </div>
+      </div>
+      <div className="px-4 pb-8">
+        {states.map(s => <GlassRow key={s} title={s} sub={`${ELEC_DISCOMS.filter(d => d.state === s).length} DISCOM(s)`} onClick={() => onPick(s)} />)}
+        {states.length === 0 && <p className="text-sm text-slate-500 text-center py-8">No state found.</p>}
+      </div>
+    </div>
+  );
+}
+
+/* Step 2: DISCOM under the chosen state */
+function ElecDiscoms({ state, onBack, onPick }) {
+  const list = ELEC_DISCOMS.filter(d => d.state === state);
+  return (
+    <div className={PAGE_BG}>
+      <Header title={state} onBack={onBack} />
+      <div className="px-4 pb-8">
+        <p className="text-sm text-slate-600 mb-3">Select your electricity provider (DISCOM)</p>
+        {list.map(d => <GlassRow key={d.name} title={d.name} onClick={() => onPick(d)} />)}
+      </div>
+    </div>
+  );
+}
+
+/* Step 3: consumer numbers (add / edit / remove) */
+function ElecConsumer({ discom, accounts, onBack, onSave, onRemove, onOpenBill }) {
+  const mine = accounts.filter(a => a.discom === discom.name);
+  const [editing, setEditing] = useState(null);
+  const [error, setError] = useState("");
+
+  const save = () => {
+    const no = (editing.consumerNo || "").trim();
+    if (!/^\d{6,15}$/.test(no)) return setError("Enter a valid consumer number (6 to 15 digits)");
+    onSave({ id: editing.id || Date.now(), discom: discom.name, state: discom.state, consumerNo: no, nickname: (editing.nickname || "").trim() });
+    setEditing(null); setError("");
+  };
+
+  return (
+    <div className={PAGE_BG}>
+      <Header title={discom.name} onBack={onBack} />
+      <div className="px-4 pb-8 space-y-3">
+        {mine.map(a => (
+          <div key={a.id} className="flex items-center gap-2 rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-md p-3">
+            <button onClick={() => onOpenBill(a)} className="flex-1 text-left">
+              <p className="font-medium">{a.consumerNo}</p>
+              {a.nickname && <p className="text-xs text-slate-500">{a.nickname}</p>}
+            </button>
+            <GlassBtn label="Edit" className="!w-8 !h-8 text-blue-700" onClick={() => setEditing({ ...a })}><Ico name="edit" className="w-4 h-4" /></GlassBtn>
+            <GlassBtn label="Remove" className="!w-8 !h-8 text-red-600" onClick={() => { if (confirm("Remove this consumer number?")) onRemove(a.id); }}><Ico name="trash" className="w-4 h-4" /></GlassBtn>
+          </div>
+        ))}
+
+        {!editing && (
+          <button onClick={() => setEditing({ consumerNo: "", nickname: "" })}
+            className="w-full rounded-2xl bg-gradient-to-r from-blue-500 to-blue-700 text-white py-3 font-medium shadow-lg">+ Add consumer number</button>
+        )}
+
+        {editing && (
+          <div className="rounded-3xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-lg p-4 space-y-3">
+            <input value={editing.consumerNo} inputMode="numeric" placeholder="Consumer number"
+              onChange={e => { setEditing({ ...editing, consumerNo: e.target.value.replace(/\D/g, "").slice(0, 15) }); setError(""); }}
+              className="w-full rounded-2xl bg-white/80 border border-white/80 px-4 py-3 text-sm outline-none focus:border-blue-400" />
+            <input value={editing.nickname} placeholder="Nickname (optional)"
+              onChange={e => setEditing({ ...editing, nickname: e.target.value })}
+              className="w-full rounded-2xl bg-white/80 border border-white/80 px-4 py-3 text-sm outline-none focus:border-blue-400" />
+            {error && <p className="text-xs text-red-600">{error}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => { setEditing(null); setError(""); }} className="flex-1 rounded-xl py-2.5 text-sm bg-white/70 border border-white/80">Cancel</button>
+              <button onClick={save} className="flex-1 rounded-xl py-2.5 text-sm text-white bg-gradient-to-r from-blue-500 to-blue-700">Save</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* Step 4: bill (live data comes from provider API later) */
+function ElecBill({ account, onBack }) {
+  return (
+    <div className={PAGE_BG}>
+      <Header title="Electricity bill" onBack={onBack} />
+      <div className="px-4 space-y-4">
+        <div className="rounded-3xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-lg p-4 space-y-1">
+          <p className="text-sm text-slate-600">{account.discom}</p>
+          <p className="text-lg font-semibold">{account.consumerNo}</p>
+          {account.nickname && <p className="text-xs text-slate-500">{account.nickname}</p>}
+        </div>
+        <div className="rounded-3xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-md p-6 text-center text-sm text-slate-600">
+          Bill amount and due date will appear here once the provider API is connected.
+        </div>
+        <button disabled className="w-full rounded-2xl bg-slate-300 text-white py-3.5 font-medium">Pay bill</button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- APP ---------- */
+function App() {
+  const [view, setView] = useState("categories");
+  const [operator, setOperator] = useState(null);
+  const [accounts, setAccounts] = useState([]); // memory only; DB later
+  const [activeAccount, setActiveAccount] = useState(null);
+  const [activePlan, setActivePlan] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [activeOrderId, setActiveOrderId] = useState(null);
+  const [elecState, setElecState] = useState(null);
+  const [elecDiscom, setElecDiscom] = useState(null);
+  const [utilAccounts, setUtilAccounts] = useState([]);
+  const [activeUtil, setActiveUtil] = useState(null);
+
+  const saveAccount = (updated) => {
+    setAccounts(prev => prev.map(a => a.id === updated.id ? updated : a));
+    setView("link");
+  };
+
+  const updateOrder = (id, patch) => setOrders(prev => prev.map(o => o.id === id ? { ...o, ...patch } : o));
+
+  const submitPayment = ({ method, utr }) => {
+    const id = Date.now();
+    const plan = activePlan;
+    const acc = activeAccount;
+    setOrders(prev => [...prev, {
+      id, mobile: acc.mobile, operatorName: operator.name, price: plan.price, data: plan.data,
+      validity: plan.validity, method, utr, status: "processing",
+    }]);
+    setActiveOrderId(id);
+    setTimeout(() => updateOrder(id, { status: "awaiting_verification" }), 3000);
+  };
+
+  // Admin verify: duplicate UTR check against orders already verified
+  const verifyOrder = (id) => {
+    const target = orders.find(o => o.id === id);
+    const dup = target.utr && orders.some(o => o.id !== id && o.utr === target.utr && o.status === "verified");
+    updateOrder(id, { status: dup ? "duplicate" : "verified" });
+  };
+
+  const recentNumbers = [...orders].reverse()
+    .filter(o => o.status === "verified")
+    .map(o => ({ mobile: o.mobile, operatorKey: OPERATORS.find(op => op.name === o.operatorName)?.key }))
+    .filter((r, i, arr) => arr.findIndex(x => x.mobile === r.mobile) === i);
+
+  if (view === "admin") {
+    return <AdminPanel orders={orders} onVerify={verifyOrder} onBack={() => setView("categories")} />;
+  }
+  if (view === "operators") {
+    return <OperatorList onBack={() => setView("categories")} onPick={op => { setOperator(op); setView("link"); }} />;
+  }
+  if (view === "link" && operator) {
+    return <LinkAccountPage operator={operator} accounts={accounts} recentNumbers={recentNumbers}
+      onBack={() => setView("operators")}
+      onLink={acc => setAccounts(prev => [...prev, acc])}
+      onEditAccount={a => { setActiveAccount(a); setView("edit"); }}
+      onRemoveAccount={id => setAccounts(prev => prev.filter(a => a.id !== id))}
+      onPlanPick={plan => {
+        const acc = accounts.find(a => a.operatorKey === operator.key && a.mobile === (activeAccount?.mobile)) || null;
+        setActivePlan(plan); setActiveAccount(acc || activeAccount);
+        setView("details");
+      }} />;
+  }
+  if (view === "details" && activePlan && operator) {
+    return <PlanDetails plan={activePlan} operator={operator} account={activeAccount || accounts.find(a => a.operatorKey === operator.key)}
+      onBack={() => setView("link")} onProceed={() => setView("payment")} />;
+  }
+  if (view === "payment" && activePlan && operator) {
+    const order = orders.find(o => o.id === activeOrderId) || null;
+    return <PaymentScreen order={order} onBack={() => setView("details")} onSubmit={submitPayment} />;
+  }
+  if (view === "edit" && activeAccount && operator) {
+    return <AccountForm account={activeAccount} operator={operator} onBack={() => setView("link")} onSave={saveAccount} />;
+  }
+  if (view === "elec-state") {
+    return <ElecStates onBack={() => setView("categories")} onPick={s => { setElecState(s); setView("elec-discom"); }} />;
+  }
+  if (view === "elec-discom" && elecState) {
+    return <ElecDiscoms state={elecState} onBack={() => setView("elec-state")} onPick={d => { setElecDiscom(d); setView("elec-consumer"); }} />;
+  }
+  if (view === "elec-consumer" && elecDiscom) {
+    return <ElecConsumer discom={elecDiscom} accounts={utilAccounts}
+      onBack={() => setView("elec-discom")}
+      onSave={acc => setUtilAccounts(prev => prev.some(a => a.id === acc.id) ? prev.map(a => a.id === acc.id ? acc : a) : [...prev, acc])}
+      onRemove={id => setUtilAccounts(prev => prev.filter(a => a.id !== id))}
+      onOpenBill={a => { setActiveUtil(a); setView("elec-bill"); }} />;
+  }
+  if (view === "elec-bill" && activeUtil) {
+    return <ElecBill account={activeUtil} onBack={() => setView("elec-consumer")} />;
+  }
+  if (view === "dth") {
+    return <DthProviders onBack={() => setView("categories")} />;
+  }
+  return <BillsCategories onAdmin={() => setView("admin")} onOpen={name => {
+    if (name === "Mobile recharge") setView("operators");
+    else if (name === "DTH / Cable TV") setView("dth");
+    else if (name === "Electricity") setView("elec-state");
+    else alert(name + " - coming soon");
+  }} />;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
