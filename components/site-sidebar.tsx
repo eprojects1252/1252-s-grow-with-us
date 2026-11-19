@@ -31,7 +31,7 @@ export default function SiteSidebar() {
   function handleItem(label: string, href: string, key?: string) {
     if (key === "search") {
       setSearchOpen((v) => !v);
-      if (expanded) setExpanded(true);
+      setExpanded(true);
       return;
     }
     if (label === "Cart" && pathname === "/") {
