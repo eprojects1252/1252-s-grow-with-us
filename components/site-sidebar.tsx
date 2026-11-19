@@ -32,9 +32,9 @@ export default function SiteSidebar() {
   function handleItem(label: string, href: string, key?: string, target?: HTMLButtonElement) {
     if (key === "search") {
       setSearchOpen((v) => !v);
-      setExpanded(true);
       return;
     }
+    setExpanded(true);
     const source = document.querySelector<HTMLButtonElement>(".site-sidebar-item.active") || document.querySelector<HTMLButtonElement>(".site-sidebar-item");
     if (source && target) {
       const a = source.getBoundingClientRect();
