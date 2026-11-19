@@ -11,7 +11,7 @@ export default function WalletPage() {
   const [utr, setUtr] = useState("");
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState("");
-  const validAmount = /^\\d+$/.test(amount) && Number(amount) >= 1 && Number(amount) <= 100000;
+  const validAmount = /^\d+$/.test(amount) && Number(amount) >= 1 && Number(amount) <= 100000;
   const reference = useMemo(() => `AMC${Date.now().toString().slice(-8)}`, []);
   const upiUri = useMemo(() => {
     if (!validAmount) return "";
