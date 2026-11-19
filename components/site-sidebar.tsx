@@ -26,19 +26,26 @@ export default function SiteSidebar() {
   const [expanded, setExpanded] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [trail, setTrail] = useState<{x:number;y:number;dx:number;dy:number;key:number}|null>(null);
   const pathname = usePathname();
 
-  function handleItem(label: string, href: string, key?: string) {
+  function handleItem(label: string, href: string, key?: string, target?: HTMLButtonElement) {
     if (key === "search") {
       setSearchOpen((v) => !v);
       setExpanded(true);
       return;
     }
+    const source = document.querySelector<HTMLButtonElement>(".site-sidebar-item.active") || document.querySelector<HTMLButtonElement>(".site-sidebar-item");
+    if (source && target) {
+      const a = source.getBoundingClientRect();
+      const b = target.getBoundingClientRect();
+      setTrail({ x: a.left + a.width / 2, y: a.top + a.height / 2, dx: b.left + b.width / 2 - (a.left + a.width / 2), dy: b.top + b.height / 2 - (a.top + a.height / 2), key: Date.now() });
+    }
     if (label === "Cart" && pathname === "/") {
-      window.dispatchEvent(new CustomEvent("amirthaa:open-cart"));
+      window.setTimeout(() => window.dispatchEvent(new CustomEvent("amirthaa:open-cart")), 560);
       return;
     }
-    window.location.assign(href);
+    window.setTimeout(() => window.location.assign(href), 560);
   }
 
   return (
@@ -56,6 +63,14 @@ export default function SiteSidebar() {
           } as CSSProperties} />
         ))}
       </div>
+      {trail && <div className="site-dust-trail" key={trail.key} aria-hidden="true">
+        {Array.from({ length: 18 }, (_, i) => <i key={i} style={{
+          left: trail.x + "px", top: trail.y + "px",
+          "--trail-x": (trail.dx + Math.cos(i * 0.9) * 24) + "px",
+          "--trail-y": (trail.dy + Math.sin(i * 0.9) * 24) + "px",
+          animationDelay: (i * 18) + "ms",
+        } as CSSProperties}/>)}
+      </div>}
       <aside className={`site-sidebar ${expanded ? "is-expanded" : "is-collapsed"}`}>
         <button className="site-sidebar-toggle" type="button" onClick={() => setExpanded(v => !v)} aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"} title={expanded ? "Collapse" : "Expand"}>
           {expanded ? <PanelLeftClose size={19}/> : <PanelLeftOpen size={19}/>}
@@ -68,7 +83,7 @@ export default function SiteSidebar() {
         )}
         <nav aria-label="Site navigation">
           {items.map(({ label, icon: Icon, href, key }) => (
-            <button key={label} type="button" className={`site-sidebar-item ${(label === "UPI & Wallet" && pathname === "/wallet") ? "active" : ""}`} onClick={() => handleItem(label, href, key)} title={expanded ? undefined : label}>
+            <button key={label} type="button" className={`site-sidebar-item ${(label === "UPI & Wallet" && pathname === "/wallet") ? "active" : ""}`} onClick={(event) => handleItem(label, href, key, event.currentTarget)} title={expanded ? undefined : label}>
               <Icon size={19} strokeWidth={1.9}/><span>{label}</span>
             </button>
           ))}
