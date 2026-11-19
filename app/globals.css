@@ -469,4 +469,4 @@ body{padding-bottom:0!important}
 
 .site-dust-trail{position:fixed;inset:0;z-index:76;pointer-events:none;overflow:hidden}
 .site-dust-trail i{position:absolute;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle,#fff 0%,#b8aaff 45%,rgba(133,119,224,0) 100%);box-shadow:0 0 12px 3px rgba(147,131,255,.48);animation:siteDustTravel .58s cubic-bezier(.2,.7,.25,1) both}
-@keyframes siteDustTravel{0%{transform:translate3d(0,0,0) scale(.25);opacity:0}18%{opacity:1;transform:translate3d(calc(var(--trail-x)*.18),calc(var(--trail-y)*.18),0) scale(1.2)}78%{opacity:.95;transform:translate3d(var(--trail-x),var(--trail-y),0) scale(1)}100%{opacity:0;transform:translate3d(var(--trail-x),var(--trail-y),0) scale(2.4)}}
+@keyframes siteDustTravel{0%{transform:translate3d(0,0,0) scale(.25);opacity:0}100%{opacity:0;transform:translate3d(var(--trail-x),var(--trail-y),0) scale(2.4)}}
