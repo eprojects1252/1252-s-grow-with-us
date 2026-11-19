@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import {
   PanelLeftOpen, PanelLeftClose, Search, Grid2X2, Wallet, Smartphone,
@@ -53,7 +53,7 @@ export default function SiteSidebar() {
             opacity: 0.22 + (i % 5) * 0.09,
             "--dust-x": (((i * 19) % 90) - 45) + "px",
             "--dust-y": (-35 - (i % 6) * 18) + "px",
-          } as React.CSSProperties} />
+          } as CSSProperties} />
         ))}
       </div>
       <aside className={`site-sidebar ${expanded ? "is-expanded" : "is-collapsed"}`}>
