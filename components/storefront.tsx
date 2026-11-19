@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Search, ShoppingBag, UserRound, Menu, X, ChevronDown, ArrowRight, MapPin,
+  Search, ShoppingBag, UserRound, Wallet, Menu, X, ChevronDown, ArrowRight, MapPin,
   Sparkles, Truck, ShieldCheck, Headphones, Smartphone, Zap, Heart,
   Plus, Minus, Trash2, CreditCard, Clock3, CheckCircle2,
   ChevronRight, Grid2X2, LogIn, Home as HomeIcon, Monitor, Shirt, House, PanelLeftClose, PanelLeftOpen, Tag, Package
@@ -108,7 +108,7 @@ export default function Storefront() {
         </div>
         <div className="location-search-row header-login-row">
           <div className="header-actions header-actions-v2">
-            <button className="action-link account-trigger" onClick={() => window.location.assign("/login")}><UserRound size={20}/><span>Login</span></button>
+            <button className="action-link account-trigger" onClick={() => window.location.assign("/wallet")}><Wallet size={19}/><span>Wallet</span></button><button className="action-link account-trigger" onClick={() => window.location.assign("/login")}><UserRound size={20}/><span>Login</span></button>
           </div>
         </div>
       </header>
