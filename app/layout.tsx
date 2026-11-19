@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import GlobalMobileNav from "@/components/global-mobile-nav";
 import SiteSidebar from "@/components/site-sidebar";
 
 export const metadata: Metadata = {
@@ -11,7 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body><SiteSidebar />{children}<GlobalMobileNav /></body>
+      <body><SiteSidebar />{children}</body>
     </html>
   );
 }
