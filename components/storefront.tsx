@@ -64,10 +64,18 @@ export default function Storefront() {
   }, [searchOpen]);
 
   useEffect(() => {
-    const requestedCategory = new URLSearchParams(window.location.search).get("category");
+    const params = new URLSearchParams(window.location.search);
+    const requestedSearch = params.get("search");
+    if (requestedSearch && requestedSearch !== "1") setQuery(requestedSearch);
+    const requestedCategory = params.get("category");
     if (requestedCategory === "Electronics") setActiveCategory("Electronics");
     if (requestedCategory === "Fashion") setActiveCategory("Fashion – Men");
     if (requestedCategory === "Home Appliances") setActiveCategory("Home Appliances");
+  }, []);
+  useEffect(() => {
+    const openCart = () => setCartOpen(true);
+    window.addEventListener("amirthaa:open-cart", openCart);
+    return () => window.removeEventListener("amirthaa:open-cart", openCart);
   }, []);
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState<CartItem[]>([]);
