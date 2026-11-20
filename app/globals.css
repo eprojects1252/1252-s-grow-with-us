@@ -655,3 +655,17 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 .site-sidebar .site-sidebar-stores-item{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .site-sidebar .site-sidebar-stores-item svg{overflow:visible;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .site-sidebar .site-sidebar-stores-item:hover{background:transparent!important;border:0!important;box-shadow:none!important}
+
+/* Final sidebar logo-toggle and clean, reflection-free navigation states */
+.site-sidebar-brand{appearance:none!important;-webkit-appearance:none!important;width:100%!important;min-height:58px!important;display:flex!important;align-items:center!important;justify-content:center!important;margin:0 0 8px!important;padding:2px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:0!important;cursor:pointer!important;flex:0 0 auto!important}
+.site-sidebar-brand img{display:block!important;width:48px!important;height:52px!important;object-fit:contain!important;background:transparent!important;mix-blend-mode:normal!important;transition:width .24s ease,height .24s ease!important}
+.site-sidebar.is-expanded .site-sidebar-brand{justify-content:flex-start!important;padding-left:2px!important}
+.site-sidebar.is-expanded .site-sidebar-brand img{width:196px!important;height:76px!important;object-position:left center!important}
+.site-sidebar-brand:hover,.site-sidebar-brand:focus,.site-sidebar-brand:focus-visible,.site-sidebar-brand:active{background:transparent!important;border:0!important;box-shadow:none!important;outline:0!important;transform:none!important}
+.site-sidebar-toggle{display:none!important}
+.site-sidebar-item,.site-sidebar-item:hover,.site-sidebar-item:focus,.site-sidebar-item:focus-visible,.site-sidebar-item:active,.site-sidebar-item.active{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;outline:0!important;transform:none!important;color:#174b2c!important}
+.site-sidebar .site-sidebar-stores-item,.site-sidebar .site-sidebar-stores-item:hover{background:transparent!important;border:0!important;box-shadow:none!important}
+.website-logo-image{display:block;width:min(100%,220px);height:54px;object-fit:contain;background:transparent}
+.website-sponsor-logo{width:min(100%,250px)}
+.website-tab,.website-tab:hover,.website-tab:focus,.website-tab:focus-visible{background:transparent!important;box-shadow:none!important;outline:0!important}
+.website-tab-active{background:transparent!important;border:0!important;box-shadow:none!important}
