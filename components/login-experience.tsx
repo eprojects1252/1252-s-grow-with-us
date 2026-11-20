@@ -109,9 +109,12 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const motionQuery=window.matchMedia("(prefers-reduced-motion: reduce)");let reduced=motionQuery.matches;const still=()=>reduced, score=()=>RULES.filter(([re])=>re.test(passwordRef.current)).length;
     const home=()=>{const r=activeSlot.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};};
     const dist=(p:{x:number;y:number})=>Math.hypot(p.x-pos.x,p.y-pos.y);
-    function say(text:string,html=text){
+    function say(text:string,withCheck=false){
       if(text===said)return;said=text;const out=labels[front],inn=labels[front^=1];if(!out||!inn)return;
-      inn.innerHTML=html;activeButton.setAttribute("aria-label",text);
+      inn.replaceChildren();
+      if(withCheck){const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 24 24");const path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("d","M5 12.5l4.5 4.5L19 7.5");path.setAttribute("pathLength","1");svg.append(path);inn.append(svg,document.createTextNode(text));}
+      else inn.textContent=text;
+      activeButton.setAttribute("aria-label",text);
       if(still()){out.style.opacity="0";inn.style.opacity="1";return;}
       out.animate([{opacity:1,transform:"none",filter:"blur(0)"},{opacity:0,transform:"translateY(-6px)",filter:"blur(2px)"}],{duration:160,easing:"ease-out",fill:"both"});
       inn.animate([{opacity:0,transform:"translateY(6px)",filter:"blur(2px)"},{opacity:1,transform:"none",filter:"blur(0)"}],{duration:220,easing:"cubic-bezier(.23, 1, .32, 1)",fill:"both"});
@@ -123,7 +126,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
       const word=meter?.querySelector("b");if(word)word.textContent=passwordRef.current?WORDS[n]:"";
       activeForm.querySelectorAll(".runaway-rules li").forEach((el,i)=>el.classList.toggle("met",RULES[i][0].test(passwordRef.current)));
       const missing=RULES.find(([re])=>!re.test(passwordRef.current));
-      say(done?"Account created":n===4?"Create account":n===0?"Nope":"Add "+missing?.[1],done?'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Account created':undefined);
+      say(done?"Account created":n===4?"Create account":n===0?"Nope":"Add "+missing?.[1],done);
       activeButton.classList.toggle("done",done);
     }
     function flee(from:{x:number;y:number},now:number){
