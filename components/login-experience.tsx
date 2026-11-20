@@ -158,9 +158,9 @@ useEffect(() => {
   const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
   const tone=PASSWORD_TONES[score];
   return (
-    <main className="auth-auth">
+    <main className="auth-page">
 
-      <form id="auth-auth-form" ref={formRef} className="auth-form" onSubmit={submit} onKeyDown={e=>{if(signup&&e.key==="Enter"&&score<4)formRef.current?.dispatchEvent(new Event("runaway:wobble"));}} noValidate>
+      <form id="auth-form" ref={formRef} className="auth-form" onSubmit={submit} onKeyDown={e=>{if(signup&&e.key==="Enter"&&score<4)formRef.current?.dispatchEvent(new Event("runaway:wobble"));}} noValidate>
         <Link className="auth-brand" href="/">1252's <strong>GROW WITH US</strong></Link>
         <div className="auth-heading"><span>{adminMode?"SECURE ADMIN ACCESS":"SRI AMIRTHAA ID"}</span><h1>{adminMode?<>Admin <em>Sign in</em></>:mode==="login"?<>Welcome <em>Back</em></>:<>Create <em>Account</em></>}</h1><p>{adminMode?"Sign in with an account assigned the Admin role.":mode==="login"?"One secure account for your Sri Amirthaa services.":"Create one account to use across participating websites."}</p></div>
         {signup&&<label className="auth-field"><span>Full name</span><input value={name} onChange={e=>setName(e.target.value)} autoComplete="name" placeholder="Your full name" required/></label>}
@@ -176,7 +176,7 @@ useEffect(() => {
         {notice&&<p className="auth-notice" role="status">{notice}</p>}
         {!adminMode&&<><div className="auth-divider"><i/> OR CONTINUE WITH <i/></div><button className="auth-google" type="button" onClick={googleSignIn} disabled={busy}><b>G</b> Continue with Google</button><p className="auth-switch">{mode==="login"?"Don't have an account?":"Already have an account?"} <button type="button" onClick={()=>{setMode(mode==="login"?"signup":"login");setNotice("");setPassword("");setConfirmPassword("");setShowPassword(false);setSuccess(false);}}>{mode==="login"?"Sign up":"Sign in"}</button></p></>}
       </form>
-        <button ref={submitRef} className={`auth-submit ${signup?(success?"runaway-submit done":"runaway-submit"):success?"done":""}`} type="submit" form="auth-auth-form" disabled={busy}><span>{signup?null:<>{busy?"Please wait…":adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></>}</span><span>{signup?null:<><Check size={18}/> You're in</>}</span></button>
+        <button ref={submitRef} className={`auth-submit ${signup?(success?"runaway-submit done":"runaway-submit"):success?"done":""}`} type="submit" form="auth-form" disabled={busy}><span>{signup?null:<>{busy?"Please wait…":adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></>}</span><span>{signup?null:<><Check size={18}/> You're in</>}</span></button>
       {adminMode&&<p className="auth-admin-foot">Admin access is checked against the Supabase Auth app_metadata role.</p>}
     </main>
   );
