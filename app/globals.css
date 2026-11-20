@@ -576,3 +576,44 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
  .site-sidebar-search input{height:48px!important;font-size:14px!important}
  .site-sidebar-search button{flex-basis:48px!important;width:48px!important;height:48px!important}
 }
+
+
+/* Final approved translucent full-page search glass overlay and clearer sidebar glass. */
+.site-sidebar{
+  background:rgba(40,137,75,.055)!important;
+  -webkit-backdrop-filter:blur(.6px) saturate(108%)!important;
+  backdrop-filter:blur(.6px) saturate(108%)!important;
+  box-shadow:2px 0 12px rgba(20,75,39,.035),inset -1px 0 rgba(255,255,255,.18)!important;
+}
+.site-sidebar.is-expanded{background:rgba(40,137,75,.075)!important}
+.site-sidebar-search{
+  position:fixed!important;inset:0!important;left:0!important;top:0!important;right:0!important;bottom:0!important;
+  width:100vw!important;height:100vh!important;height:100dvh!important;min-height:100vh!important;
+  box-sizing:border-box!important;display:flex!important;align-items:flex-start!important;justify-content:center!important;
+  gap:10px!important;padding:22px clamp(14px,3vw,34px)!important;
+  border:1px solid rgba(255,255,255,.32)!important;border-radius:0!important;
+  background:rgba(222,244,228,.15)!important;
+  -webkit-backdrop-filter:blur(1px) saturate(108%)!important;
+  backdrop-filter:blur(1px) saturate(108%)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)!important;
+  z-index:1100!important;
+}
+.site-sidebar-search input{
+  flex:1 1 auto!important;width:min(100%,920px)!important;max-width:920px!important;min-width:0!important;
+  height:54px!important;padding:0 20px!important;
+  border:1px solid rgba(255,255,255,.62)!important;border-radius:16px!important;
+  background:rgba(255,255,255,.58)!important;color:#174b2c!important;
+  font-size:16px!important;box-shadow:0 8px 26px rgba(20,75,39,.07)!important;
+  backdrop-filter:blur(2px)!important;-webkit-backdrop-filter:blur(2px)!important;
+}
+.site-sidebar-search input::placeholder{color:rgba(23,75,44,.68)!important}
+.site-sidebar-search button{
+  flex:0 0 54px!important;width:54px!important;height:54px!important;
+  display:grid!important;place-items:center!important;border:1px solid rgba(255,255,255,.38)!important;
+  border-radius:15px!important;background:rgba(37,131,74,.78)!important;color:#fff!important;
+}
+@media(max-width:760px){
+ .site-sidebar-search{padding:12px!important;gap:8px!important}
+ .site-sidebar-search input{height:48px!important;padding:0 13px!important;font-size:14px!important}
+ .site-sidebar-search button{flex-basis:48px!important;width:48px!important;height:48px!important}
+}
