@@ -892,3 +892,5 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 .runaway-submit.comet-hit::before{display:block!important;content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;background:linear-gradient(#cfeaff,#86c4ff);clip-path:circle(0 at var(--hx,50%) 50%);transition:clip-path .5s cubic-bezier(.23,1,.32,1)}
 .runaway-submit.comet-hit.comet-hit-done::before{clip-path:circle(150% at var(--hx,50%) 50%)}
 .runaway-submit.comet-hit.still::before{transition:none!important}
+
+@media(prefers-reduced-motion:reduce){.comet-submit.bad{animation:none!important}.comet-password.drop .comet-password-mirror .dots i,.comet-password.drop .comet-password-mirror .text b{animation:none!important}}
