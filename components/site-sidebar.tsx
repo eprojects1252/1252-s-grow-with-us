@@ -3,7 +3,7 @@
 import { useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import {
-  PanelLeftOpen, PanelLeftClose, Search, WalletCards, ReceiptText,
+  PanelLeftOpen, PanelLeftClose, Search, Images, WalletCards, ReceiptText,
   UserRound, BadgePercent, Heart, ClipboardList, Store, SlidersHorizontal
 } from "lucide-react";
 
@@ -50,6 +50,7 @@ const items = [
   { label: "Followed Stores", icon: Store, href: "/#stores" },
   { label: "Affiliate Program", icon: AffiliateNetworkIcon, href: "/#affiliate" },
   { label: "Settings", icon: SlidersHorizontal, href: "/login" },
+  { label: "Pictures", icon: Images, href: "/#pictures" },
 ];
 
 export default function SiteSidebar() {
@@ -107,12 +108,6 @@ export default function SiteSidebar() {
           {expanded ? <PanelLeftClose size={19}/> : <PanelLeftOpen size={19}/>}
           {expanded && <span>Expand Button</span>}
         </button>
-        {searchOpen && (
-          <form className="site-sidebar-search" onSubmit={(e) => { e.preventDefault(); window.location.assign("/?search=" + encodeURIComponent(search) + "#products"); }}>
-            <input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…" aria-label="Search products"/>
-            <button type="submit" aria-label="Submit search"><Search size={17}/></button>
-          </form>
-        )}
         <nav aria-label="Site navigation">
           {items.map(({ label, icon: Icon, href, key }) => (
             <button key={label} type="button" className={`site-sidebar-item ${(label === "UPI & Wallet" && pathname === "/wallet") ? "active" : ""}`} onClick={(event) => handleItem(label, href, key, event.currentTarget)} title={expanded ? undefined : label} aria-expanded={key === "search" ? searchOpen : undefined}>
@@ -121,6 +116,12 @@ export default function SiteSidebar() {
           ))}
         </nav>
       </aside>
+      {searchOpen && (
+        <form className="site-sidebar-search" role="search" onSubmit={(e) => { e.preventDefault(); window.location.assign("/?search=" + encodeURIComponent(search) + "#products"); }}>
+          <input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…" aria-label="Search products"/>
+          <button type="submit" aria-label="Submit search"><Search size={17}/></button>
+        </form>
+      )}
     </>
   );
 }
