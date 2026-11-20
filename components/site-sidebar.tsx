@@ -119,7 +119,7 @@ export default function SiteSidebar() {
       </div>}
       <aside className={`site-sidebar ${expanded ? "is-expanded" : "is-collapsed"} ${searchOpen ? "has-search-open" : ""}`}>
         <button className="site-sidebar-brand" type="button" onClick={() => setExpanded(v => !v)} aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"} title="Grow With Us — expand or collapse">
-          <img src="/images/grow-with-us-logo.png" alt="1252's Grow With Us" />
+          <img src="/images/1252-logo.png" alt="1252's Grow With Us" />
         </button>
         <nav aria-label="Site navigation">
           {items.map(({ label, icon: Icon, href, key }) => (
