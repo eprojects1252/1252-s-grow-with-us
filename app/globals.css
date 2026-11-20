@@ -528,3 +528,26 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
   .site-sidebar-toggle,.site-sidebar-item{min-height:40px!important;flex-basis:40px!important}
   .site-sidebar-search{left:calc(100% + 7px)!important;top:50px!important;width:min(230px,calc(100vw - 68px))!important}
 }
+
+
+/* Search opens independently of the sidebar and is not clipped by the glass rail. */
+.site-sidebar-search{
+  position:fixed!important;left:68px!important;top:58px!important;
+  width:260px!important;display:flex!important;align-items:center!important;gap:8px!important;
+  padding:10px!important;z-index:1200!important;
+  border:1px solid rgba(255,255,255,.62)!important;border-radius:15px!important;
+  background:rgba(238,250,241,.86)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(125%)!important;
+  backdrop-filter:blur(10px) saturate(125%)!important;
+  box-shadow:0 12px 30px rgba(22,72,38,.16)!important;
+}
+.site-sidebar-search input{flex:1!important;min-width:0!important;height:40px!important;padding:0 11px!important}
+.site-sidebar-search button{
+  flex:0 0 38px!important;width:38px!important;height:38px!important;
+  display:grid!important;place-items:center!important;border:0!important;border-radius:10px!important;
+  background:#25834a!important;color:#fff!important;cursor:pointer!important;
+}
+.site-sidebar-search button:hover{background:#176c39!important}
+@media(max-width:760px){
+  .site-sidebar-search{left:60px!important;top:52px!important;width:min(260px,calc(100vw - 70px))!important}
+}
