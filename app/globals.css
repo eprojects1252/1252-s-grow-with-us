@@ -669,3 +669,21 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 .website-sponsor-logo{width:min(100%,250px)}
 .website-tab,.website-tab:hover,.website-tab:focus,.website-tab:focus-visible{background:transparent!important;box-shadow:none!important;outline:0!important}
 .website-tab-active{background:transparent!important;border:0!important;box-shadow:none!important}
+
+
+/* Mobile homepage: two equal, larger brand panels and remove the empty login row. */
+@media(max-width:650px){
+  .header-v2{padding:8px 10px 4px!important;gap:0!important}
+  .website-switcher{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  .website-tab{height:88px!important;min-width:0;border-radius:16px!important;padding:5px!important}
+  .website-logo-image{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;padding:0!important;transform:scale(1.28)!important;object-fit:contain!important}
+  .header-login-row{height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
+  .hero{margin-top:8px!important}
+}
+@media(min-width:651px){
+  .website-switcher{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .website-tab{height:88px}
+  .website-logo-image{max-height:82px;transform:scale(1.2)}
+}
+/* Stores navigation mark: coordinated multi-store icon, same monochrome sidebar stroke. */
+.site-sidebar-stores-item svg{color:currentColor!important}
