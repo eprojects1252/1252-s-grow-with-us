@@ -875,6 +875,7 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 @media(prefers-reduced-motion:reduce){.comet-orb,.comet-submit:before{transition:none!important}.comet-password-mirror .caret{animation:none!important}}
 
 /* Final interaction isolation and accessibility safeguards */
+.comet-brand{position:relative;left:auto;bottom:auto;display:inline-flex;align-items:center;gap:8px;margin:0 0 4px}
 .comet-submit:not(.runaway-submit){width:100%;height:52px;position:relative;z-index:3}
 .comet-submit:not(.runaway-submit)::before{pointer-events:none}
 .comet-submit:not(.runaway-submit)>span{z-index:1}
