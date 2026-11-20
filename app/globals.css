@@ -687,3 +687,70 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 }
 /* Stores navigation mark: coordinated multi-store icon, same monochrome sidebar stroke. */
 .site-sidebar-stores-item svg{color:currentColor!important}
+
+
+/* Final logo presentation: transparent artwork only, split evenly with no tab cards. */
+.website-switcher{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:0!important;
+  align-items:center!important;
+  width:100%!important;
+}
+.website-tab,
+.website-tab:hover,
+.website-tab:focus,
+.website-tab:focus-visible,
+.website-tab-active{
+  width:100%!important;
+  height:112px!important;
+  min-width:0!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  outline:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:visible!important;
+}
+.website-logo-image{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  padding:0!important;
+  margin:0!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+  background:transparent!important;
+}
+@media(max-width:650px){
+  .header-v2{padding:4px 8px 0!important;gap:0!important}
+  .website-tab,.website-tab:hover,.website-tab:focus,.website-tab:focus-visible,.website-tab-active{height:108px!important}
+  .header-login-row{height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
+  .hero{margin-top:4px!important}
+}
+/* Sidebar brand expands to use the full available expanded sidebar header width. */
+.site-sidebar.is-expanded .site-sidebar-brand{
+  width:100%!important;
+  min-height:94px!important;
+  height:94px!important;
+  justify-content:center!important;
+  align-items:center!important;
+  padding:0 4px!important;
+  margin:0 0 5px!important;
+}
+.site-sidebar.is-expanded .site-sidebar-brand img{
+  width:100%!important;
+  max-width:100%!important;
+  height:90px!important;
+  max-height:90px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
