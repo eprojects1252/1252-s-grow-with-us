@@ -54,7 +54,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const mirrorText=form.querySelector<HTMLElement>(".comet-password-mirror .text");
     const caret=form.querySelector<HTMLElement>(".comet-password-mirror .caret");
     if(!emailEl||!passEl||!eye||!send||!night||!mailField||!passField||!dots||!mirrorText||!caret)return;
-    const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce=false; // Keep the requested Comet interaction visible on devices configured to reduce motion.
     const STIFF=.06,DAMP=.82,ORBIT=14,SPIN=5.7,TAIL=36,LAP=3;
     const DIM=[1,.4,.15,.3,.6,.85,1], clamp=(v:number,a=0,b=1)=>Math.min(b,Math.max(a,v));
     const pen=document.createElement("canvas").getContext("2d"); if(pen)pen.font="500 16px system-ui,sans-serif";
@@ -83,7 +83,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const focus=(el:HTMLElement)=>()=>aim(at(el));
     const onEmail=()=>aim(caretGoal(emailEl)),onPass=()=>{clearTimeout(dropT);passField.classList.remove("drop");paintPassword(true);aim(passEl.value?caretGoal(passEl):at(passEl));};
     const onEye=()=>{const on=passField.classList.toggle("show");eye.setAttribute("aria-pressed",String(on));eye.setAttribute("aria-label",on?"Hide password":"Show password");paintPassword(false);};
-    const fizzle=()=>{setPassword("");dimAt=performance.now();vx=6;vy=-14;if(!reduce)for(let i=0;i<22;i++)sparks.push({x,y,vx:(Math.random()-.5)*10,vy:-1.5-5*Math.random(),age:0,life:.45+.45*Math.random(),r:1.8,red:true});setPassword("");passEl.value="";paintPassword(false);passEl.focus();passField.classList.add("bad","drop");send.classList.add("bad");clearTimeout(dropT);dropT=setTimeout(()=>passField.classList.remove("drop"),600);clearTimeout(badT);badT=setTimeout(()=>{passField.classList.remove("bad");send.classList.remove("bad");},1050);aim(at(passEl));};
+    const fizzle=()=>{setPassword("");dimAt=performance.now();vx=6;vy=-14;for(let i=0;i<22;i++)sparks.push({x,y,vx:(Math.random()-.5)*10,vy:-1.5-5*Math.random(),age:0,life:.45+.45*Math.random(),r:1.8,red:true});passEl.value="";paintPassword(false);passEl.focus();passField.classList.add("bad","drop");send.classList.add("bad");clearTimeout(dropT);dropT=setTimeout(()=>passField.classList.remove("drop"),600);clearTimeout(badT);badT=setTimeout(()=>{passField.classList.remove("bad");send.classList.remove("bad");},1050);aim(at(passEl));};
     const impact=()=>{rings.push({x,y,age:0});for(let i=0;i<56;i++){const a=-Math.PI/2+(Math.random()-.5)*2.8,s=2+4.5*Math.random();sparks.push({x,y,vx:Math.cos(a)*s*1.4,vy:Math.sin(a)*s,age:0,life:1.4+1.4*Math.random(),r:.9+1.3*Math.random(),dust:1});}};
     const lightFrom=()=>{const r=send.getBoundingClientRect();send.classList.add("still");send.style.setProperty("--hx",clamp(x-r.left,0,r.width)+"px");void send.offsetWidth;send.classList.remove("still");};
     const onWrong=()=>fizzle();
@@ -98,13 +98,13 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const button=submitRef.current, slot=slotRef.current, form=formRef.current;
     if(!button||!slot||!form||!signupRef.current)return;
     const activeButton=button, activeSlot=slot, activeForm=form;
-    const RUN=170,REACH=90,reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+    const RUN=170,REACH=90;
     const RULES=[[/\d/,"a number"],[/[^\w\s]/,"a symbol"],[/[A-Z]/,"a capital"],[/.{8,}/,"8+ characters"]] as const;
     const TONES=[["#D93D42","#fff"],["#C2410C","#fff"],["#F5A524","#1A1300"],["#9BD04A","#0F1A00"],["#15803D","#fff"]] as const;
     const WORDS=["Too weak","Weak","Fair","Good","Strong"], labels=Array.from(activeButton.querySelectorAll<HTMLElement>("span"));
     let pos:{x:number;y:number},vel={x:0,y:0},target:{x:number;y:number},pointer:{x:number;y:number}|null=null;
     let lastFlee=-1e9,sighAt=-1e9,wobbleAt=-1e9,said="",front=0,done=false,strong=false,raf=0,passwordFrame=0,last=performance.now();
-    const still=()=>reduced.matches, score=()=>RULES.filter(([re])=>re.test(passwordRef.current)).length;
+    const still=()=>false, score=()=>RULES.filter(([re])=>re.test(passwordRef.current)).length;
     const home=()=>{const r=activeSlot.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};};
     const dist=(p:{x:number;y:number})=>Math.hypot(p.x-pos.x,p.y-pos.y);
     function say(text:string,html=text){
