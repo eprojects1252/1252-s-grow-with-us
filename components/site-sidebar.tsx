@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 const items = [
-  { label: "Search Icon", icon: Search, href: "/?search=1", key: "search" },
+  { label: "Search", icon: Search, href: "/?search=1", key: "search" },
   { label: "All Categories", icon: Grid2X2, href: "/#categories" },
   { label: "UPI & Wallet", icon: Wallet, href: "/wallet" },
   { label: "Bills & Recharges", icon: Smartphone, href: "/recharge-bills" },
