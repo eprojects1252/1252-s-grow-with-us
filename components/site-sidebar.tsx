@@ -4,7 +4,7 @@ import { useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-  PanelLeftOpen, PanelLeftClose, Search, WalletCards, ReceiptText,
+  Search, WalletCards, ReceiptText,
   UserRound, BadgePercent, Heart, ClipboardList, Store, SlidersHorizontal
 } from "lucide-react";
 
@@ -118,12 +118,8 @@ export default function SiteSidebar() {
         } as CSSProperties}/>)}
       </div>}
       <aside className={`site-sidebar ${expanded ? "is-expanded" : "is-collapsed"} ${searchOpen ? "has-search-open" : ""}`}>
-        <Link href="/" className="site-sidebar-brand" aria-label="Sri Amirthaa Groups 1252 home" title="Sri Amirthaa Groups 1252">
-          <img src="/images/1252-logo.png" alt="Sri Amirthaa Groups 1252" />
-        </Link>
-        <button className="site-sidebar-toggle" type="button" onClick={() => setExpanded(v => !v)} aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"} title={expanded ? "Collapse" : "Expand"}>
-          {expanded ? <PanelLeftClose size={19}/> : <PanelLeftOpen size={19}/>}
-          {expanded && <span>Expand Button</span>}
+        <button className="site-sidebar-brand" type="button" onClick={() => setExpanded(v => !v)} aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"} title="Grow With Us — expand or collapse">
+          <img src="/images/grow-with-us-logo.png" alt="1252's Grow With Us" />
         </button>
         <nav aria-label="Site navigation">
           {items.map(({ label, icon: Icon, href, key }) => (
