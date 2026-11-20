@@ -41,93 +41,60 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   const score = passwordScore(password);
 
   useEffect(() => {
-    const canvas = canvasRef.current, comet = cometRef.current, form = formRef.current;
-    if (!canvas || !comet || !form) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const reduce = reduceMotion.matches;
-    const STIFF = .06, DAMP = .82, TAIL = 36;
-    let raf = 0, x = window.innerWidth * .5, y = window.innerHeight * .5, vx = 0, vy = 0;
-    let goal = { x, y }, pointer: { x: number; y: number } | null = null;
-    let phase: "idle" | "wrong" | "success" = "idle", phaseAt = 0, last = 0, orbit = 0;
-    const trail: Array<{x:number;y:number;life:number}> = [];
-    const sparks: Array<{x:number;y:number;vx:number;vy:number;life:number;size:number}> = [];
-    const rings: Array<{x:number;y:number;life:number}> = [];
-    const stars = Array.from({length:90}, () => ({x:Math.random(),y:Math.random(),r:.35+Math.random()*1.35,p:Math.random()*Math.PI*2}));
-    const inputs = Array.from(form.querySelectorAll<HTMLInputElement>("input:not([type=checkbox])"));
-    const resize = () => {
-      const d = Math.min(2, window.devicePixelRatio || 1);
-      canvas.width = Math.round(window.innerWidth*d); canvas.height = Math.round(window.innerHeight*d);
-      canvas.style.width = window.innerWidth+"px"; canvas.style.height = window.innerHeight+"px";
+    const form=formRef.current, canvas=canvasRef.current, comet=cometRef.current;
+    if(!form||!canvas||!comet)return;
+    const g=canvas.getContext("2d"); if(!g)return;
+    const emailEl=form.querySelector<HTMLInputElement>(".comet-email input");
+    const passEl=form.querySelector<HTMLInputElement>(".comet-password input");
+    const eye=form.querySelector<HTMLButtonElement>(".comet-password button");
+    const send=submitRef.current, night=form.querySelector<HTMLElement>(".comet-night");
+    const mailField=emailEl?.parentElement as HTMLElement|null;
+    const passField=passEl?.parentElement as HTMLElement|null;
+    const dots=form.querySelector<HTMLElement>(".comet-password-mirror .dots");
+    const mirrorText=form.querySelector<HTMLElement>(".comet-password-mirror .text");
+    const caret=form.querySelector<HTMLElement>(".comet-password-mirror .caret");
+    if(!emailEl||!passEl||!eye||!send||!night||!mailField||!passField||!dots||!mirrorText||!caret)return;
+    const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const STIFF=.06,DAMP=.82,ORBIT=14,SPIN=5.7,TAIL=36,LAP=3;
+    const DIM=[1,.4,.15,.3,.6,.85,1], clamp=(v:number,a=0,b=1)=>Math.min(b,Math.max(a,v));
+    const pen=document.createElement("canvas").getContext("2d"); if(pen)pen.font="500 16px system-ui,sans-serif";
+    const at=(el:HTMLElement)=>{const r=el.getBoundingClientRect();return el===emailEl||el===passEl?{x:r.left+22,y:el===passEl?r.top+r.height/2:r.top-4}:{x:r.left+r.width/2,y:r.top+r.height/2};};
+    const caretGoal=(el:HTMLInputElement)=>{const r=el.getBoundingClientRect(),v=el.value;const w=el===emailEl?(pen?.measureText(v).width||0)+24:passField.classList.contains("show")?(pen?.measureText(v).width||0)+v.length*.5:v.length*14-7;return{x:r.left+(el===emailEl?24:18)+Math.min(Math.max(w,6),r.width-70),y:el===emailEl?r.top-4:r.top+r.height/2};};
+    let p=at(emailEl),x=p.x,y=p.y,vx=0,vy=0,goal={...p},idle=1,dimAt=-1e4,rx=ORBIT,ry=ORBIT/2,spin=SPIN,day=false,dawn=0,strike:(()=>void)|null=null;
+    let last=performance.now(),acc=0,dpr=1,raf=0,dropT:ReturnType<typeof setTimeout>,badT:ReturnType<typeof setTimeout>;
+    const tail:Array<{x:number;y:number}>=[],sparks:Array<{x:number;y:number;vx:number;vy:number;age:number;life:number;r:number;red?:boolean;dust?:number}>=[],rings:Array<{x:number;y:number;age:number}>=[];
+    const aim=(q:{x:number;y:number},wide?:{x:number;y:number})=>{goal=q;idle=0;rx=wide?wide.x:ORBIT;ry=wide?wide.y:ORBIT/2;spin=wide?LAP:SPIN;};
+    const daylight=(on:boolean)=>{day=on;night.classList.toggle("day",on);};
+    const size=()=>{dpr=Math.min(2,window.devicePixelRatio||1);canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;canvas.style.width="100%";canvas.style.height="100%";};
+    const light=(now:number)=>{const s=(now-dimAt)/150,i=Math.floor(s);if(reduce||s<0||i>=DIM.length-1)return 1;return DIM[i]+(DIM[i+1]-DIM[i])*(s-i);};
+    const heat=(now:number)=>{const s=(now-dimAt)/1000;return s<0?0:clamp(s/.15)*clamp((1.05-s)/.3);};
+    const stars=Array.from({length:90},()=>({x:Math.random(),y:Math.random(),r:.6+.8*Math.random(),f:.683*(3+Math.floor(4*Math.random())),p:7*Math.random()}));
+    const PASSES:[[number,number,number[],number],[number,number,number[],number],[number,number,number[],number]]=[[1,9,[140,203,255],.16],[.65,4.5,[160,212,255],.4],[.35,2,[236,246,255],.95]];
+    const HOT=[[255,120,145],[255,143,160],[255,226,232]];
+    const draw=(k:number,hot:number,t:number)=>{
+      g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,innerWidth,innerHeight);g.globalCompositeOperation="lighter";
+      for(const s of stars){const sx=s.x*innerWidth+(reduce?0:Math.sin(t*.683+s.p)*6),sy=s.y*innerHeight+(reduce?0:Math.cos(t*.683+s.p*1.7)*8),near=Math.pow(clamp(1-Math.hypot(sx-x,sy-y)/(260*(.4+.6*k))),1.5),a=(.08+.34*dawn+.8*near)*(reduce?1:.55+.45*Math.sin(t*s.f+s.p));if(a>.02){g.fillStyle="rgba(200,230,255,"+a.toFixed(3)+")";g.beginPath();g.arc(sx,sy,s.r,0,7);g.fill();}}
+      g.lineCap=g.lineJoin="round";
+      if(!reduce&&tail.length>2)for(let pi=0;pi<PASSES.length;pi++){const [part,width,c,alpha]=PASSES[pi],h=HOT[pi],rgb="rgba("+c.map((v,j)=>Math.round(v+(h[j]-v)*hot)).join(",")+",",n=Math.max(2,Math.round(tail.length*part)),end=tail[n-1],fade=g.createLinearGradient(tail[0].x,tail[0].y,end.x,end.y);fade.addColorStop(0,rgb+(alpha*k).toFixed(3)+")");fade.addColorStop(1,rgb+"0)");g.strokeStyle=fade;g.lineWidth=width;g.beginPath();g.moveTo(tail[0].x,tail[0].y);for(let i=1;i<n;i++)g.lineTo(tail[i].x,tail[i].y);g.stroke();}
+      for(const q of sparks){const a=1-q.age/q.life;if(!q.dust){g.fillStyle="rgba("+(q.red?"255,143,160":"200,230,255")+","+a.toFixed(3)+")";g.beginPath();g.arc(q.x,q.y,q.r,0,7);g.fill();}else{const al=a*(.6+.4*Math.sin(q.age*14+q.r*9)),d=g.createRadialGradient(q.x,q.y,0,q.x,q.y,q.r*4);d.addColorStop(0,"rgba(236,246,255,"+al.toFixed(3)+")");d.addColorStop(.35,"rgba(140,203,255,"+(.5*al).toFixed(3)+")");d.addColorStop(1,"rgba(140,203,255,0)");g.fillStyle=d;g.fillRect(q.x-q.r*4,q.y-q.r*4,q.r*8,q.r*8);}}
+      for(const o of rings){const e=1-Math.pow(1-o.age/.7,3),q=1-o.age/.3;if(q>0){const R=50+170*(1-q),d=g.createRadialGradient(o.x,o.y,0,o.x,o.y,R);d.addColorStop(0,"rgba(236,246,255,"+(.85*q).toFixed(3)+")");d.addColorStop(.4,"rgba(140,203,255,"+(.3*q).toFixed(3)+")");d.addColorStop(1,"rgba(140,203,255,0)");g.fillStyle=d;g.fillRect(o.x-R,o.y-R,R*2,R*2);}g.strokeStyle="rgba(160,212,255,"+(.75*(1-o.age/.7)).toFixed(3)+")";g.lineWidth=2.5;g.beginPath();g.ellipse(o.x,o.y,10+190*e,4+52*e,0,0,7);g.stroke();}
     };
-    const inputAim = (el: HTMLInputElement) => {
-      const r = el.getBoundingClientRect();
-      let caretX = r.left + 18;
-      try {
-        if (el.type === "text" || el.type === "email") {
-          const before = el.value.slice(0, el.selectionStart || 0);
-          const style = getComputedStyle(el);
-          const measure = document.createElement("canvas").getContext("2d");
-          if (measure) { measure.font = style.font; caretX = r.left + 14 + measure.measureText(before).width; }
-        } else if (el.type === "password") {
-          caretX = r.left + Math.min(r.width-24, 18 + (el.value.length * 8));
-        }
-      } catch {}
-      goal = {x:Math.max(r.left+12,Math.min(r.right-12,caretX)),y:r.top+r.height*.5};
-    };
-    const aimAtElement = (target: EventTarget | null) => {
-      const el = target instanceof Element ? target.closest("input") : null;
-      if (el instanceof HTMLInputElement && form.contains(el) && el.type !== "checkbox") inputAim(el);
-    };
-    const focusHandler = (e: Event) => aimAtElement(e.target);
-    const typingHandler = (e: Event) => aimAtElement(e.target);
-    form.addEventListener("focusin", focusHandler);
-    form.addEventListener("input", typingHandler);
-    form.addEventListener("click", focusHandler);
-    const first = inputs.find(el => el.offsetParent !== null);
-    if (first) inputAim(first);
-    else { const r=form.getBoundingClientRect(); goal={x:r.left+24,y:r.top+80}; }
-    const burst = (at:{x:number;y:number}, count:number, power:number) => {
-      for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,v=power*(.25+Math.random());sparks.push({x:at.x,y:at.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,size:1+Math.random()*2.8});}
-    };
-    const onWrong = () => { phase="wrong";phaseAt=performance.now();comet.classList.add("comet-fizzle");burst({x,y},34,5); };
-    const onSuccess = () => { phase="success";phaseAt=performance.now();comet.classList.remove("comet-fizzle"); };
-    form.addEventListener("comet:wrong", onWrong as EventListener);
-    form.addEventListener("comet:success", onSuccess as EventListener);
-    const tick = (now:number) => {
-      const dt=Math.min(.033,Math.max(.001,(now-(last||now))/1000));last=now;
-      if(phase==="idle"){
-        if(pointer && !reduce){goal={x:goal.x,y:goal.y};}
-        const dx=goal.x-x,dy=goal.y-y;
-        vx=(vx+dx*STIFF)*DAMP;vy=(vy+dy*STIFF)*DAMP;x+=vx;y+=vy;
-        orbit+=dt*1.7;
-        if(Math.hypot(dx,dy)<9){x+=Math.cos(orbit)*.7;y+=Math.sin(orbit*1.2)*.5;}
-      } else if(phase==="wrong"){
-        const t=(now-phaseAt)/1000;
-        if(t<.62){vx=-vx*.92+(Math.random()-.5)*2.2;vy=-vy*.92+(Math.random()-.5)*2.2;x+=vx*2;y+=vy*2;}
-        else {phase="idle";comet.classList.remove("comet-fizzle");const active=form.querySelector<HTMLInputElement>("input:focus");if(active)inputAim(active);}
-      } else {
-        const button=submitRef.current, r=button?.getBoundingClientRect();
-        if(r){const tx=r.left+r.width*.5,ty=r.top+r.height*.5;const t=Math.min(1,(now-phaseAt)/650);x+=(tx-x)*(.035+t*.12);y+=(ty-y)*(.035+t*.12);if(t>.85){rings.push({x:tx,y:ty,life:1});burst({x:tx,y:ty},42,7);phase="idle";}}
-      }
-      comet.style.transform="translate3d("+(x-12)+"px,"+(y-12)+"px,0)";
-      trail.push({x,y,life:1});if(trail.length>TAIL)trail.shift();
-      const d=Math.min(2,window.devicePixelRatio||1);
-      ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,window.innerWidth,window.innerHeight);ctx.globalCompositeOperation="lighter";
-      for(const s of stars){const near=Math.max(0,1-Math.hypot(s.x*innerWidth-x,s.y*innerHeight-y)/260);const twinkle=.35+.3*Math.sin(now*.0015+s.p);ctx.beginPath();ctx.arc(s.x*innerWidth,s.y*innerHeight,s.r+near,0,Math.PI*2);ctx.fillStyle="rgba(190,220,255,"+(.12+twinkle*.35+near*.5)+")";ctx.fill();}
-      if(!reduce){
-        for(let pass=2;pass>=0;pass--){ctx.beginPath();trail.forEach((p,i)=>{if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);});ctx.strokeStyle=pass===0?"rgba(225,246,255,.9)":pass===1?"rgba(91,177,255,.28)":"rgba(50,126,255,.12)";ctx.lineWidth=pass===0?1.6:pass===1?5:11;ctx.lineCap="round";ctx.lineJoin="round";ctx.stroke();}
-      }
-      for(let i=sparks.length-1;i>=0;i--){const p=sparks[i];p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy*=.97;p.life-=dt*1.5;ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);ctx.fillStyle="rgba(133,204,255,"+Math.max(0,p.life)+")";ctx.fill();if(p.life<=0)sparks.splice(i,1);}
-      for(let i=rings.length-1;i>=0;i--){const q=rings[i];q.life-=dt*1.6;ctx.beginPath();ctx.arc(q.x,q.y,(1-q.life)*58,0,Math.PI*2);ctx.strokeStyle="rgba(153,211,255,"+q.life+")";ctx.lineWidth=2;ctx.stroke();if(q.life<=0)rings.splice(i,1);}
-      raf=requestAnimationFrame(tick);
-    };
-    resize();window.addEventListener("resize",resize);raf=requestAnimationFrame(tick);
-    return()=>{cancelAnimationFrame(raf);window.removeEventListener("resize",resize);form.removeEventListener("focusin",focusHandler);form.removeEventListener("input",typingHandler);form.removeEventListener("click",focusHandler);form.removeEventListener("comet:wrong",onWrong as EventListener);form.removeEventListener("comet:success",onSuccess as EventListener);};
-  }, []);
-
-  useEffect(() => {
+    const paintPassword=(fresh:boolean)=>{const v=Array.from(passEl.value);dots.replaceChildren(...v.map((_,i)=>{const n=document.createElement("i");n.style.setProperty("--i",String(i));if(fresh&&i===v.length-1)n.className="new";return n;}));mirrorText.replaceChildren(...v.map((ch,i)=>{const n=document.createElement("b");n.textContent=ch;n.style.setProperty("--i",String(i));if(fresh&&i===v.length-1)n.className="new";return n;}));caret.style.translate=(passField.classList.contains("show")?mirrorText.offsetWidth:v.length*14)+"px 0";};
+    const focus=(el:HTMLElement)=>()=>aim(at(el));
+    const onEmail=()=>aim(caretGoal(emailEl)),onPass=()=>{clearTimeout(dropT);passField.classList.remove("drop");paintPassword(true);aim(passEl.value?caretGoal(passEl):at(passEl));};
+    const onEye=()=>{const on=passField.classList.toggle("show");eye.setAttribute("aria-pressed",String(on));eye.setAttribute("aria-label",on?"Hide password":"Show password");paintPassword(false);};
+    const fizzle=()=>{dimAt=performance.now();vx=6;vy=-14;if(!reduce)for(let i=0;i<22;i++)sparks.push({x,y,vx:(Math.random()-.5)*10,vy:-1.5-5*Math.random(),age:0,life:.45+.45*Math.random(),r:1.8,red:true});passField.classList.add("bad","drop");send.classList.add("bad");clearTimeout(dropT);dropT=setTimeout(()=>passField.classList.remove("drop"),600);clearTimeout(badT);badT=setTimeout(()=>{passField.classList.remove("bad");send.classList.remove("bad");},1050);aim(at(passEl));};
+    const impact=()=>{rings.push({x,y,age:0});for(let i=0;i<56;i++){const a=-Math.PI/2+(Math.random()-.5)*2.8,s=2+4.5*Math.random();sparks.push({x,y,vx:Math.cos(a)*s*1.4,vy:Math.sin(a)*s,age:0,life:1.4+1.4*Math.random(),r:.9+1.3*Math.random(),dust:1});}};
+    const lightFrom=()=>{const r=send.getBoundingClientRect();send.classList.add("still");send.style.setProperty("--hx",clamp(x-r.left,0,r.width)+"px");void send.offsetWidth;send.classList.remove("still");};
+    const onWrong=()=>fizzle();
+    const onSuccess=()=>{const r=send.getBoundingClientRect();if(!reduce){aim({x:r.left+r.width*.9,y:r.top-150});window.setTimeout(()=>{aim(at(send));vx-=6;vy+=12;strike=()=>{lightFrom();send.classList.add("done");daylight(true);impact();vx=vy=0;aim({x,y});const f=form.getBoundingClientRect();form.animate([{translate:"0 0"},{translate:"0 6px",offset:.2},{translate:"0 0"}],{duration:420,easing:"cubic-bezier(.23,1,.32,1)"});window.setTimeout(()=>aim({x:f.left+f.width/2,y:f.top+f.height/2},{x:f.width*.52,y:f.height*.7}),450);};},280);}else{lightFrom();send.classList.add("done");daylight(true);}};
+    const onReset=()=>{clearTimeout(dropT);clearTimeout(badT);dimAt=-1e4;passField.classList.remove("show","bad","drop");eye.setAttribute("aria-pressed","false");send.classList.remove("done","bad");daylight(false);paintPassword(false);aim(at(emailEl));};
+    emailEl.addEventListener("focus",focus(emailEl));emailEl.addEventListener("click",focus(emailEl));passEl.addEventListener("focus",focus(passEl));passEl.addEventListener("click",focus(passEl));eye.addEventListener("click",onEye);send.addEventListener("focus",focus(send));send.addEventListener("click",focus(send));emailEl.addEventListener("input",onEmail);passEl.addEventListener("input",onPass);form.addEventListener("comet:wrong",onWrong);form.addEventListener("comet:success",onSuccess);form.addEventListener("comet:reset",onReset);
+    const resize=()=>size();window.addEventListener("resize",resize);size();paintPassword(false);
+    const fly=(now:number)=>{acc+=Math.min(100,now-last);last=now;for(;acc>=1000/60;acc-=1000/60){if(!reduce)idle+=1/60;const grow=clamp(idle*2-.6),ox=Math.cos(idle*spin)*rx*grow,oy=Math.sin(idle*spin)*ry*grow;vx=(vx+(goal.x+ox-x)*STIFF)*DAMP;vy=(vy+(goal.y+oy-y)*STIFF)*DAMP;x+=vx;y+=vy;tail.unshift({x,y});if(tail.length>TAIL)tail.pop();if(strike&&Math.hypot(goal.x-x,goal.y-y)<20){strike();strike=null;}dawn+=((day?1:0)-dawn)*.05;if(!reduce&&Math.hypot(vx,vy)>2.5&&Math.random()<.5)sparks.push({x,y,vx:vx*.15+Math.random()-.5,vy:vy*.15+Math.random()-.5,age:0,life:.5+Math.random()*.5,r:1.3,red:heat(now)>.5});for(const q of sparks){const f=q.dust?.93:.95;q.x+=q.vx;q.y+=q.vy;q.vx*=f;q.vy=q.vy*f+(q.dust?.012:.03);q.age+=1/60;}for(const q of rings)q.age+=1/60;}for(let i=sparks.length-1;i>=0;i--)if(sparks[i].age>=sparks[i].life)sparks.splice(i,1);for(let i=rings.length-1;i>=0;i--)if(rings[i].age>=.7)rings.splice(i,1);const k=light(now),hot=heat(now),t=now/1000,pulse=reduce?1:.86+.14*Math.sin(t*5.464),level=(.3+.7*k)*pulse,core=.4+.6*k;comet.style.translate=x+"px "+y+"px";comet.style.setProperty("--glow",(level*(1-hot)).toFixed(3));comet.style.setProperty("--hot-glow",(level*hot).toFixed(3));comet.style.setProperty("--core",(core*(1-hot)).toFixed(3));comet.style.setProperty("--hot-core",(core*hot).toFixed(3));night.style.setProperty("--x",x+"px");night.style.setProperty("--y",y+"px");night.style.setProperty("--r",(260*(.4+.6*k))+"px");for(const f of [mailField,passField]){const r=f.getBoundingClientRect(),dx=Math.max(r.left-x,0,x-r.right),dy=Math.max(r.top-y,0,y-r.bottom);f.style.setProperty("--rim",(clamp(1-Math.hypot(dx,dy)/150)*k).toFixed(3));}draw(k,hot,t);raf=requestAnimationFrame(fly);};
+    raf=requestAnimationFrame(fly);
+    return()=>{cancelAnimationFrame(raf);window.removeEventListener("resize",resize);emailEl.removeEventListener("focus",focus(emailEl));emailEl.removeEventListener("click",focus(emailEl));passEl.removeEventListener("focus",focus(passEl));passEl.removeEventListener("click",focus(passEl));eye.removeEventListener("click",onEye);send.removeEventListener("focus",focus(send));send.removeEventListener("click",focus(send));emailEl.removeEventListener("input",onEmail);passEl.removeEventListener("input",onPass);form.removeEventListener("comet:wrong",onWrong);form.removeEventListener("comet:success",onSuccess);form.removeEventListener("comet:reset",onReset);clearTimeout(dropT);clearTimeout(badT);};
+  }, []);  useEffect(() => {
     const button=submitRef.current, slot=slotRef.current, form=formRef.current;
     if(!button||!slot||!form||!signupRef.current)return;
     const RUN=170,REACH=90,reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -250,8 +217,8 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
         <Link className="comet-brand" href="/">1252's <strong>GROW WITH US</strong></Link>
         <div className="comet-heading"><span>{adminMode?"SECURE ADMIN ACCESS":"SRI AMIRTHAA ID"}</span><h1>{adminMode?<>Admin <em>Sign in</em></>:mode==="login"?<>Welcome <em>Back</em></>:<>Create <em>Account</em></>}</h1><p>{adminMode?"Sign in with an account assigned the Admin role.":mode==="login"?"One secure account for your Sri Amirthaa services.":"Create one account to use across participating websites."}</p></div>
         {signup&&<label className="comet-field"><span>Full name</span><input value={name} onChange={e=>setName(e.target.value)} autoComplete="name" placeholder="Your full name" required/></label>}
-        <label className="comet-field"><span>Email address</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="username" placeholder="name@example.com" required/></label>
-        <label className="comet-field"><span>Password</span><div className="comet-password"><input type={showPassword?"text":"password"} value={password} onChange={e=>updatePassword(e.target.value)} autoComplete={signup?"new-password":"current-password"} placeholder="Enter your password" minLength={signup?8:1} required/><button type="button" aria-label={showPassword?"Hide password":"Show password"} onClick={()=>setShowPassword(!showPassword)}>{showPassword?<EyeOff size={18}/>:<Eye size={18}/>}</button></div></label>
+        <label className="comet-field comet-email"><span>Email address</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="username" placeholder="name@example.com" required/></label>
+        <label className="comet-field"><span>Password</span><div className="comet-password"><input type={showPassword?"text":"password"} value={password} onChange={e=>updatePassword(e.target.value)} autoComplete={signup?"new-password":"current-password"} placeholder="Enter your password" minLength={signup?8:1} required/><button type="button" aria-label={showPassword?"Hide password":"Show password"} onClick={()=>setShowPassword(!showPassword)}>{showPassword?<EyeOff size={18}/>:<Eye size={18}/>}</button><span className="comet-password-mirror" aria-hidden="true"><span className="dots"/><span className="text"/><i className="caret"/></span></div></label>
         {signup&&<section className="runaway-strength" aria-live="polite">
           <div className="runaway-meter" style={{"--meter-tone":tone} as React.CSSProperties}>{[0,1,2,3].map(i=><i key={i} className={i<score?"on":""}/>)}<b>{password?PASSWORD_WORDS[score]:""}</b></div>
           <ul className="runaway-rules">{PASSWORD_RULES.map((rule,i)=><li key={rule.label} className={rule.test.test(password)?"met":""}>{rule.label}</li>)}</ul>
@@ -261,7 +228,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
         {signup&&<div ref={slotRef} className="runaway-slot" aria-hidden="true"/>}
         <button ref={submitRef} className={(success?"comet-submit done":"comet-submit")+(signup?" runaway-submit":"")} type="submit" form="comet-auth-form" disabled={busy}><span>{signup?null:<>{busy?"Please wait…":adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></>}</span><span>{signup?null:<><Check size={18}/> You're in</>}</span></button>
         {notice&&<p className="comet-notice" role="status">{notice}</p>}
-        {!adminMode&&<><div className="comet-divider"><i/> OR CONTINUE WITH <i/></div><button className="comet-google" type="button" onClick={googleSignIn} disabled={busy}><b>G</b> Continue with Google</button><p className="comet-switch">{mode==="login"?"Don't have an account?":"Already have an account?"} <button type="button" onClick={()=>{setMode(mode==="login"?"signup":"login");setNotice("");setPassword("");setConfirmPassword("");setSuccess(false);}}>{mode==="login"?"Sign up":"Sign in"}</button></p></>}
+        {!adminMode&&<><div className="comet-divider"><i/> OR CONTINUE WITH <i/></div><button className="comet-google" type="button" onClick={googleSignIn} disabled={busy}><b>G</b> Continue with Google</button><p className="comet-switch">{mode==="login"?"Don't have an account?":"Already have an account?"} <button type="button" onClick={()=>{setMode(mode==="login"?"signup":"login");setNotice("");setPassword("");setConfirmPassword("");setSuccess(false);formRef.current?.dispatchEvent(new Event("comet:reset"));}}>{mode==="login"?"Sign up":"Sign in"}</button></p></>}
       </form>
       {adminMode&&<p className="comet-admin-foot">Admin access is checked against the Supabase Auth app_metadata role.</p>}
     </main>
