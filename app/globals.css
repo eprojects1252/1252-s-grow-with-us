@@ -872,4 +872,4 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 .comet-submit>span:last-child{opacity:0;filter:blur(3px);transform:translateY(6px);color:#07182c}
 .comet-submit.done>span:first-child{opacity:0;filter:blur(3px);transform:translateY(-6px)}
 .comet-submit.done>span:last-child{opacity:1;filter:none;transform:none;transition-delay:.16s}
-@media(prefers-reduced-motion:reduce){.comet-orb,.comet-submit:before{transition:none!important}.comet-sky{display:none}.comet-password-mirror .caret{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.comet-orb,.comet-submit:before{transition:none!important}.comet-password-mirror .caret{animation:none!important}}
