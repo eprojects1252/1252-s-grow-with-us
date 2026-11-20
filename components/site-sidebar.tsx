@@ -8,8 +8,8 @@ import {
 } from "lucide-react";
 
 
-function CategoryOrbitIcon() {
-  return <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+function CategoryOrbitIcon(props: {size?:number;strokeWidth?:number}) {
+  return <svg width={props.size ?? 19} height={props.size ?? 19} viewBox="0 0 48 48" fill="none" aria-hidden="true">
     <circle cx="24" cy="24" r="9" stroke="currentColor" strokeWidth="2.2"/>
     <circle cx="24" cy="5.5" r="3" fill="#eabf42"/><circle cx="37.2" cy="10.8" r="3" fill="#e99b37"/>
     <circle cx="42.5" cy="24" r="3" fill="#df694c"/><circle cx="37.2" cy="37.2" r="3" fill="#c85b70"/>
@@ -18,16 +18,16 @@ function CategoryOrbitIcon() {
     <path d="M24 1.5a22.5 22.5 0 0 1 19.2 10.8M46.5 24a22.5 22.5 0 0 1-10.8 19.2M24 46.5A22.5 22.5 0 0 1 4.8 35.7M1.5 24A22.5 22.5 0 0 1 12.3 4.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="2.5 3.5"/>
   </svg>;
 }
-function CartLineIcon() {
-  return <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+function CartLineIcon(props: {size?:number;strokeWidth?:number}) {
+  return <svg width={props.size ?? 19} height={props.size ?? 19} viewBox="0 0 48 48" fill="none" aria-hidden="true">
     <path d="M5 8h5l4.2 23.1a3.5 3.5 0 0 0 3.4 2.9h19.1a3.5 3.5 0 0 0 3.4-2.7L44 16H12" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M17 20h23M18.5 26h20M21 16l1.2 15M32 16l-1 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
     <circle cx="19" cy="40" r="3" stroke="currentColor" strokeWidth="2.2"/><circle cx="36" cy="40" r="3" stroke="currentColor" strokeWidth="2.2"/>
     <path d="M17 13.5 16 8.5h9l2 5M29 13.5l2-5h8l-1 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>;
 }
-function AffiliateNetworkIcon() {
-  return <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+function AffiliateNetworkIcon(props: {size?:number;strokeWidth?:number}) {
+  return <svg width={props.size ?? 19} height={props.size ?? 19} viewBox="0 0 48 48" fill="none" aria-hidden="true">
     <circle cx="21" cy="17" r="8" stroke="currentColor" strokeWidth="2.5"/>
     <path d="M7 39c.8-7 5.8-11 14-11 4.1 0 7.4 1 10 3" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
     <path d="m27 24 7-5m-6 10 7 5M17 28l-5 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
