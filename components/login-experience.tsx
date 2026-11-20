@@ -142,7 +142,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const down=(e:PointerEvent)=>{pointer={x:e.clientX,y:e.clientY};if(e.pointerType!=="mouse"&&!still()&&!done)flee(pointer,performance.now());};
     const up=(e:PointerEvent)=>{if(e.pointerType!=="mouse")pointer=null;};
     const leave=()=>{pointer=null;};
-    const resize=()=>{if(!activeSlot.classList.contains("runaway-empty"))pos=home();target={...pos};};
+    const resize=()=>{if(!activeSlot.classList.contains("runaway-empty"))pos=home();else{const pad=activeButton.offsetWidth/2+24,halfH=activeButton.offsetHeight/2+24;pos.x=Math.min(innerWidth-pad,Math.max(pad,pos.x));pos.y=Math.min(innerHeight-halfH,Math.max(halfH,pos.y));}target={...pos};vel={x:0,y:0};};
     const wobble=()=>{wobbleAt=performance.now();};
     const passwordInput=activeForm.querySelector<HTMLInputElement>(".comet-password input");
     const onPassword=()=>{cancelAnimationFrame(passwordFrame);passwordFrame=requestAnimationFrame(()=>{const n=score();if(n===4&&!strong)sighAt=performance.now();strong=n===4;done=false;cornered=false;update();});};
