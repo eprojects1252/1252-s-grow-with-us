@@ -176,7 +176,8 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const wobble=()=>{wobbleAt=performance.now();};
     const passwordInput=form.querySelector<HTMLInputElement>(".comet-password input");
     const onPassword=()=>{const n=score();if(n===4&&!strong)sighAt=performance.now();strong=n===4;done=false;update();};
-    form.addEventListener("runaway:wobble",wobble);passwordInput?.addEventListener("input",onPassword);
+    const onSuccess=()=>{done=true;update();};
+    form.addEventListener("comet:success",onSuccess);form.addEventListener("runaway:wobble",wobble);passwordInput?.addEventListener("input",onPassword);
     const tick=(now:number)=>{
       const dt=Math.min(1/30,Math.max(0,(now-last)/1000));last=now;
       const n=score(),runner=!still()&&!done&&signupRef.current&&n<4;
@@ -198,7 +199,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     window.addEventListener("pointermove",move);window.addEventListener("pointerdown",down);window.addEventListener("pointerup",up);
     document.documentElement.addEventListener("pointerleave",leave);window.addEventListener("resize",resize);
     pos=home();target={...pos};update();raf=requestAnimationFrame(tick);
-    return()=>{cancelAnimationFrame(raf);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);passwordInput?.removeEventListener("input",onPassword);form.removeEventListener("runaway:wobble",wobble);};
+    return()=>{cancelAnimationFrame(raf);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);passwordInput?.removeEventListener("input",onPassword);form.removeEventListener("runaway:wobble",wobble);form.removeEventListener("comet:success",onSuccess);};
   }, [signup]);
 
   function updatePassword(value:string) { setPassword(value); setNotice(""); }
@@ -258,7 +259,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
         {signup&&<label className="comet-field"><span>Confirm password</span><input type={showPassword?"text":"password"} value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} autoComplete="new-password" placeholder="Re-enter your password" minLength={8} required/></label>}
         {!adminMode&&signup&&<label className="comet-terms"><input type="checkbox" required/><span>I agree to the <Link href="/terms">Terms</Link> and <Link href="/privacy">Privacy Policy</Link>.</span></label>}
         {signup&&<div ref={slotRef} className="runaway-slot" aria-hidden="true"/>}
-        <button ref={submitRef} className={(success?"comet-submit done":"comet-submit")+(signup?" runaway-submit":"")} type="submit" form="comet-auth-form" disabled={busy}><span>{busy?"Please wait…":signup?(score===4?"Create account":score===0?"Nope":"Add "+(missing?.label||"details")):adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></span><span className="comet-success"><Check size={18}/> You're in</span></button>
+        <button ref={submitRef} className={(success?"comet-submit done":"comet-submit")+(signup?" runaway-submit":"")} type="submit" form="comet-auth-form" disabled={busy}><span>{busy?"Please wait…":signup?(score===4?"Create account":score===0?"Nope":"Add "+(missing?.label||"details")):adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></span><span ><Check size={18}/> You're in</span></button>
         {notice&&<p className="comet-notice" role="status">{notice}</p>}
         {!adminMode&&<><div className="comet-divider"><i/> OR CONTINUE WITH <i/></div><button className="comet-google" type="button" onClick={googleSignIn} disabled={busy}><b>G</b> Continue with Google</button><p className="comet-switch">{mode==="login"?"Don't have an account?":"Already have an account?"} <button type="button" onClick={()=>{setMode(mode==="login"?"signup":"login");setNotice("");setPassword("");setConfirmPassword("");setSuccess(false);}}>{mode==="login"?"Sign up":"Sign in"}</button></p></>}
       </form>
