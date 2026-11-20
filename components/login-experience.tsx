@@ -26,6 +26,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
+  const signup = mode === "signup" && !adminMode;
   const cometRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,7 +39,6 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   signupRef.current = signup;
   const slotRef = useRef<HTMLDivElement>(null);
   const score = passwordScore(password);
-  const signup = mode === "signup" && !adminMode;
 
   useEffect(() => {
     const canvas = canvasRef.current, comet = cometRef.current, form = formRef.current;
