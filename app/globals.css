@@ -830,3 +830,46 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 .runaway-slot.runaway-empty{box-shadow:inset 0 0 0 1.5px rgba(16,19,26,.14)}
 .runaway-slot.runaway-empty:after{content:"come back";position:absolute;inset:0;display:grid;place-items:center;color:rgba(16,19,26,.28);font-size:12.5px;font-weight:600}
 @media(prefers-reduced-motion:reduce){.runaway-submit svg{animation:none;stroke-dashoffset:0}.runaway-submit.done:after{animation:none}}
+
+/* CodinVisual Comet Login source mechanics — adapted to the existing Supabase form */
+.comet-night{position:fixed;inset:0;z-index:0;pointer-events:none;transition:opacity .6s ease;background:radial-gradient(circle at var(--x,-200px) var(--y,30%),rgba(140,203,255,.08) 0,rgba(5,7,12,.22) calc(var(--r,260px)*.5),rgba(5,7,12,.52) var(--r,260px))}
+.comet-night.day{opacity:.3}
+.comet-sky{position:fixed!important;inset:0;z-index:1;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen}
+.comet-form{z-index:2}
+.comet-orb{position:fixed;left:0;top:0;z-index:4;width:110px;height:110px;margin:-55px 0 0 -55px;pointer-events:none;background:none!important;box-shadow:none!important;border-radius:0!important;will-change:translate}
+.comet-orb i,.comet-orb b{position:absolute;border-radius:50%}
+.comet-orb i{inset:0;width:auto;height:auto;left:0;top:0;background:radial-gradient(circle,rgba(170,215,255,.7),rgba(120,185,255,.22) 22%,rgba(120,185,255,.06) 42%,transparent 62%);opacity:var(--glow,1);box-shadow:none}
+.comet-orb i:after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(255,170,185,.7),rgba(255,110,135,.22) 22%,rgba(255,110,135,.06) 42%,transparent 62%);opacity:var(--hot-glow,0)}
+.comet-orb b{left:50%;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;background:#f4faff;opacity:var(--core,1);box-shadow:0 0 6px 2px rgba(200,230,255,.9),0 0 16px 5px rgba(140,203,255,.55)}
+.comet-orb b:after{content:"";position:absolute;inset:0;border-radius:50%;background:#fff1f3;opacity:var(--hot-core,0);box-shadow:0 0 6px 2px rgba(255,220,228,.9),0 0 16px 5px rgba(255,143,160,.55)}
+.comet-email,.comet-password{position:relative}
+.comet-email>input,.comet-password{box-shadow:inset 0 0 0 1.2px rgba(160,210,255,calc(.1 + .45 * var(--rim,0))),0 0 calc(18px * var(--rim,0)) rgba(120,185,255,calc(.18 * var(--rim,0)))}
+.comet-password input{color:transparent!important;caret-color:transparent!important;padding-right:52px!important}
+.comet-password-mirror{position:absolute;left:16px;right:52px;top:0;bottom:0;pointer-events:none;overflow:hidden;font:500 14px system-ui,sans-serif}
+.comet-password-mirror .dots,.comet-password-mirror .text{position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;white-space:pre;transition:opacity .3s cubic-bezier(.77,0,.175,1),filter .3s cubic-bezier(.77,0,.175,1)}
+.comet-password-mirror .dots i{flex:none;width:14px;height:14px;display:grid;place-items:center}
+.comet-password-mirror .dots i:after{content:"";width:7px;height:7px;border-radius:50%;background:#eef4fa}
+.comet-password-mirror .text{opacity:0;filter:blur(3px);letter-spacing:.5px}
+.comet-password-mirror .text b{font-weight:500}
+.comet-password.show .comet-password-mirror .dots{opacity:0;filter:blur(3px)}
+.comet-password.show .comet-password-mirror .text{opacity:1;filter:none}
+.comet-password-mirror .new{animation:cometFlash .5s cubic-bezier(.23,1,.32,1)}
+@keyframes cometFlash{from{filter:drop-shadow(0 0 5px #a8d8ff) brightness(1.7)}}
+.comet-password-mirror .caret{position:absolute;left:0;top:14px;width:2px;height:20px;background:#8ccBff;opacity:0}
+.comet-password:focus-within .comet-password-mirror .caret{opacity:1;animation:cometBlink 1s steps(1) infinite}
+@keyframes cometBlink{50%{opacity:0}}
+.comet-password.bad:after,.comet-submit.bad:after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 0 1.6px rgba(255,143,160,.95),inset 0 0 14px rgba(255,143,160,.16);animation:cometBadFade 1.05s ease both}
+@keyframes cometBadFade{0%,70%{opacity:1}100%{opacity:0}}
+.comet-password.drop .comet-password-mirror .dots i,.comet-password.drop .comet-password-mirror .text b{animation:cometDrop .45s cubic-bezier(.45,0,.55,1) calc(var(--i,0)*40ms) forwards}
+@keyframes cometDrop{to{translate:0 16px;opacity:0}}
+.comet-submit{--hx:50%;background:#161b24!important;box-shadow:inset 0 0 0 1.2px rgba(215,230,255,.1)!important}
+.comet-submit:before{background:linear-gradient(#cfeaff,#86c4ff)!important;clip-path:circle(0 at var(--hx,50%) 50%)!important}
+.comet-submit.done:before{clip-path:circle(150% at var(--hx,50%) 50%)!important}
+.comet-submit.still:before,.comet-submit.still span{transition:none!important}
+.comet-submit.bad{animation:cometNope .4s cubic-bezier(.36,.07,.19,.97)}
+@keyframes cometNope{15%{translate:-7px 0}40%{translate:6px 0}65%{translate:-3px 0}85%{translate:1px 0}}
+.comet-submit>span{z-index:1}
+.comet-submit>span:last-child{opacity:0;filter:blur(3px);transform:translateY(6px);color:#07182c}
+.comet-submit.done>span:first-child{opacity:0;filter:blur(3px);transform:translateY(-6px)}
+.comet-submit.done>span:last-child{opacity:1;filter:none;transform:none;transition-delay:.16s}
+@media(prefers-reduced-motion:reduce){.comet-orb,.comet-submit:before{transition:none!important}.comet-sky{display:none}.comet-password-mirror .caret{animation:none!important}}
