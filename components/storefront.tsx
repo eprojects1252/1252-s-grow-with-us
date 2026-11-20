@@ -111,8 +111,8 @@ export default function Storefront() {
     <main>
       <header className="header header-v2">
         <div className="website-switcher" aria-label="Main websites">
-          <button className="website-tab website-tab-active" type="button" aria-label="1252's Grow With Us"><img className="website-logo-image" src="/images/grow-with-us-logo.png" alt="1252's Grow With Us" /></button>
-          <button className="website-tab" type="button" aria-label="Sri Amirthaa Groups 1252 sponsor"><img className="website-logo-image website-sponsor-logo" src="/images/sri-amirthaa-groups-1252.png" alt="Sri Amirthaa Groups 1252" /></button>
+          <button className="website-tab website-tab-active" type="button" aria-label="1252's Grow With Us"><img className="website-logo-image" src="/images/1252-logo.png" alt="1252's Grow With Us" /></button>
+          <button className="website-tab" type="button" aria-label="Sri Amirthaa Groups 1252 sponsor"><span className="website-logo-placeholder">Sponsor Logo</span></button>
         </div>
         <div className="location-search-row header-login-row">
           <div className="header-actions header-actions-v2">
