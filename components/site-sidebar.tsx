@@ -3,23 +3,23 @@
 import { useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import {
-  PanelLeftOpen, PanelLeftClose, Search, Grid2X2, Wallet, Smartphone,
-  UserRound, Tag, Heart, Package, ShoppingCart, Store, Handshake, Settings
+  PanelLeftOpen, PanelLeftClose, Search, Grid2X2, WalletCards, ReceiptText,
+  UserRound, BadgePercent, Heart, ClipboardList, ShoppingBag, Store, UsersRound, SlidersHorizontal
 } from "lucide-react";
 
 const items = [
   { label: "Search", icon: Search, href: "/?search=1", key: "search" },
   { label: "All Categories", icon: Grid2X2, href: "/#categories" },
-  { label: "UPI & Wallet", icon: Wallet, href: "/wallet" },
-  { label: "Bills & Recharges", icon: Smartphone, href: "/recharge-bills" },
+  { label: "UPI & Wallet", icon: WalletCards, href: "/wallet" },
+  { label: "Bills & Recharges", icon: ReceiptText, href: "/recharge-bills" },
   { label: "My Account", icon: UserRound, href: "/login" },
-  { label: "Offers", icon: Tag, href: "/#offers" },
+  { label: "Offers", icon: BadgePercent, href: "/#offers" },
   { label: "Favorite", icon: Heart, href: "/#favorites" },
-  { label: "Orders", icon: Package, href: "/login" },
-  { label: "Cart", icon: ShoppingCart, href: "/#cart" },
+  { label: "Orders", icon: ClipboardList, href: "/login" },
+  { label: "Cart", icon: ShoppingBag, href: "/#cart" },
   { label: "Followed Stores", icon: Store, href: "/#stores" },
-  { label: "Affiliate Program", icon: Handshake, href: "/#affiliate" },
-  { label: "Settings", icon: Settings, href: "/login" },
+  { label: "Affiliate Program", icon: UsersRound, href: "/#affiliate" },
+  { label: "Settings", icon: SlidersHorizontal, href: "/login" },
 ];
 
 export default function SiteSidebar() {
