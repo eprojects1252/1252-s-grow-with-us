@@ -18,6 +18,7 @@ const passwordScore = (value: string) => PASSWORD_RULES.filter(rule => rule.test
 
 export default function LoginExperience({ initialMode = "login", adminMode = false, onAuthenticated }: Props) {
   const [mode, setMode] = useState<"login" | "signup">(adminMode ? "login" : initialMode);
+  const signup = mode === "signup" && !adminMode;
   const [showPassword, setShowPassword] = useState(false);
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -26,7 +27,6 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
-  const signup = mode === "signup" && !adminMode;
   const cometRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
