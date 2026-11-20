@@ -168,7 +168,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     window.addEventListener("pointermove",move);window.addEventListener("pointerdown",down);window.addEventListener("pointerup",up);document.documentElement.addEventListener("pointerleave",leave);window.addEventListener("resize",resize);
     pos=home();target={...pos};raf=requestAnimationFrame(tick);
     return()=>{cancelAnimationFrame(raf);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);};
-  }, []);
+  }, [signup]);
 
   function updatePassword(value:string) { setPassword(value); setNotice(""); }
   async function submit(event: React.FormEvent<HTMLFormElement>) {
