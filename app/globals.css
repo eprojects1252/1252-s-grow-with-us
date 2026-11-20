@@ -551,3 +551,28 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 @media(max-width:760px){
   .site-sidebar-search{left:60px!important;top:52px!important;width:min(260px,calc(100vw - 70px))!important}
 }
+
+
+/* Petopia sidebar entry and full-screen search overlay. */
+.petopia-sidebar-icon{display:block;object-fit:contain;border-radius:50%;flex:0 0 auto}
+.site-sidebar-search{
+ position:fixed!important;left:60px!important;top:0!important;right:0!important;bottom:0!important;
+ width:auto!important;height:100dvh!important;min-height:100vh!important;
+ display:flex!important;align-items:flex-start!important;gap:12px!important;
+ padding:18px 22px!important;border:0!important;border-left:1px solid rgba(255,255,255,.5)!important;
+ border-radius:0!important;background:rgba(239,249,242,.94)!important;
+ -webkit-backdrop-filter:blur(14px) saturate(125%)!important;backdrop-filter:blur(14px) saturate(125%)!important;
+ box-shadow:0 10px 34px rgba(22,72,38,.13)!important;z-index:850!important;
+}
+.site-sidebar-search input{
+ flex:1!important;width:auto!important;min-width:0!important;height:52px!important;
+ padding:0 18px!important;border:1px solid rgba(41,132,75,.22)!important;border-radius:15px!important;
+ background:rgba(255,255,255,.9)!important;font-size:15px!important;color:#174b2c!important;
+ box-shadow:0 5px 18px rgba(25,83,45,.06)!important;
+}
+.site-sidebar-search button{flex:0 0 52px!important;width:52px!important;height:52px!important;border-radius:14px!important}
+@media(max-width:760px){
+ .site-sidebar-search{left:52px!important;padding:12px!important;gap:8px!important}
+ .site-sidebar-search input{height:48px!important;font-size:14px!important}
+ .site-sidebar-search button{flex-basis:48px!important;width:48px!important;height:48px!important}
+}
