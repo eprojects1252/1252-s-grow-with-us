@@ -30,6 +30,12 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   const formRef = useRef<HTMLFormElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
+  const passwordRef = useRef(password);
+  const successRef = useRef(success);
+  const signupRef = useRef(signup);
+  passwordRef.current = password;
+  successRef.current = success;
+  signupRef.current = signup;
   const slotRef = useRef<HTMLDivElement>(null);
   const score = passwordScore(password);
   const signup = mode === "signup" && !adminMode;
@@ -132,7 +138,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const dist=(p:{x:number;y:number})=>Math.hypot(p.x-pos.x,p.y-pos.y);
     const fit=(x:number,y:number)=>{const w=button.offsetWidth/2+24,h=button.offsetHeight/2+24;return{x:Math.min(innerWidth-w,Math.max(w,x)),y:Math.min(innerHeight-h,Math.max(h,y))};};
     const flee=(from:{x:number;y:number},now:number)=>{
-      const strength=passwordScore(password);const run=RUN*(1-strength/4);
+      const strength=passwordScore(passwordRef.current);const run=RUN*(1-strength/4);
       if(!run||dist(from)>REACH||now-lastFlee<260)return;
       let dx=pos.x-from.x,dy=pos.y-from.y,d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
       let to=fit(pos.x+dx*run,pos.y+dy*run);
@@ -146,7 +152,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const resize=()=>{if(!slot.classList.contains("runaway-empty"))pos=home();target={...pos};};
     const tick=(now:number)=>{
       const dt=Math.min(1/30,Math.max(0,(now-last)/1000));last=now;
-      const s=passwordScore(password),runner=!reduced.matches&&!success&&s<4;
+      const s=passwordScore(passwordRef.current),runner=!reduced.matches&&!successRef.current&&signupRef.current&&s<4;
       if(runner&&pointer)flee(pointer,now);
       const far=!pointer||dist(pointer)>REACH*1.6,going=runner&&far&&now-lastFlee>900;
       if(going)target=home();
@@ -162,7 +168,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     window.addEventListener("pointermove",move);window.addEventListener("pointerdown",down);window.addEventListener("pointerup",up);document.documentElement.addEventListener("pointerleave",leave);window.addEventListener("resize",resize);
     pos=home();target={...pos};raf=requestAnimationFrame(tick);
     return()=>{cancelAnimationFrame(raf);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);};
-  }, [password,success,signup]);
+  }, []);
 
   function updatePassword(value:string) { setPassword(value); setNotice(""); }
   async function submit(event: React.FormEvent<HTMLFormElement>) {
