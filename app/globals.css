@@ -859,7 +859,8 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 /* Final interaction isolation and accessibility safeguards */
 .comet-brand{position:relative;left:auto;bottom:auto;display:inline-flex;align-items:center;gap:8px;margin:0 0 4px}
 .comet-submit:not(.runaway-submit){width:100%;height:52px;position:relative;z-index:3}
-.comet-submit:not(.runaway-submit)::before{pointer-events:none}
+.comet-submit:not(.runaway-submit)::before{content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,#cfeaff,#86c4ff);clip-path:circle(0 at var(--hx,50%) 50%);transition:clip-path .5s cubic-bezier(.23,1,.32,1)}
+.comet-submit:not(.runaway-submit).done::before{clip-path:circle(150% at var(--hx,50%) 50%)}
 .comet-submit:not(.runaway-submit)>span{z-index:1}
 .runaway-submit{display:block!important;position:fixed!important;left:0!important;top:0!important;z-index:7!important;width:min(188px,calc(100vw - 32px))!important;height:50px!important;margin:0!important;padding:0!important;overflow:visible!important;transform-origin:50% 50%;touch-action:manipulation;will-change:transform}
 .runaway-submit::before{display:none!important;content:none!important}
