@@ -646,3 +646,12 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 .stores-note{display:flex;flex-direction:column;gap:6px;margin-top:26px;padding:20px 22px;border:1px solid #e1ebf7;border-radius:18px;background:#f3f8ff;color:#617a98;font-size:12px;line-height:1.7}
 .stores-note strong{color:#345d8b;font-size:13px}
 @media(max-width:680px){.stores-page{padding:34px 18px 70px}.stores-heading-row{align-items:flex-start}.stores-grid{grid-template-columns:1fr}.store-card{min-height:190px;padding:20px;gap:16px}.store-card-mark{width:82px;height:82px;flex-basis:82px;border-radius:20px}.store-card-mark img{width:68px;height:68px}.store-card-copy h2{font-size:18px}.store-card-copy p{font-size:11px}.store-add-card{min-height:170px}}
+
+/* Sidebar brand mark and clean icon presentation */
+.site-sidebar-brand{width:100%;min-height:44px;display:flex;align-items:center;justify-content:center;margin:0 0 8px;padding:0;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;flex:0 0 auto}
+.site-sidebar-brand img{display:block;width:42px;height:36px;object-fit:contain;mix-blend-mode:multiply;transition:width .22s,height .22s}
+.site-sidebar.is-expanded .site-sidebar-brand{justify-content:flex-start;padding-left:5px}
+.site-sidebar.is-expanded .site-sidebar-brand img{width:188px;height:62px;object-position:left center}
+.site-sidebar .site-sidebar-stores-item{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.site-sidebar .site-sidebar-stores-item svg{overflow:visible;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.site-sidebar .site-sidebar-stores-item:hover{background:transparent!important;border:0!important;box-shadow:none!important}
