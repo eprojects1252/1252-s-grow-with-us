@@ -2,6 +2,7 @@
 
 import { useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import {
   PanelLeftOpen, PanelLeftClose, Search, WalletCards, ReceiptText,
   UserRound, BadgePercent, Heart, ClipboardList, Store, SlidersHorizontal
@@ -117,13 +118,16 @@ export default function SiteSidebar() {
         } as CSSProperties}/>)}
       </div>}
       <aside className={`site-sidebar ${expanded ? "is-expanded" : "is-collapsed"} ${searchOpen ? "has-search-open" : ""}`}>
+        <Link href="/" className="site-sidebar-brand" aria-label="Sri Amirthaa Groups 1252 home" title="Sri Amirthaa Groups 1252">
+          <img src="/images/1252-logo.png" alt="Sri Amirthaa Groups 1252" />
+        </Link>
         <button className="site-sidebar-toggle" type="button" onClick={() => setExpanded(v => !v)} aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"} title={expanded ? "Collapse" : "Expand"}>
           {expanded ? <PanelLeftClose size={19}/> : <PanelLeftOpen size={19}/>}
           {expanded && <span>Expand Button</span>}
         </button>
         <nav aria-label="Site navigation">
           {items.map(({ label, icon: Icon, href, key }) => (
-            <button key={label} type="button" className={`site-sidebar-item ${(label === "UPI & Wallet" && pathname === "/wallet") ? "active" : ""}`} onClick={(event) => handleItem(label, href, key, event.currentTarget)} title={expanded ? undefined : label} aria-expanded={key === "search" ? searchOpen : undefined}>
+            <button key={label} type="button" className={`site-sidebar-item ${label === "Stores" ? "site-sidebar-stores-item" : ""} ${(label === "UPI & Wallet" && pathname === "/wallet") ? "active" : ""}`} onClick={(event) => handleItem(label, href, key, event.currentTarget)} title={expanded ? undefined : label} aria-expanded={key === "search" ? searchOpen : undefined}>
               <Icon size={19} strokeWidth={1.9}/><span>{label}</span>
             </button>
           ))}
