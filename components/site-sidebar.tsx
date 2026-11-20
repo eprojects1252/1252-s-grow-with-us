@@ -8,7 +8,18 @@ import {
 } from "lucide-react";
 
 
-function PetopiaIcon(props: {size?:number}) { return <img src="/petopia-icon.svg" alt="" width={props.size ?? 22} height={props.size ?? 22} className="petopia-sidebar-icon" />; }
+function StoresNetworkIcon(props: {size?:number;strokeWidth?:number}) {
+  return <svg width={props.size ?? 20} height={props.size ?? 20} viewBox="0 0 48 48" fill="none" aria-hidden="true">
+    <g stroke="#5aa4f5" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 15H8v8M18 33H8v-8M18 24h9M27 8h3M27 24h3M27 40h3"/>
+      <path d="M30 5h13v10H30zM30 21h13v10H30zM30 37h13v8H30z"/>
+      <path d="M30 5h13l2 4v2H28V9zM30 21h13l2 4v2H28v-2zM30 37h13l2 3v2H28v-2z"/>
+      <path d="M33 11v4M38 11v4M33 27v4M38 27v4M33 42v3M38 42v3"/>
+      <path d="M2 18h3M2 30h3"/>
+    </g>
+    <circle cx="18" cy="15" r="2.2" fill="#5aa4f5"/><circle cx="18" cy="33" r="2.2" fill="#5aa4f5"/>
+  </svg>;
+}
 
 function CategoryOrbitIcon(props: {size?:number;strokeWidth?:number}) {
   return <svg width={props.size ?? 19} height={props.size ?? 19} viewBox="0 0 48 48" fill="none" aria-hidden="true">
@@ -52,7 +63,7 @@ const items = [
   { label: "Followed Stores", icon: Store, href: "/#stores" },
   { label: "Affiliate Program", icon: AffiliateNetworkIcon, href: "/#affiliate" },
   { label: "Settings", icon: SlidersHorizontal, href: "/login" },
-  { label: "Pet Shop", icon: PetopiaIcon, href: "/pet-shop" },
+  { label: "Stores", icon: StoresNetworkIcon, href: "/stores" },
 ];
 
 export default function SiteSidebar() {
