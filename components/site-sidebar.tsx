@@ -12,10 +12,12 @@ import {
 function StoresNetworkIcon(props: {size?:number;strokeWidth?:number}) {
   return <svg width={props.size ?? 20} height={props.size ?? 20} viewBox="0 0 48 48" fill="none" aria-hidden="true">
     <g stroke="currentColor" strokeWidth={props.strokeWidth ?? 1.9} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 19.5 8.5 8h31L43 19.5v3a5 5 0 0 1-9 3 5 5 0 0 1-9 0 5 5 0 0 1-9 0 5 5 0 0 1-9-3z"/>
-      <path d="M8 25v17h32V25M18 42V29h12v13M13 14h22M14 8l-2 11M34 8l2 11"/>
-      <path d="M4 19.5h40M21 8l-1 11M27 8l1 11"/>
-      <path d="M35 31h2M35 36h2"/>
+      <path d="M3 18 5.5 9h13l2.5 9v2a3.8 3.8 0 0 1-7 2 3.8 3.8 0 0 1-7 0 3.8 3.8 0 0 1-4-2z"/>
+      <path d="M6 23v16h13V23M10 39V29h6v10"/>
+      <path d="m22 18 2.5-9h13l2.5 9v2a3.8 3.8 0 0 1-7 2 3.8 3.8 0 0 1-7 0 3.8 3.8 0 0 1-4-2z"/>
+      <path d="M25 23v16h13V23M29 39V29h6v10"/>
+      <path d="M19 26h3M19 31h3M41 26h4v13h-7"/>
+      <path d="M8 13h10M27 13h10"/>
     </g>
   </svg>;
 }
