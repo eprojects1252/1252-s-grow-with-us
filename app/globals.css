@@ -871,7 +871,11 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 .comet-password-mirror .caret{pointer-events:none}
 @media(prefers-reduced-motion:reduce){.comet-orb b,.comet-submit:not(.runaway-submit)::before,.runaway-submit svg,.runaway-submit.done::after{animation:none!important;transition:none!important}}
 
-.runaway-submit.comet-hit::before{display:block!important;content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;background:linear-gradient(#cfeaff,#86c4ff);clip-path:circle(0 at var(--hx,50%) 50%);transition:clip-path .5s cubic-bezier(.23,1,.32,1)}
+.runaway-submit.comet-hit::before{display:block!important;content:""!important;position:absolute;inset:0;z-index:0;border-radius:inherit;background:linear-gradient(#cfeaff,#86c4ff);clip-path:circle(0 at var(--hx,50%) 50%);transition:clip-path .5s cubic-bezier(.23,1,.32,1)}
+/* Comet light sweep must override the Runaway pseudo-element reset. */
+.runaway-submit.comet-submit{background:var(--tone,#D93D42)!important;box-shadow:0 10px 24px -10px rgba(0,0,0,.55)!important}
+.comet-sky{visibility:visible!important;opacity:1!important}
+.comet-orb{visibility:visible!important;opacity:1!important;z-index:6!important}
 .runaway-submit.comet-hit.comet-hit-done::before{clip-path:circle(150% at var(--hx,50%) 50%)}
 .runaway-submit.comet-hit.still::before{transition:none!important}
 
