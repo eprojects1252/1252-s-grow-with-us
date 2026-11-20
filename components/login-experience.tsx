@@ -103,7 +103,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const TONES=[["#D93D42","#fff"],["#C2410C","#fff"],["#F5A524","#1A1300"],["#9BD04A","#0F1A00"],["#15803D","#fff"]] as const;
     const WORDS=["Too weak","Weak","Fair","Good","Strong"], labels=Array.from(activeButton.querySelectorAll<HTMLElement>("span"));
     let pos:{x:number;y:number},vel={x:0,y:0},target:{x:number;y:number},pointer:{x:number;y:number}|null=null;
-    let lastFlee=-1e9,sighAt=-1e9,wobbleAt=-1e9,said="",front=0,done=false,strong=false,raf=0,last=performance.now();
+    let lastFlee=-1e9,sighAt=-1e9,wobbleAt=-1e9,said="",front=0,done=false,strong=false,raf=0,passwordFrame=0,last=performance.now();
     const still=()=>reduced.matches, score=()=>RULES.filter(([re])=>re.test(passwordRef.current)).length;
     const home=()=>{const r=activeSlot.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};};
     const dist=(p:{x:number;y:number})=>Math.hypot(p.x-pos.x,p.y-pos.y);
@@ -143,7 +143,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const resize=()=>{if(!activeSlot.classList.contains("runaway-empty"))pos=home();target={...pos};};
     const wobble=()=>{wobbleAt=performance.now();};
     const passwordInput=activeForm.querySelector<HTMLInputElement>(".comet-password input");
-    const onPassword=()=>{const n=score();if(n===4&&!strong)sighAt=performance.now();strong=n===4;done=false;update();};
+    const onPassword=()=>{cancelAnimationFrame(passwordFrame);passwordFrame=requestAnimationFrame(()=>{const n=score();if(n===4&&!strong)sighAt=performance.now();strong=n===4;done=false;update();});};
     const onSuccess=()=>{done=true;update();};
     activeForm.addEventListener("comet:success",onSuccess);activeForm.addEventListener("runaway:wobble",wobble);passwordInput?.addEventListener("input",onPassword);
     const tick=(now:number)=>{
@@ -167,7 +167,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     window.addEventListener("pointermove",move);window.addEventListener("pointerdown",down);window.addEventListener("pointerup",up);
     document.documentElement.addEventListener("pointerleave",leave);window.addEventListener("resize",resize);
     pos=home();target={...pos};update();raf=requestAnimationFrame(tick);
-    return()=>{cancelAnimationFrame(raf);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);passwordInput?.removeEventListener("input",onPassword);activeForm.removeEventListener("runaway:wobble",wobble);activeForm.removeEventListener("comet:success",onSuccess);};
+    return()=>{cancelAnimationFrame(raf);cancelAnimationFrame(passwordFrame);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);passwordInput?.removeEventListener("input",onPassword);activeForm.removeEventListener("runaway:wobble",wobble);activeForm.removeEventListener("comet:success",onSuccess);};
   }, [signup]);
 
   function updatePassword(value:string) { setPassword(value); setNotice(""); }
