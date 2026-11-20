@@ -129,45 +129,76 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
 
   useEffect(() => {
     const button=submitRef.current, slot=slotRef.current, form=formRef.current;
-    if(!button||!slot||!form)return;
-    const reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
-    const RUN=170,REACH=90;
-    let pos={x:0,y:0},vel={x:0,y:0},target={x:0,y:0},pointer:{x:number;y:number}|null=null;
-    let lastFlee=-1e9,raf=0,last=performance.now(),wobbleAt=-1e9;
+    if(!button||!slot||!form||!signupRef.current)return;
+    const RUN=170,REACH=90,reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+    const RULES=[[/\d/,"a number"],[/[^\w\s]/,"a symbol"],[/[A-Z]/,"a capital"],[/.{8,}/,"8+ characters"]] as const;
+    const TONES=[["#D93D42","#fff"],["#C2410C","#fff"],["#F5A524","#1A1300"],["#9BD04A","#0F1A00"],["#15803D","#fff"]] as const;
+    const WORDS=["Too weak","Weak","Fair","Good","Strong"], labels=Array.from(button.querySelectorAll<HTMLElement>("span"));
+    let pos:{x:number;y:number},vel={x:0,y:0},target:{x:number;y:number},pointer:{x:number;y:number}|null=null;
+    let lastFlee=-1e9,sighAt=-1e9,wobbleAt=-1e9,said="",front=0,done=false,strong=false,raf=0,last=performance.now();
+    const still=()=>reduced.matches, score=()=>RULES.filter(([re])=>re.test(passwordRef.current)).length;
     const home=()=>{const r=slot.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};};
     const dist=(p:{x:number;y:number})=>Math.hypot(p.x-pos.x,p.y-pos.y);
-    const fit=(x:number,y:number)=>{const w=button.offsetWidth/2+24,h=button.offsetHeight/2+24;return{x:Math.min(innerWidth-w,Math.max(w,x)),y:Math.min(innerHeight-h,Math.max(h,y))};};
-    const flee=(from:{x:number;y:number},now:number)=>{
-      const strength=passwordScore(passwordRef.current);const run=RUN*(1-strength/4);
-      if(!run||dist(from)>REACH||now-lastFlee<260)return;
+    function say(text:string,html=text){
+      if(text===said)return;said=text;const out=labels[front],inn=labels[front^=1];if(!out||!inn)return;
+      inn.innerHTML=html;button.setAttribute("aria-label",text);
+      if(still()){out.style.opacity="0";inn.style.opacity="1";return;}
+      out.animate([{opacity:1,transform:"none",filter:"blur(0)"},{opacity:0,transform:"translateY(-6px)",filter:"blur(2px)"}],{duration:160,easing:"ease-out",fill:"both"});
+      inn.animate([{opacity:0,transform:"translateY(6px)",filter:"blur(2px)"},{opacity:1,transform:"none",filter:"blur(0)"}],{duration:220,easing:"cubic-bezier(.23, 1, .32, 1)",fill:"both"});
+    }
+    function update(){
+      const n=score(),[tone,ink]=TONES[done?4:n];button.style.setProperty("--tone",tone);button.style.setProperty("--tone-ink",ink);
+      button.style.backgroundColor=tone;button.style.color=ink;
+      const meter=form.querySelector(".runaway-meter");meter?.querySelectorAll("i").forEach((el,i)=>el.classList.toggle("on",i<n));
+      const word=meter?.querySelector("b");if(word)word.textContent=passwordRef.current?WORDS[n]:"";
+      form.querySelectorAll(".runaway-rules li").forEach((el,i)=>el.classList.toggle("met",RULES[i][0].test(passwordRef.current)));
+      const missing=RULES.find(([re])=>!re.test(passwordRef.current));
+      say(done?"Account created":n===4?"Create account":n===0?"Nope":"Add "+missing?.[1],done?'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1"/></svg>Account created':undefined);
+      button.classList.toggle("done",done);
+    }
+    function flee(from:{x:number;y:number},now:number){
+      const run=RUN*(1-score()/4);if(!run||dist(from)>REACH||now-lastFlee<260)return;
       let dx=pos.x-from.x,dy=pos.y-from.y,d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
+      const pad=24,w=button.offsetWidth/2+pad,h=button.offsetHeight/2+pad;
+      const fit=(x:number,y:number)=>({x:Math.min(innerWidth-w,Math.max(w,x)),y:Math.min(innerHeight-h,Math.max(h,y))});
       let to=fit(pos.x+dx*run,pos.y+dy*run);
-      if(Math.hypot(to.x-pos.x,to.y-pos.y)<run*.6){const side=Math.abs(dx)>Math.abs(dy)?{x:0,y:pos.y<innerHeight/2?1:-1}:{x:pos.x<innerWidth/2?1:-1,y:0};to=fit(pos.x+side.x*run+dx*run*.3,pos.y+side.y*run+dy*run*.3);dx=side.x;dy=side.y;}
+      if(Math.hypot(to.x-pos.x,to.y-pos.y)<run*.6){
+        const side=Math.abs(dx)>Math.abs(dy)?{x:0,y:pos.y<innerHeight/2?1:-1}:{x:pos.x<innerWidth/2?1:-1,y:0};
+        to=fit(pos.x+side.x*run+dx*run*.3,pos.y+side.y*run+dy*run*.3);dx=side.x;dy=side.y;
+      }
       target=to;vel.x+=dx*run*5;vel.y+=dy*run*5;lastFlee=now;slot.classList.add("runaway-empty");
-    };
+    }
     const move=(e:PointerEvent)=>{pointer={x:e.clientX,y:e.clientY};};
-    const down=(e:PointerEvent)=>{pointer={x:e.clientX,y:e.clientY};if(e.pointerType!=="mouse"&&!reduced.matches)flee(pointer,performance.now());};
+    const down=(e:PointerEvent)=>{pointer={x:e.clientX,y:e.clientY};if(e.pointerType!=="mouse"&&!still()&&!done)flee(pointer,performance.now());};
     const up=(e:PointerEvent)=>{if(e.pointerType!=="mouse")pointer=null;};
     const leave=()=>{pointer=null;};
     const resize=()=>{if(!slot.classList.contains("runaway-empty"))pos=home();target={...pos};};
+    const wobble=()=>{wobbleAt=performance.now();};
+    const passwordInput=form.querySelector<HTMLInputElement>(".comet-password input");
+    const onPassword=()=>{const n=score();if(n===4&&!strong)sighAt=performance.now();strong=n===4;done=false;update();};
+    form.addEventListener("runaway:wobble",wobble);passwordInput?.addEventListener("input",onPassword);
     const tick=(now:number)=>{
       const dt=Math.min(1/30,Math.max(0,(now-last)/1000));last=now;
-      const s=passwordScore(passwordRef.current),runner=!reduced.matches&&!successRef.current&&signupRef.current&&s<4;
+      const n=score(),runner=!still()&&!done&&signupRef.current&&n<4;
       if(runner&&pointer)flee(pointer,now);
       const far=!pointer||dist(pointer)>REACH*1.6,going=runner&&far&&now-lastFlee>900;
       if(going)target=home();
-      const k=s/4,response=going ? .6 : .3+.25*k,zeta=going ? .9 : .55+.2*k,w=2*Math.PI/response;
+      const k=n/4,response=going ? .6 : .3+.25*k,zeta=going ? .9 : .55+.2*k,w=2*Math.PI/response;
       vel.x+=(w*w*(target.x-pos.x)-2*zeta*w*vel.x)*dt;vel.y+=(w*w*(target.y-pos.y)-2*zeta*w*vel.y)*dt;
       pos.x+=vel.x*dt;pos.y+=vel.y*dt;
-      const h=home();if(Math.hypot(pos.x-h.x,pos.y-h.y)<2&&Math.hypot(vel.x,vel.y)<20)slot.classList.remove("runaway-empty");
+      const back=home();if(Math.hypot(pos.x-back.x,pos.y-back.y)<2&&Math.hypot(vel.x,vel.y)<20)slot.classList.remove("runaway-empty");
       const speed=Math.hypot(vel.x,vel.y),stretch=1+Math.min(.2,speed/4200),angle=Math.atan2(vel.y,vel.x);
-      const x=pos.x-button.offsetWidth/2,y=pos.y-button.offsetHeight/2;
-      button.style.transform="translate("+x.toFixed(2)+"px,"+y.toFixed(2)+"px) rotate("+angle+"rad) scale("+stretch.toFixed(4)+","+(1/stretch).toFixed(4)+") rotate("+(-angle)+"rad)";
+      let lx=0,ly=0,tilt=0,sy=1;
+      if(pointer&&!still()){const d=dist(pointer),near=Math.max(0,1-d/(REACH*1.8)),ux=(pos.x-pointer.x)/(d||1),uy=(pos.y-pointer.y)/(d||1),lean=runner?12*near*near:-3*near;lx=ux*lean;ly=uy*lean;tilt=(runner?5:0)*near*Math.sign(ux||1);}
+      const sigh=(now-sighAt)/450;if(sigh>=0&&sigh<1)sy-=.08*Math.sin(Math.PI*sigh);
+      const wob=(now-wobbleAt)/360;if(wob>=0&&wob<1&&!still())lx+=7*Math.sin(2*Math.PI*3*wob)*(1-wob);
+      button.style.transform="translate("+(pos.x+lx-button.offsetWidth/2).toFixed(2)+"px,"+(pos.y+ly-button.offsetHeight/2).toFixed(2)+"px) rotate("+tilt.toFixed(2)+"deg) rotate("+angle+"rad) scale("+stretch.toFixed(4)+","+(sy/stretch).toFixed(4)+") rotate("+(-angle)+"rad)";
       raf=requestAnimationFrame(tick);
     };
-    window.addEventListener("pointermove",move);window.addEventListener("pointerdown",down);window.addEventListener("pointerup",up);document.documentElement.addEventListener("pointerleave",leave);window.addEventListener("resize",resize);
-    pos=home();target={...pos};raf=requestAnimationFrame(tick);
-    return()=>{cancelAnimationFrame(raf);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);};
+    window.addEventListener("pointermove",move);window.addEventListener("pointerdown",down);window.addEventListener("pointerup",up);
+    document.documentElement.addEventListener("pointerleave",leave);window.addEventListener("resize",resize);
+    pos=home();target={...pos};update();raf=requestAnimationFrame(tick);
+    return()=>{cancelAnimationFrame(raf);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);passwordInput?.removeEventListener("input",onPassword);form.removeEventListener("runaway:wobble",wobble);};
   }, [signup]);
 
   function updatePassword(value:string) { setPassword(value); setNotice(""); }
@@ -177,7 +208,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     if(signup){
       if(!name.trim()){setNotice("Enter your full name.");return;}
       const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
-      if(missing){setNotice("Please add "+missing.label+" to your password.");submitRef.current?.classList.add("runaway-wobble");formRef.current?.dispatchEvent(new Event("comet:wrong"));window.setTimeout(()=>submitRef.current?.classList.remove("runaway-wobble"),450);return;}
+      if(missing){setNotice("Please add "+missing.label+" to your password.");formRef.current?.dispatchEvent(new Event("runaway:wobble"));formRef.current?.dispatchEvent(new Event("comet:wrong"));return;}
       if(password!==confirmPassword){setNotice("Passwords do not match.");return;}
     }
     const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
