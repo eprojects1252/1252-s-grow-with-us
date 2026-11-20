@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import {
   Search, ShoppingBag, UserRound, Wallet, Menu, X, ChevronDown, ArrowRight, MapPin,
   Sparkles, Truck, ShieldCheck, Headphones, Smartphone, Zap, Heart,
@@ -111,8 +112,8 @@ export default function Storefront() {
     <main>
       <header className="header header-v2">
         <div className="website-switcher" aria-label="Main websites">
-          <button className="website-tab website-tab-active" type="button" aria-label="1252's Grow With Us"><img className="website-logo-image" src="/images/grow-with-us-logo.png" alt="1252's Grow With Us" /></button>
-          <button className="website-tab" type="button" aria-label="Sri Amirthaa Groups 1252 sponsor"><img className="website-logo-image sponsor-logo-image" src="/images/sri-amirthaa-groups-1252.png" alt="Sri Amirthaa Groups 1252" /></button>
+          <button className="website-tab website-tab-active" type="button" aria-label="1252's Grow With Us"><Image className="website-logo-image" src="/images/grow-with-us-logo.png" alt="1252's Grow With Us" width={1200} height={700} sizes="(max-width: 650px) 50vw, 50vw" quality={78} priority /></button>
+          <button className="website-tab" type="button" aria-label="Sri Amirthaa Groups 1252 sponsor"><Image className="website-logo-image sponsor-logo-image" src="/images/sri-amirthaa-groups-1252.png" alt="Sri Amirthaa Groups 1252" width={1200} height={700} sizes="(max-width: 650px) 50vw, 50vw" quality={78} priority /></button>
         </div>
         <div className="location-search-row header-login-row">
           <div className="header-actions header-actions-v2">
