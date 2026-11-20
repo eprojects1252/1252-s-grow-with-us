@@ -150,7 +150,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
       if(runner&&pointer)flee(pointer,now);
       const far=!pointer||dist(pointer)>REACH*1.6,going=runner&&far&&now-lastFlee>900;
       if(going)target=home();
-      const k=s/4,response=going?.6:.3+.25*k,zeta=going?.9:.55+.2*k,w=2*Math.PI/response;
+      const k=s/4,response=going ? .6 : .3+.25*k,zeta=going ? .9 : .55+.2*k,w=2*Math.PI/response;
       vel.x+=(w*w*(target.x-pos.x)-2*zeta*w*vel.x)*dt;vel.y+=(w*w*(target.y-pos.y)-2*zeta*w*vel.y)*dt;
       pos.x+=vel.x*dt;pos.y+=vel.y*dt;
       const h=home();if(Math.hypot(pos.x-h.x,pos.y-h.y)<2&&Math.hypot(vel.x,vel.y)<20)slot.classList.remove("runaway-empty");
