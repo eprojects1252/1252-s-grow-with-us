@@ -43,7 +43,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   useEffect(() => {
     const form=formRef.current, canvas=canvasRef.current, comet=cometRef.current;
     if(!form||!canvas||!comet)return;
-    const g=canvas.getContext("2d"); if(!g)return;
+    const g=canvas.getContext("2d");
     const emailEl=form.querySelector<HTMLInputElement>(".comet-email input");
     const passEl=form.querySelector<HTMLInputElement>(".comet-password input");
     const eye=form.querySelector<HTMLButtonElement>(".comet-password button");
@@ -54,14 +54,14 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const mirrorText=form.querySelector<HTMLElement>(".comet-password-mirror .text");
     const caret=form.querySelector<HTMLElement>(".comet-password-mirror .caret");
     if(!emailEl||!passEl||!eye||!send||!night||!mailField||!passField||!dots||!mirrorText||!caret)return;
-    const reduce=false; // Keep the requested Comet interaction visible on devices configured to reduce motion.
+    const motionQuery=window.matchMedia("(prefers-reduced-motion: reduce)"); let reduce=motionQuery.matches;
     const STIFF=.06,DAMP=.82,ORBIT=14,SPIN=5.7,TAIL=36,LAP=3;
     const DIM=[1,.4,.15,.3,.6,.85,1], clamp=(v:number,a=0,b=1)=>Math.min(b,Math.max(a,v));
     const pen=document.createElement("canvas").getContext("2d"); if(pen)pen.font="500 16px system-ui,sans-serif";
     const at=(el:HTMLElement)=>{const r=el.getBoundingClientRect();return el===emailEl||el===passEl?{x:r.left+22,y:el===passEl?r.top+r.height/2:r.top-4}:{x:r.left+r.width/2,y:r.top+r.height/2};};
     const caretGoal=(el:HTMLInputElement)=>{const r=el.getBoundingClientRect(),v=el.value;const w=el===emailEl?(pen?.measureText(v).width||0)+24:passField.classList.contains("show")?(pen?.measureText(v).width||0)+v.length*.5:v.length*14-7;return{x:r.left+(el===emailEl?24:18)+Math.min(Math.max(w,6),r.width-70),y:el===emailEl?r.top-4:r.top+r.height/2};};
     let p=at(emailEl),x=p.x,y=p.y,vx=0,vy=0,goal={...p},idle=1,dimAt=-1e4,rx=ORBIT,ry=ORBIT/2,spin=SPIN,day=false,dawn=0,strike:(()=>void)|null=null;
-    let last=performance.now(),acc=0,dpr=1,raf=0,dropT:ReturnType<typeof setTimeout>,badT:ReturnType<typeof setTimeout>;
+    let last=performance.now(),acc=0,dpr=1,raf=0,dropT:ReturnType<typeof setTimeout>,badT:ReturnType<typeof setTimeout>; const successTimers:number[]=[];
     const tail:Array<{x:number;y:number}>=[],sparks:Array<{x:number;y:number;vx:number;vy:number;age:number;life:number;r:number;red?:boolean;dust?:number}>=[],rings:Array<{x:number;y:number;age:number}>=[];
     const aim=(q:{x:number;y:number},wide?:{x:number;y:number})=>{goal=q;idle=0;rx=wide?wide.x:ORBIT;ry=wide?wide.y:ORBIT/2;spin=wide?LAP:SPIN;};
     const daylight=(on:boolean)=>{day=on;night.classList.toggle("day",on);};
@@ -72,6 +72,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const PASSES:[[number,number,number[],number],[number,number,number[],number],[number,number,number[],number]]=[[1,9,[140,203,255],.16],[.65,4.5,[160,212,255],.4],[.35,2,[236,246,255],.95]];
     const HOT=[[255,120,145],[255,143,160],[255,226,232]];
     const draw=(k:number,hot:number,t:number)=>{
+      if(!g)return;
       g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,innerWidth,innerHeight);g.globalCompositeOperation="lighter";
       for(const s of stars){const sx=s.x*innerWidth+(reduce?0:Math.sin(t*.683+s.p)*6),sy=s.y*innerHeight+(reduce?0:Math.cos(t*.683+s.p*1.7)*8),near=Math.pow(clamp(1-Math.hypot(sx-x,sy-y)/(260*(.4+.6*k))),1.5),a=(.08+.34*dawn+.8*near)*(reduce?1:.55+.45*Math.sin(t*s.f+s.p));if(a>.02){g.fillStyle="rgba(200,230,255,"+a.toFixed(3)+")";g.beginPath();g.arc(sx,sy,s.r,0,7);g.fill();}}
       g.lineCap=g.lineJoin="round";
@@ -81,19 +82,20 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     };
     const paintPassword=(fresh:boolean)=>{const v=Array.from(passEl.value);dots.replaceChildren(...v.map((_,i)=>{const n=document.createElement("i");n.style.setProperty("--i",String(i));if(fresh&&i===v.length-1)n.className="new";return n;}));mirrorText.replaceChildren(...v.map((ch,i)=>{const n=document.createElement("b");n.textContent=ch;n.style.setProperty("--i",String(i));if(fresh&&i===v.length-1)n.className="new";return n;}));caret.style.translate=(passField.classList.contains("show")?mirrorText.offsetWidth:v.length*14)+"px 0";};
     const focus=(el:HTMLElement)=>()=>aim(at(el));
+    const onEmailFocus=focus(emailEl),onPassFocus=focus(passEl),onSendFocus=focus(send);
     const onEmail=()=>aim(caretGoal(emailEl)),onPass=()=>{clearTimeout(dropT);passField.classList.remove("drop");paintPassword(true);aim(passEl.value?caretGoal(passEl):at(passEl));};
     const onEye=()=>{const on=passField.classList.toggle("show");eye.setAttribute("aria-pressed",String(on));eye.setAttribute("aria-label",on?"Hide password":"Show password");paintPassword(false);};
     const fizzle=()=>{setPassword("");dimAt=performance.now();vx=6;vy=-14;for(let i=0;i<22;i++)sparks.push({x,y,vx:(Math.random()-.5)*10,vy:-1.5-5*Math.random(),age:0,life:.45+.45*Math.random(),r:1.8,red:true});passEl.value="";paintPassword(false);passEl.focus();passField.classList.add("bad","drop");send.classList.add("bad");clearTimeout(dropT);dropT=setTimeout(()=>passField.classList.remove("drop"),600);clearTimeout(badT);badT=setTimeout(()=>{passField.classList.remove("bad");send.classList.remove("bad");},1050);aim(at(passEl));};
     const impact=()=>{rings.push({x,y,age:0});for(let i=0;i<56;i++){const a=-Math.PI/2+(Math.random()-.5)*2.8,s=2+4.5*Math.random();sparks.push({x,y,vx:Math.cos(a)*s*1.4,vy:Math.sin(a)*s,age:0,life:1.4+1.4*Math.random(),r:.9+1.3*Math.random(),dust:1});}};
     const lightFrom=()=>{const r=send.getBoundingClientRect();send.classList.add("still");send.style.setProperty("--hx",clamp(x-r.left,0,r.width)+"px");void send.offsetWidth;send.classList.remove("still");};
     const onWrong=()=>fizzle();
-    const onSuccess=()=>{const r=send.getBoundingClientRect();if(!reduce){aim({x:r.left+r.width*.9,y:r.top-150});window.setTimeout(()=>{aim(at(send));vx-=6;vy+=12;let hit=false;const finish=()=>{if(hit)return;hit=true;strike=null;lightFrom();send.classList.add("done");daylight(true);impact();vx=vy=0;aim({x,y});const f=form.getBoundingClientRect();form.animate([{translate:"0 0"},{translate:"0 6px",offset:.2},{translate:"0 0"}],{duration:420,easing:"cubic-bezier(.23,1,.32,1)"});window.setTimeout(()=>aim({x:f.left+f.width/2,y:f.top+f.height/2},{x:f.width*.52,y:f.height*.7}),450);};strike=finish;window.setTimeout(finish,420);},280);}else{lightFrom();send.classList.add("done");daylight(true);}};
+    const onSuccess=()=>{const r=send.getBoundingClientRect();const signupMode=signupRef.current;const finish=()=>{strike=null;if(!signupMode){lightFrom();send.classList.add("done");}daylight(true);impact();vx=vy=0;aim({x,y});const f=form.getBoundingClientRect();if(!reduce)form.animate([{translate:"0 0"},{translate:"0 6px",offset:.2},{translate:"0 0"}],{duration:420,easing:"cubic-bezier(.23,1,.32,1)"});successTimers.push(window.setTimeout(()=>aim({x:f.left+f.width/2,y:f.top+f.height/2},{x:f.width*.52,y:f.height*.7}),450));};if(reduce){finish();return;}aim({x:r.left+r.width*.9,y:r.top-150});successTimers.push(window.setTimeout(()=>{aim(at(send));vx-=6;vy+=12;let hit=false;const done=()=>{if(hit)return;hit=true;finish();};strike=done;successTimers.push(window.setTimeout(done,420));},280));};
     const onReset=()=>{clearTimeout(dropT);clearTimeout(badT);dimAt=-1e4;passField.classList.remove("show","bad","drop");eye.setAttribute("aria-pressed","false");send.classList.remove("done","bad");daylight(false);paintPassword(false);aim(at(emailEl));};
-    emailEl.addEventListener("focus",focus(emailEl));emailEl.addEventListener("click",focus(emailEl));passEl.addEventListener("focus",focus(passEl));passEl.addEventListener("click",focus(passEl));eye.addEventListener("click",onEye);send.addEventListener("focus",focus(send));send.addEventListener("click",focus(send));emailEl.addEventListener("input",onEmail);passEl.addEventListener("input",onPass);form.addEventListener("comet:wrong",onWrong);form.addEventListener("comet:success",onSuccess);form.addEventListener("comet:reset",onReset);
-    const resize=()=>size();window.addEventListener("resize",resize);size();paintPassword(false);
+    emailEl.addEventListener("focus",onEmailFocus);emailEl.addEventListener("click",onEmailFocus);passEl.addEventListener("focus",onPassFocus);passEl.addEventListener("click",onPassFocus);eye.addEventListener("click",onEye);send.addEventListener("focus",onSendFocus);send.addEventListener("click",onSendFocus);emailEl.addEventListener("input",onEmail);passEl.addEventListener("input",onPass);form.addEventListener("comet:wrong",onWrong);form.addEventListener("comet:success",onSuccess);form.addEventListener("comet:reset",onReset);
+    const resize=()=>size(); const onMotionChange=(event:MediaQueryListEvent)=>{reduce=event.matches;if(reduce){tail.length=0;sparks.length=0;rings.length=0;}}; motionQuery.addEventListener("change",onMotionChange);window.addEventListener("resize",resize);size();paintPassword(false);
     const fly=(now:number)=>{acc+=Math.min(100,now-last);last=now;for(;acc>=1000/60;acc-=1000/60){if(!reduce)idle+=1/60;const grow=clamp(idle*2-.6),ox=Math.cos(idle*spin)*rx*grow,oy=Math.sin(idle*spin)*ry*grow;vx=(vx+(goal.x+ox-x)*STIFF)*DAMP;vy=(vy+(goal.y+oy-y)*STIFF)*DAMP;x+=vx;y+=vy;tail.unshift({x,y});if(tail.length>TAIL)tail.pop();if(strike&&Math.hypot(goal.x-x,goal.y-y)<20){strike();strike=null;}dawn+=((day?1:0)-dawn)*.05;if(!reduce&&Math.hypot(vx,vy)>2.5&&Math.random()<.5)sparks.push({x,y,vx:vx*.15+Math.random()-.5,vy:vy*.15+Math.random()-.5,age:0,life:.5+Math.random()*.5,r:1.3,red:heat(now)>.5});for(const q of sparks){const f=q.dust?.93:.95;q.x+=q.vx;q.y+=q.vy;q.vx*=f;q.vy=q.vy*f+(q.dust?.012:.03);q.age+=1/60;}for(const q of rings)q.age+=1/60;}for(let i=sparks.length-1;i>=0;i--)if(sparks[i].age>=sparks[i].life)sparks.splice(i,1);for(let i=rings.length-1;i>=0;i--)if(rings[i].age>=.7)rings.splice(i,1);const k=light(now),hot=heat(now),t=now/1000,pulse=reduce?1:.86+.14*Math.sin(t*5.464),level=(.3+.7*k)*pulse,core=.4+.6*k;comet.style.translate=x+"px "+y+"px";comet.style.setProperty("--glow",(level*(1-hot)).toFixed(3));comet.style.setProperty("--hot-glow",(level*hot).toFixed(3));comet.style.setProperty("--core",(core*(1-hot)).toFixed(3));comet.style.setProperty("--hot-core",(core*hot).toFixed(3));night.style.setProperty("--x",x+"px");night.style.setProperty("--y",y+"px");night.style.setProperty("--r",(260*(.4+.6*k))+"px");for(const f of [mailField,passField]){const r=f.getBoundingClientRect(),dx=Math.max(r.left-x,0,x-r.right),dy=Math.max(r.top-y,0,y-r.bottom);f.style.setProperty("--rim",(clamp(1-Math.hypot(dx,dy)/150)*k).toFixed(3));}draw(k,hot,t);raf=requestAnimationFrame(fly);};
     raf=requestAnimationFrame(fly);
-    return()=>{cancelAnimationFrame(raf);window.removeEventListener("resize",resize);emailEl.removeEventListener("focus",focus(emailEl));emailEl.removeEventListener("click",focus(emailEl));passEl.removeEventListener("focus",focus(passEl));passEl.removeEventListener("click",focus(passEl));eye.removeEventListener("click",onEye);send.removeEventListener("focus",focus(send));send.removeEventListener("click",focus(send));emailEl.removeEventListener("input",onEmail);passEl.removeEventListener("input",onPass);form.removeEventListener("comet:wrong",onWrong);form.removeEventListener("comet:success",onSuccess);form.removeEventListener("comet:reset",onReset);clearTimeout(dropT);clearTimeout(badT);};
+    return()=>{cancelAnimationFrame(raf);window.removeEventListener("resize",resize);emailEl.removeEventListener("focus",onEmailFocus);emailEl.removeEventListener("click",onEmailFocus);passEl.removeEventListener("focus",onPassFocus);passEl.removeEventListener("click",onPassFocus);eye.removeEventListener("click",onEye);send.removeEventListener("focus",onSendFocus);send.removeEventListener("click",onSendFocus);emailEl.removeEventListener("input",onEmail);passEl.removeEventListener("input",onPass);form.removeEventListener("comet:wrong",onWrong);form.removeEventListener("comet:success",onSuccess);form.removeEventListener("comet:reset",onReset);clearTimeout(dropT);clearTimeout(badT);successTimers.forEach(window.clearTimeout);motionQuery.removeEventListener("change",onMotionChange);};
   }, []);  useEffect(() => {
     const button=submitRef.current, slot=slotRef.current, form=formRef.current;
     if(!button||!slot||!form||!signupRef.current)return;
@@ -103,8 +105,8 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const TONES=[["#D93D42","#fff"],["#C2410C","#fff"],["#F5A524","#1A1300"],["#9BD04A","#0F1A00"],["#15803D","#fff"]] as const;
     const WORDS=["Too weak","Weak","Fair","Good","Strong"], labels=Array.from(activeButton.querySelectorAll<HTMLElement>("span"));
     let pos:{x:number;y:number},vel={x:0,y:0},target:{x:number;y:number},pointer:{x:number;y:number}|null=null;
-    let lastFlee=-1e9,sighAt=-1e9,wobbleAt=-1e9,said="",front=0,done=false,strong=false,raf=0,passwordFrame=0,last=performance.now();
-    const still=()=>false, score=()=>RULES.filter(([re])=>re.test(passwordRef.current)).length;
+    let lastFlee=-1e9,sighAt=-1e9,wobbleAt=-1e9,said="",front=0,done=false,strong=false,cornered=false,raf=0,passwordFrame=0,last=performance.now();
+    const motionQuery=window.matchMedia("(prefers-reduced-motion: reduce)");let reduced=motionQuery.matches;const still=()=>reduced, score=()=>RULES.filter(([re])=>re.test(passwordRef.current)).length;
     const home=()=>{const r=activeSlot.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};};
     const dist=(p:{x:number;y:number})=>Math.hypot(p.x-pos.x,p.y-pos.y);
     function say(text:string,html=text){
@@ -134,7 +136,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
         const side=Math.abs(dx)>Math.abs(dy)?{x:0,y:pos.y<innerHeight/2?1:-1}:{x:pos.x<innerWidth/2?1:-1,y:0};
         to=fit(pos.x+side.x*run+dx*run*.3,pos.y+side.y*run+dy*run*.3);dx=side.x;dy=side.y;
       }
-      target=to;vel.x+=dx*run*5;vel.y+=dy*run*5;lastFlee=now;activeSlot.classList.add("runaway-empty");
+      cornered=Math.hypot(to.x-pos.x,to.y-pos.y)<run*.35;target=to;vel.x+=dx*run*5;vel.y+=dy*run*5;lastFlee=now;activeSlot.classList.add("runaway-empty");if(cornered)say("I’m cornered!");
     }
     const move=(e:PointerEvent)=>{pointer={x:e.clientX,y:e.clientY};};
     const down=(e:PointerEvent)=>{pointer={x:e.clientX,y:e.clientY};if(e.pointerType!=="mouse"&&!still()&&!done)flee(pointer,performance.now());};
@@ -143,7 +145,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     const resize=()=>{if(!activeSlot.classList.contains("runaway-empty"))pos=home();target={...pos};};
     const wobble=()=>{wobbleAt=performance.now();};
     const passwordInput=activeForm.querySelector<HTMLInputElement>(".comet-password input");
-    const onPassword=()=>{cancelAnimationFrame(passwordFrame);passwordFrame=requestAnimationFrame(()=>{const n=score();if(n===4&&!strong)sighAt=performance.now();strong=n===4;done=false;update();});};
+    const onPassword=()=>{cancelAnimationFrame(passwordFrame);passwordFrame=requestAnimationFrame(()=>{const n=score();if(n===4&&!strong)sighAt=performance.now();strong=n===4;done=false;cornered=false;update();});};
     const onSuccess=()=>{done=true;update();};
     activeForm.addEventListener("comet:success",onSuccess);activeForm.addEventListener("runaway:wobble",wobble);passwordInput?.addEventListener("input",onPassword);
     const tick=(now:number)=>{
@@ -151,7 +153,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
       const n=score(),runner=!still()&&!done&&signupRef.current&&n<4;
       if(runner&&pointer)flee(pointer,now);
       const far=!pointer||dist(pointer)>REACH*1.6,going=runner&&far&&now-lastFlee>900;
-      if(going)target=home();
+      if(going||(!runner&&!done)){target=home();cornered=false;}
       const k=n/4,response=going ? .6 : .3+.25*k,zeta=going ? .9 : .55+.2*k,w=2*Math.PI/response;
       vel.x+=(w*w*(target.x-pos.x)-2*zeta*w*vel.x)*dt;vel.y+=(w*w*(target.y-pos.y)-2*zeta*w*vel.y)*dt;
       pos.x+=vel.x*dt;pos.y+=vel.y*dt;
@@ -164,20 +166,23 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
       activeButton.style.transform="translate("+(pos.x+lx-activeButton.offsetWidth/2).toFixed(2)+"px,"+(pos.y+ly-activeButton.offsetHeight/2).toFixed(2)+"px) rotate("+tilt.toFixed(2)+"deg) rotate("+angle+"rad) scale("+stretch.toFixed(4)+","+(sy/stretch).toFixed(4)+") rotate("+(-angle)+"rad)";
       raf=requestAnimationFrame(tick);
     };
-    window.addEventListener("pointermove",move);window.addEventListener("pointerdown",down);window.addEventListener("pointerup",up);
+    const onMotionChange=(event:MediaQueryListEvent)=>{reduced=event.matches;if(reduced){pointer=null;target=home();}};motionQuery.addEventListener("change",onMotionChange);window.addEventListener("pointermove",move);window.addEventListener("pointerdown",down);window.addEventListener("pointerup",up);
     document.documentElement.addEventListener("pointerleave",leave);window.addEventListener("resize",resize);
     pos=home();target={...pos};update();raf=requestAnimationFrame(tick);
-    return()=>{cancelAnimationFrame(raf);cancelAnimationFrame(passwordFrame);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);passwordInput?.removeEventListener("input",onPassword);activeForm.removeEventListener("runaway:wobble",wobble);activeForm.removeEventListener("comet:success",onSuccess);};
+    return()=>{cancelAnimationFrame(raf);cancelAnimationFrame(passwordFrame);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);motionQuery.removeEventListener("change",onMotionChange);passwordInput?.removeEventListener("input",onPassword);activeForm.removeEventListener("runaway:wobble",wobble);activeForm.removeEventListener("comet:success",onSuccess);};
   }, [signup]);
 
   function updatePassword(value:string) { setPassword(value); setNotice(""); }
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();setNotice("");
     if(!email.trim()||!password){setNotice("Enter your email and password.");return;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())){setNotice("Enter a valid email address.");return;}
     if(signup){
       if(!name.trim()){setNotice("Enter your full name.");return;}
+      const terms=formRef.current?.querySelector<HTMLInputElement>(".comet-terms input");
+      if(!terms?.checked){setNotice("Please accept the Terms and Privacy Policy.");return;}
       const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
-      if(missing){setNotice("Please add "+missing.label+" to your password.");formRef.current?.dispatchEvent(new Event("runaway:wobble"));formRef.current?.dispatchEvent(new Event("comet:wrong"));return;}
+      if(missing){setNotice("Please add "+missing.label+" to your password.");formRef.current?.dispatchEvent(new Event("runaway:wobble"));return;}
       if(password!==confirmPassword){setNotice("Passwords do not match.");return;}
     }
     const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -197,7 +202,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
           setSuccess(true);formRef.current?.dispatchEvent(new Event("comet:success"));setNotice("Admin access verified.");onAuthenticated?.();
         }else{setSuccess(true);formRef.current?.dispatchEvent(new Event("comet:success"));setNotice("You're signed in. Opening your account…");await new Promise(resolve=>window.setTimeout(resolve,1250));window.location.assign("/account");}
       }
-    }catch(error){formRef.current?.dispatchEvent(new Event("comet:wrong"));setNotice(error instanceof Error?error.message:"Unable to complete sign-in. Please try again.");setSuccess(false);}
+    }catch(error){if(!signup)formRef.current?.dispatchEvent(new Event("comet:wrong"));setNotice(error instanceof Error?error.message:"Unable to complete sign-in. Please try again.");setSuccess(false);}
     finally{setBusy(false);}
   }
   async function googleSignIn(){
@@ -214,7 +219,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
       <div className="comet-night" aria-hidden="true"/>
       <canvas ref={canvasRef} className="comet-sky" aria-hidden="true"/>
       <div ref={cometRef} className="comet-orb" aria-hidden="true"><i/><b/></div>
-      <form id="comet-auth-form" ref={formRef} className="comet-form" onSubmit={submit} noValidate>
+      <form id="comet-auth-form" ref={formRef} className="comet-form" onSubmit={submit} onKeyDown={e=>{if(signup&&e.key==="Enter"&&score<4)formRef.current?.dispatchEvent(new Event("runaway:wobble"));}} noValidate>
         <Link className="comet-brand" href="/">1252's <strong>GROW WITH US</strong></Link>
         <div className="comet-heading"><span>{adminMode?"SECURE ADMIN ACCESS":"SRI AMIRTHAA ID"}</span><h1>{adminMode?<>Admin <em>Sign in</em></>:mode==="login"?<>Welcome <em>Back</em></>:<>Create <em>Account</em></>}</h1><p>{adminMode?"Sign in with an account assigned the Admin role.":mode==="login"?"One secure account for your Sri Amirthaa services.":"Create one account to use across participating websites."}</p></div>
         {signup&&<label className="comet-field"><span>Full name</span><input value={name} onChange={e=>setName(e.target.value)} autoComplete="name" placeholder="Your full name" required/></label>}
@@ -230,7 +235,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
         {notice&&<p className="comet-notice" role="status">{notice}</p>}
         {!adminMode&&<><div className="comet-divider"><i/> OR CONTINUE WITH <i/></div><button className="comet-google" type="button" onClick={googleSignIn} disabled={busy}><b>G</b> Continue with Google</button><p className="comet-switch">{mode==="login"?"Don't have an account?":"Already have an account?"} <button type="button" onClick={()=>{setMode(mode==="login"?"signup":"login");setNotice("");setPassword("");setConfirmPassword("");setSuccess(false);formRef.current?.dispatchEvent(new Event("comet:reset"));}}>{mode==="login"?"Sign up":"Sign in"}</button></p></>}
       </form>
-        <button ref={submitRef} className={(success?"comet-submit done":"comet-submit")+(signup?" runaway-submit":"")} type="submit" form="comet-auth-form" disabled={busy}><span>{signup?null:<>{busy?"Please wait…":adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></>}</span><span>{signup?null:<><Check size={18}/> You're in</>}</span></button>
+        <button ref={submitRef} className={signup?"runaway-submit":success?"comet-submit done":"comet-submit"} type="submit" form="comet-auth-form" disabled={busy}><span>{signup?null:<>{busy?"Please wait…":adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></>}</span><span>{signup?null:<><Check size={18}/> You're in</>}</span></button>
       {adminMode&&<p className="comet-admin-foot">Admin access is checked against the Supabase Auth app_metadata role.</p>}
     </main>
   );
