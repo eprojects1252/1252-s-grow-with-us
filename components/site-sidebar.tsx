@@ -11,14 +11,12 @@ import {
 
 function StoresNetworkIcon(props: {size?:number;strokeWidth?:number}) {
   return <svg width={props.size ?? 20} height={props.size ?? 20} viewBox="0 0 48 48" fill="none" aria-hidden="true">
-    <g stroke="#5aa4f5" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 15H8v8M18 33H8v-8M18 24h9M27 8h3M27 24h3M27 40h3"/>
-      <path d="M30 5h13v10H30zM30 21h13v10H30zM30 37h13v8H30z"/>
-      <path d="M30 5h13l2 4v2H28V9zM30 21h13l2 4v2H28v-2zM30 37h13l2 3v2H28v-2z"/>
-      <path d="M33 11v4M38 11v4M33 27v4M38 27v4M33 42v3M38 42v3"/>
-      <path d="M2 18h3M2 30h3"/>
+    <g stroke="currentColor" strokeWidth={props.strokeWidth ?? 1.9} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 19.5 8.5 8h31L43 19.5v3a5 5 0 0 1-9 3 5 5 0 0 1-9 0 5 5 0 0 1-9 0 5 5 0 0 1-9-3z"/>
+      <path d="M8 25v17h32V25M18 42V29h12v13M13 14h22M14 8l-2 11M34 8l2 11"/>
+      <path d="M4 19.5h40M21 8l-1 11M27 8l1 11"/>
+      <path d="M35 31h2M35 36h2"/>
     </g>
-    <circle cx="18" cy="15" r="2.2" fill="#5aa4f5"/><circle cx="18" cy="33" r="2.2" fill="#5aa4f5"/>
   </svg>;
 }
 
@@ -119,7 +117,7 @@ export default function SiteSidebar() {
       </div>}
       <aside className={`site-sidebar ${expanded ? "is-expanded" : "is-collapsed"} ${searchOpen ? "has-search-open" : ""}`}>
         <button className="site-sidebar-brand" type="button" onClick={() => setExpanded(v => !v)} aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"} title="Grow With Us — expand or collapse">
-          <img src="/images/1252-logo.png" alt="1252's Grow With Us" />
+          <img src="/images/grow-with-us-logo.png" alt="1252's Grow With Us" />
         </button>
         <nav aria-label="Site navigation">
           {items.map(({ label, icon: Icon, href, key }) => (
