@@ -754,3 +754,23 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
   object-fit:contain!important;
   object-position:center!important;
 }
+
+
+/* Final responsive logo sizing: equal 50/50 columns, transparent art, no card containers. */
+.website-switcher{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0!important}
+.website-tab,.website-tab:hover,.website-tab:focus,.website-tab:focus-visible,.website-tab-active{
+  min-width:0!important;width:100%!important;height:126px!important;padding:0!important;margin:0!important;
+  border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
+  outline:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important;
+}
+.website-logo-image{
+  display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
+  padding:0!important;margin:0!important;object-fit:contain!important;object-position:center!important;
+  transform:none!important;background:transparent!important;
+}
+@media(max-width:650px){
+  .header-v2{padding:4px 8px 0!important;gap:0!important}
+  .website-tab,.website-tab:hover,.website-tab:focus,.website-tab:focus-visible,.website-tab-active{height:112px!important}
+  .header-login-row{height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
+  .hero{margin-top:4px!important}
+}
