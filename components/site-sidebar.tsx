@@ -3,10 +3,12 @@
 import { useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import {
-  PanelLeftOpen, PanelLeftClose, Search, Images, WalletCards, ReceiptText,
+  PanelLeftOpen, PanelLeftClose, Search, WalletCards, ReceiptText,
   UserRound, BadgePercent, Heart, ClipboardList, Store, SlidersHorizontal
 } from "lucide-react";
 
+
+function PetopiaIcon(props: {size?:number}) { return <img src="/petopia-icon.svg" alt="" width={props.size ?? 22} height={props.size ?? 22} className="petopia-sidebar-icon" />; }
 
 function CategoryOrbitIcon(props: {size?:number;strokeWidth?:number}) {
   return <svg width={props.size ?? 19} height={props.size ?? 19} viewBox="0 0 48 48" fill="none" aria-hidden="true">
@@ -50,7 +52,7 @@ const items = [
   { label: "Followed Stores", icon: Store, href: "/#stores" },
   { label: "Affiliate Program", icon: AffiliateNetworkIcon, href: "/#affiliate" },
   { label: "Settings", icon: SlidersHorizontal, href: "/login" },
-  { label: "Pictures", icon: Images, href: "/#pictures" },
+  { label: "Pet Shop", icon: PetopiaIcon, href: "/pet-shop" },
 ];
 
 export default function SiteSidebar() {
@@ -117,7 +119,7 @@ export default function SiteSidebar() {
         </nav>
       </aside>
       {searchOpen && (
-        <form className="site-sidebar-search" role="search" onSubmit={(e) => { e.preventDefault(); window.location.assign("/?search=" + encodeURIComponent(search) + "#products"); }}>
+        <form className="site-sidebar-search" role="search" aria-label="Full screen product search" onSubmit={(e) => { e.preventDefault(); window.location.assign("/?search=" + encodeURIComponent(search) + "#products"); }}>
           <input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…" aria-label="Search products"/>
           <button type="submit" aria-label="Submit search"><Search size={17}/></button>
         </form>
