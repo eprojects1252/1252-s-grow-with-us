@@ -122,7 +122,7 @@ export default function SiteSidebar() {
       </div>}
       <aside
         className={`site-sidebar ${expanded ? "is-expanded" : "is-collapsed"} ${searchOpen ? "has-search-open" : ""}`}
-        onPointerDown={(event) => { swipeStart.current = { x: event.clientX, y: event.clientY }; }}
+        onPointerDown={(event) => { swipeStart.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }}
         onPointerUp={(event) => {
           if (!swipeStart.current) return;
           const dx = event.clientX - swipeStart.current.x;
@@ -133,6 +133,7 @@ export default function SiteSidebar() {
             setExpanded(dx > 0);
           }
         }}
+        onPointerCancel={() => { swipeStart.current = null; }}
         onClickCapture={(event) => {
           if (suppressClick.current) {
             event.preventDefault();
