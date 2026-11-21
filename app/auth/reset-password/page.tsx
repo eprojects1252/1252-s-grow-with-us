@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { Eye, EyeOff, Check } from "lucide-react";
 import Link from "next/link";
@@ -35,7 +36,7 @@ export default function ResetPasswordPage() {
   return <main className="auth-page reset-auth-page"><section className="auth-form reset-auth-card">
     <Link className="auth-brand" href="/">1252's <strong>GROW WITH US</strong></Link>
     <div className="auth-heading"><span>ACCOUNT SECURITY</span><h1>New <em>Password</em></h1><p>Create a strong password for your Sri Amirthaa ID.</p></div>
-    {done?<div className="reset-done"><span><Check size={28}/></span><b>Password updated</b><p>{message}</p><Link href="/login">Return to sign in</Link></div>:<form onSubmit={submit}>
+    {done?<div className="reset-done"><span><Check size={28}/></span><b>Password updated</b><p>{message}</p><Link href="/">Return to sign in</Link></div>:<form onSubmit={submit}>
       <label className="auth-field"><span>New password</span><div className="auth-password"><input type={show?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} autoComplete="new-password" placeholder="Enter new password" required/><button type="button" aria-label={show?"Hide password":"Show password"} onClick={()=>setShow(v=>!v)}>{show?<EyeOff size={18}/>:<Eye size={18}/>}</button></div></label>
       <label className="auth-field"><span>Confirm new password</span><input type={show?"text":"password"} value={confirm} onChange={e=>setConfirm(e.target.value)} autoComplete="new-password" placeholder="Re-enter new password" required/></label>
       {message&&<p className="auth-notice" role="status">{message}</p>}
