@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   Search, WalletCards, ReceiptText,
-  UserRound, BadgePercent, Heart, ClipboardList, SlidersHorizontal
+  UserRound, BadgePercent, Heart, ClipboardList, SlidersHorizontal, Store
 } from "lucide-react";
 
 
@@ -74,6 +74,8 @@ export default function SiteSidebar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [trail, setTrail] = useState<{x:number;y:number;dx:number;dy:number;key:number}|null>(null);
+  const swipeStart = useRef<{x:number;y:number}|null>(null);
+  const suppressClick = useRef(false);
   const pathname = usePathname();
 
   function handleItem(label: string, href: string, key?: string, target?: HTMLButtonElement) {
@@ -118,8 +120,28 @@ export default function SiteSidebar() {
           animationDelay: (i * 18) + "ms",
         } as CSSProperties}/>)}
       </div>}
-      <aside className={`site-sidebar ${expanded ? "is-expanded" : "is-collapsed"} ${searchOpen ? "has-search-open" : ""}`}>
-        <button className="site-sidebar-brand" type="button" onClick={() => setExpanded(v => !v)} aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"} title="Grow With Us — expand or collapse">
+      <aside
+        className={`site-sidebar ${expanded ? "is-expanded" : "is-collapsed"} ${searchOpen ? "has-search-open" : ""}`}
+        onPointerDown={(event) => { swipeStart.current = { x: event.clientX, y: event.clientY }; }}
+        onPointerUp={(event) => {
+          if (!swipeStart.current) return;
+          const dx = event.clientX - swipeStart.current.x;
+          const dy = event.clientY - swipeStart.current.y;
+          swipeStart.current = null;
+          if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+            suppressClick.current = true;
+            setExpanded(dx > 0);
+          }
+        }}
+        onClickCapture={(event) => {
+          if (suppressClick.current) {
+            event.preventDefault();
+            event.stopPropagation();
+            suppressClick.current = false;
+          }
+        }}
+      >
+        <button className="site-sidebar-brand" type="button" aria-label="Grow With Us sidebar" title="Swipe right to expand; swipe left to collapse">
           <img src="/images/grow-with-us-logo.png" alt="1252's Grow With Us" />
         </button>
         <nav aria-label="Site navigation">
