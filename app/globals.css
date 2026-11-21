@@ -840,3 +840,7 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 @media(prefers-reduced-motion:reduce){.site-active-dust i{animation:none!important;opacity:.7!important}}
 
 .site-active-dust{opacity:1!important;visibility:visible!important;display:block!important}
+
+/* Authentication method heading for the email/password option. */
+.auth-method-label{margin:18px 0 2px;padding-top:15px;border-top:1px solid #ffffff20;color:#9db6d0;font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.auth-google svg{display:block;flex:0 0 19px}
