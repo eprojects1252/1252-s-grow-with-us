@@ -808,3 +808,7 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 .runaway-submit.done>span:first-child{display:none;opacity:0}
 .runaway-submit.done>span:last-child{display:flex;opacity:1}
 @media(prefers-reduced-motion:reduce){.runaway-meter i,.runaway-rules li,.runaway-rules li:before,.runaway-submit svg,.runaway-submit.done:after{animation:none!important;transition:none!important}}
+
+
+/* Keep vertical scrolling native while allowing horizontal sidebar swipe gestures. */
+.site-sidebar{touch-action:pan-y!important}
