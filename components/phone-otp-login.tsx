@@ -76,9 +76,9 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
   }
 
   return (
-    <section className="phone-otp-panel" aria-label="Phone number OTP sign in">
+    <section className="phone-otp-inline" aria-label="Phone number OTP sign in">
       <style jsx>{`
-        .phone-otp-panel{position:relative;width:100%;margin:18px 0 0;padding:0;border:0;border-radius:0;background:transparent;color:#234632;box-shadow:none;display:grid;gap:14px;font-family:inherit}.otp-back{justify-self:start;padding:0;border:0;background:transparent;color:#28784b;font-size:10px;font-weight:800;cursor:pointer}
+        .phone-otp-inline{position:relative;width:100%;margin:18px 0 0;padding:0;border:0;border-radius:0;background:transparent;color:#234632;box-shadow:none;display:grid;gap:14px;font-family:inherit}.otp-back{justify-self:start;padding:0;border:0;background:transparent;color:#28784b;font-size:10px;font-weight:800;cursor:pointer}
         .otp-kicker{font:700 10px/1.4 ui-monospace,monospace;letter-spacing:2px;color:#168363;text-align:center}
         .otp-title{text-align:center;font-size:19px;font-weight:700;color:#12352b}
         .otp-copy{text-align:center;font-size:12px;line-height:1.6;color:#607b70}
