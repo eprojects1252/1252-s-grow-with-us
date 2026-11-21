@@ -9,7 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 type Props = { onAuthenticated: () => void; onClose: () => void };
 type Phase = "phone" | "password" | "email" | "otp" | "orbit" | "verified";
 const DIGITS = 6;
-const validEmail = (value: string) => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value.trim());
+const validEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
 export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
   const [phone, setPhone] = useState("");
@@ -35,9 +35,9 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
 
   async function checkPhone() {
     setMessage("");
-    const normalized = phone.replace(/[\\s()-]/g, "");
+    const normalized = phone.replace(/[\s()-]/g, "");
     const e164 = normalized.startsWith("+") ? normalized : "+" + normalized;
-    if (!/^\\+[1-9]\\d{7,14}$/.test(e164)) {
+    if (!/^\+[1-9]\d{7,14}$/.test(e164)) {
       setMessage("Enter a valid phone number with country code, e.g. +91 9876543210.");
       return;
     }
@@ -92,7 +92,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
       if (!fullName.trim()) { setMessage("Enter your full name."); return; }
       if (password !== confirmPassword) { setMessage("Passwords do not match."); return; }
       if (!acceptedTerms) { setMessage("Please accept the Terms and Privacy Policy."); return; }
-      if (password.length < 8 || !/[A-Z]/.test(password) || !/\\d/.test(password) || !/[^\\w\\s]/.test(password)) {
+      if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^\w\s]/.test(password)) {
         setMessage("Password must contain 8 characters, a capital letter, a number and a symbol."); return;
       }
     }
@@ -191,7 +191,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
   }
 
   return (
-    <section className="phone-otp-inline" aria-label="Phone sign in and signup">
+    <section className="phone-otp-inline phone-otp-panel" aria-label="Phone sign in and signup">
       <style jsx>{`
         .phone-otp-inline{position:relative;width:100%;margin:18px 0 0;padding:0;border:0;border-radius:0;background:transparent;color:#234632;display:grid;gap:14px;font-family:inherit}
         .otp-back{justify-self:start;padding:0;border:0;background:transparent;color:#28784b;font-size:10px;font-weight:800;cursor:pointer}
@@ -254,7 +254,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
       {phase === "otp" && <>
         <div><h3 className="otp-title">Enter your OTP</h3><p className="otp-copy">Enter the 6-digit code sent to {phone}.</p></div>
         <div className="otp-boxes" onClick={()=>inputRef.current?.focus()}>{Array.from({length:DIGITS},(_,i)=><div className={`otp-digit ${code[i]?"filled":""}`} key={i}>{code[i]||(i===code.length?"•":"")}</div>)}</div>
-        <input ref={inputRef} className="otp-hidden" type="tel" inputMode="numeric" autoComplete="one-time-code" maxLength={DIGITS} value={code} onChange={e=>setCode(e.target.value.replace(/\\D/g,"").slice(0,DIGITS))} aria-label="6-digit OTP"/>
+        <input ref={inputRef} className="otp-hidden" type="tel" inputMode="numeric" autoComplete="one-time-code" maxLength={DIGITS} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,DIGITS))} aria-label="6-digit OTP"/>
         <button className="otp-action" type="button" onClick={verifyCode} disabled={busy||code.length!==DIGITS}>{busy?"Verifying…":"Verify OTP"}</button>
         <button type="button" className="otp-change-number" onClick={resetPhone}><ArrowLeftRight size={15}/> Change number</button>
       </>}
