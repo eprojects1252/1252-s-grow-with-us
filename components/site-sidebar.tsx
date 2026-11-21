@@ -4,7 +4,7 @@ import { useRef, useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-  Search, WalletCards, ReceiptText,
+  Search, WalletCards, ReceiptText, ChevronDown,
   UserRound, BadgePercent, Heart, ClipboardList, SlidersHorizontal, Store
 } from "lucide-react";
 
@@ -56,16 +56,16 @@ function AffiliateNetworkIcon(props: {size?:number;strokeWidth?:number}) {
 const items = [
   { label: "Search", icon: Search, href: "/?search=1", key: "search" },
   { label: "All Categories", icon: CategoryOrbitIcon, href: "/#categories" },
-  { label: "UPI & Wallet", icon: WalletCards, href: "/wallet" },
+  { label: "UPI & Wallet", icon: WalletCards, group: "wallet", children: [{ label: "Saved Payments", href: "/wallet/saved-payments" }, { label: "Sri Digital Wallet", href: "/wallet" }, { label: "Saved UPI", href: "/wallet/saved-upi" }] },
   { label: "Bills & Recharges", icon: ReceiptText, href: "/recharge-bills" },
   { label: "My Account", icon: UserRound, href: "/login" },
-  { label: "Offers", icon: BadgePercent, href: "/#offers" },
+  { label: "Offers", icon: BadgePercent, group: "offers", children: [{ label: "Coupons", href: "/offers/coupons" }, { label: "Discount Vouchers", href: "/offers/discount-vouchers" }, { label: "Rewards", href: "/offers/rewards" }, { label: "Gift Coupons", href: "/offers/gift-coupons" }, { label: "Gift Vouchers", href: "/offers/gift-vouchers" }] },
   { label: "Favorite", icon: Heart, href: "/#favorites" },
   { label: "Orders", icon: ClipboardList, href: "/login" },
   { label: "Cart", icon: CartLineIcon, href: "/#cart" },
   { label: "Followed Stores", icon: Store, href: "/#stores" },
   { label: "Affiliate Program", icon: AffiliateNetworkIcon, href: "/#affiliate" },
-  { label: "Settings", icon: SlidersHorizontal, href: "/login" },
+  { label: "Settings", icon: SlidersHorizontal, group: "settings", children: [{ label: "Themes", href: "/settings/themes" }, { label: "Notification", href: "/settings/notification" }, { label: "Manage Devices", href: "/settings/manage-devices" }, { label: "Terms & Policies", href: "/settings/terms-policies" }, { label: "Feedback", href: "/settings/feedback" }, { label: "About Us", href: "/about" }] },
   { label: "Stores", icon: StoresNetworkIcon, href: "/stores" },
 ];
 
@@ -73,6 +73,7 @@ export default function SiteSidebar() {
   const [expanded, setExpanded] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [trail, setTrail] = useState<{x:number;y:number;dx:number;dy:number;key:number}|null>(null);
   const swipeStart = useRef<{x:number;y:number}|null>(null);
   const suppressClick = useRef(false);
@@ -146,12 +147,29 @@ export default function SiteSidebar() {
           <img src="/images/grow-with-us-logo.png" alt="1252's Grow With Us" />
         </button>
         <nav aria-label="Site navigation">
-          {items.map(({ label, icon: Icon, href, key }) => (
-            <button key={label} type="button" className={`site-sidebar-item ${label === "Stores" ? "site-sidebar-stores-item" : ""} ${(label === "UPI & Wallet" && pathname === "/wallet") ? "active" : ""}`} onClick={(event) => { event.stopPropagation(); handleItem(label, href, key, event.currentTarget); }} title={expanded ? undefined : label} aria-expanded={key === "search" ? searchOpen : undefined}>
-              <Icon size={19} strokeWidth={1.9}/><span>{label}</span>
-            </button>
-          ))}
-        </nav>
+          {items.map((item) => {
+            const Icon = item.icon;
+            const group = "group" in item ? item.group : undefined;
+            const children = "children" in item ? item.children : undefined;
+            const href = "href" in item ? item.href : undefined;
+            const key = "key" in item ? item.key : undefined;
+            const active = (item.label === "UPI & Wallet" && pathname.startsWith("/wallet")) || (item.label === "Offers" && pathname.startsWith("/offers")) || (item.label === "Settings" && pathname.startsWith("/settings"));
+            return (
+              <div key={item.label} className="site-sidebar-entry">
+                <button type="button" className={`site-sidebar-item ${item.label === "Stores" ? "site-sidebar-stores-item" : ""} ${active ? "active" : ""}`} onClick={(event) => {
+                  event.stopPropagation();
+                  if (group) { setOpenGroups((current) => ({ ...current, [group]: !current[group] })); return; }
+                  if (href) handleItem(item.label, href, key, event.currentTarget);
+                }} title={expanded ? undefined : item.label} aria-expanded={group ? !!openGroups[group] : key === "search" ? searchOpen : undefined}>
+                  <Icon size={19} strokeWidth={1.9}/><span>{item.label}</span>
+                  {group && expanded && <ChevronDown className={`site-sidebar-chevron ${openGroups[group] ? "is-open" : ""}`} size={15}/>}
+                </button>
+                {group && expanded && openGroups[group] && <div className="site-sidebar-submenu">
+                  {children?.map((child) => <button type="button" key={child.href} className={`site-sidebar-subitem ${pathname === child.href ? "active" : ""}`} onClick={(event) => { event.stopPropagation(); window.location.assign(child.href); }}>{child.label}</button>)}
+                </div>}
+              </div>
+            );
+          })}        </nav>
       </aside>
       {searchOpen && (
         <form className="site-sidebar-search" role="search" aria-label="Full screen product search" onSubmit={(e) => { e.preventDefault(); window.location.assign("/?search=" + encodeURIComponent(search) + "#products"); }}>
