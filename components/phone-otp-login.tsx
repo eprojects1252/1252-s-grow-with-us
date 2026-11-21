@@ -121,6 +121,23 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
     } finally { setBusy(false); }
   }
 
+  async function resetExistingPassword() {
+    setMessage("");
+    try {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+      if (!url || !key) throw new Error("Password recovery is not configured.");
+      const supabase = createClient(url, key);
+      const { error } = await supabase.auth.resetPasswordForEmail(existingEmail, {
+        redirectTo: window.location.origin + "/auth/reset-password"
+      });
+      if (error) throw error;
+      setMessage("If password recovery is available, a reset link has been sent to your registered email.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to send a password reset link.");
+    }
+  }
+
   async function signInWithPhonePassword() {
     if (!password) { setMessage("Enter your password."); return; }
     if (!validEmail(existingEmail)) { setMessage("The account email is unavailable. Please contact support."); return; }
@@ -216,6 +233,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
         <label className="otp-field"><span>Email address</span><input type="email" value={existingEmail} readOnly/></label>
         <label className="otp-field"><span>Password</span><div style={{position:"relative"}}><input type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} autoComplete="current-password" placeholder="Enter your password"/><button type="button" aria-label={showPassword?"Hide password":"Show password"} onClick={()=>setShowPassword(v=>!v)} style={{position:"absolute",right:12,top:13,border:0,background:"transparent",color:"#28784b"}}>{showPassword?<EyeOff size={18}/>:<Eye size={18}/>}</button></div></label>
         <button className="otp-action" type="button" onClick={signInWithPhonePassword} disabled={busy}>{busy?"Signing in…":"Sign in"}</button>
+        <button type="button" className="otp-back" onClick={resetExistingPassword}>Forgot password?</button>
         <button className="otp-change-number" type="button" onClick={resetPhone}><ArrowLeftRight size={15}/> Change number</button>
       </>}
 
