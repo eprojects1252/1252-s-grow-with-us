@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
@@ -33,91 +33,9 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   const [name, setName] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
-  const passwordRef = useRef(password);
-  const signupRef = useRef(signup);
-  passwordRef.current = password;
-  signupRef.current = signup;
-  const slotRef = useRef<HTMLDivElement>(null);
   const score = passwordScore(password);
 
-useEffect(() => {
-    const button=submitRef.current, slot=slotRef.current, form=formRef.current;
-    if(!button||!slot||!form||!signupRef.current)return;
-    const activeButton=button, activeSlot=slot, activeForm=form;
-    const RUN=170,REACH=90;
-    const RULES=[[/\d/,"a number"],[/[^\w\s]/,"a symbol"],[/[A-Z]/,"a capital"],[/.{8,}/,"8+ characters"]] as const;
-    const TONES=[["#D93D42","#fff"],["#C2410C","#fff"],["#F5A524","#1A1300"],["#9BD04A","#0F1A00"],["#15803D","#fff"]] as const;
-    const WORDS=["Too weak","Weak","Fair","Good","Strong"], labels=Array.from(activeButton.querySelectorAll<HTMLElement>("span"));
-    let pos:{x:number;y:number},vel={x:0,y:0},target:{x:number;y:number},pointer:{x:number;y:number}|null=null;
-    let lastFlee=-1e9,sighAt=-1e9,wobbleAt=-1e9,said="",front=0,done=false,strong=false,cornered=false,raf=0,passwordFrame=0,last=performance.now();
-    const motionQuery=window.matchMedia("(prefers-reduced-motion: reduce)");let reduced=motionQuery.matches;const still=()=>reduced, score=()=>RULES.filter(([re])=>re.test(passwordRef.current)).length;
-    const home=()=>{const r=activeSlot.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};};
-    const dist=(p:{x:number;y:number})=>Math.hypot(p.x-pos.x,p.y-pos.y);
-    function say(text:string,withCheck=false){
-      if(text===said)return;said=text;const out=labels[front],inn=labels[front^=1];if(!out||!inn)return;
-      inn.replaceChildren();
-      if(withCheck){const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 24 24");const path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("d","M5 12.5l4.5 4.5L19 7.5");path.setAttribute("pathLength","1");svg.append(path);inn.append(svg,document.createTextNode(text));}
-      else inn.textContent=text;
-      activeButton.setAttribute("aria-label",text);
-      if(still()){out.style.opacity="0";inn.style.opacity="1";return;}
-      out.animate([{opacity:1,transform:"none",filter:"blur(0)"},{opacity:0,transform:"translateY(-6px)",filter:"blur(2px)"}],{duration:160,easing:"ease-out",fill:"both"});
-      inn.animate([{opacity:0,transform:"translateY(6px)",filter:"blur(2px)"},{opacity:1,transform:"none",filter:"blur(0)"}],{duration:220,easing:"cubic-bezier(.23, 1, .32, 1)",fill:"both"});
-    }
-    function update(){
-      const n=score(),[tone,ink]=TONES[done?4:n];activeButton.style.setProperty("--tone",tone);activeButton.style.setProperty("--tone-ink",ink);
-      activeButton.style.backgroundColor=tone;activeButton.style.color=ink;
-      const meter=activeForm.querySelector(".runaway-meter");meter?.querySelectorAll("i").forEach((el,i)=>el.classList.toggle("on",i<n));
-      const word=meter?.querySelector("b");if(word)word.textContent=passwordRef.current?WORDS[n]:"";
-      activeForm.querySelectorAll(".runaway-rules li").forEach((el,i)=>el.classList.toggle("met",RULES[i][0].test(passwordRef.current)));
-      const missing=RULES.find(([re])=>!re.test(passwordRef.current));
-      say(done?"Account created":n===4?"Create account":n===0?"Nope":"Add "+missing?.[1],done);
-      activeButton.classList.toggle("done",done);
-    }
-    function flee(from:{x:number;y:number},now:number){
-      const run=RUN*(1-score()/4);if(!run||dist(from)>REACH||now-lastFlee<260)return;
-      let dx=pos.x-from.x,dy=pos.y-from.y,d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
-      const pad=24,w=activeButton.offsetWidth/2+pad,h=activeButton.offsetHeight/2+pad;
-      const fit=(x:number,y:number)=>({x:Math.min(innerWidth-w,Math.max(w,x)),y:Math.min(innerHeight-h,Math.max(h,y))});
-      let to=fit(pos.x+dx*run,pos.y+dy*run);
-      if(Math.hypot(to.x-pos.x,to.y-pos.y)<run*.6){
-        const side=Math.abs(dx)>Math.abs(dy)?{x:0,y:pos.y<innerHeight/2?1:-1}:{x:pos.x<innerWidth/2?1:-1,y:0};
-        to=fit(pos.x+side.x*run+dx*run*.3,pos.y+side.y*run+dy*run*.3);dx=side.x;dy=side.y;
-      }
-      cornered=Math.hypot(to.x-pos.x,to.y-pos.y)<run*.35;target=to;vel.x+=dx*run*5;vel.y+=dy*run*5;lastFlee=now;activeSlot.classList.add("runaway-empty");if(cornered)say("I’m cornered!");
-    }
-    const move=(e:PointerEvent)=>{pointer={x:e.clientX,y:e.clientY};};
-    const down=(e:PointerEvent)=>{pointer={x:e.clientX,y:e.clientY};if(e.pointerType!=="mouse"&&!still()&&!done)flee(pointer,performance.now());};
-    const up=(e:PointerEvent)=>{if(e.pointerType!=="mouse")pointer=null;};
-    const leave=()=>{pointer=null;};
-    const resize=()=>{if(!activeSlot.classList.contains("runaway-empty"))pos=home();else{const pad=activeButton.offsetWidth/2+24,halfH=activeButton.offsetHeight/2+24;pos.x=Math.min(innerWidth-pad,Math.max(pad,pos.x));pos.y=Math.min(innerHeight-halfH,Math.max(halfH,pos.y));}target={...pos};vel={x:0,y:0};};
-    const wobble=()=>{wobbleAt=performance.now();};
-    const passwordInput=activeForm.querySelector<HTMLInputElement>(".auth-password input");
-    const onPassword=()=>{cancelAnimationFrame(passwordFrame);passwordFrame=requestAnimationFrame(()=>{const n=score();if(n===4&&!strong)sighAt=performance.now();strong=n===4;done=false;cornered=false;update();});};
-    const onSuccess=()=>{done=true;update();};
-    activeForm.addEventListener("auth:success",onSuccess);activeForm.addEventListener("runaway:wobble",wobble);passwordInput?.addEventListener("input",onPassword);
-    const tick=(now:number)=>{
-      const dt=Math.min(1/30,Math.max(0,(now-last)/1000));last=now;
-      const n=score(),runner=!still()&&!done&&signupRef.current&&n<4;
-      if(runner&&pointer)flee(pointer,now);
-      const far=!pointer||dist(pointer)>REACH*1.6,going=runner&&far&&now-lastFlee>900;
-      if(going||(!runner&&!done)){target=home();cornered=false;}
-      const k=n/4,response=going ? .6 : .3+.25*k,zeta=going ? .9 : .55+.2*k,w=2*Math.PI/response;
-      vel.x+=(w*w*(target.x-pos.x)-2*zeta*w*vel.x)*dt;vel.y+=(w*w*(target.y-pos.y)-2*zeta*w*vel.y)*dt;
-      pos.x+=vel.x*dt;pos.y+=vel.y*dt;
-      const back=home();if(Math.hypot(pos.x-back.x,pos.y-back.y)<2&&Math.hypot(vel.x,vel.y)<20)activeSlot.classList.remove("runaway-empty");
-      const speed=Math.hypot(vel.x,vel.y),stretch=1+Math.min(.2,speed/4200),angle=Math.atan2(vel.y,vel.x);
-      let lx=0,ly=0,tilt=0,sy=1;
-      if(pointer&&!still()){const d=dist(pointer),near=Math.max(0,1-d/(REACH*1.8)),ux=(pos.x-pointer.x)/(d||1),uy=(pos.y-pointer.y)/(d||1),lean=runner?12*near*near:-3*near;lx=ux*lean;ly=uy*lean;tilt=(runner?5:0)*near*Math.sign(ux||1);}
-      const sigh=(now-sighAt)/450;if(sigh>=0&&sigh<1)sy-=.08*Math.sin(Math.PI*sigh);
-      const wob=(now-wobbleAt)/360;if(wob>=0&&wob<1&&!still())lx+=7*Math.sin(2*Math.PI*3*wob)*(1-wob);
-      activeButton.style.transform="translate("+(pos.x+lx-activeButton.offsetWidth/2).toFixed(2)+"px,"+(pos.y+ly-activeButton.offsetHeight/2).toFixed(2)+"px) rotate("+tilt.toFixed(2)+"deg) rotate("+angle+"rad) scale("+stretch.toFixed(4)+","+(sy/stretch).toFixed(4)+") rotate("+(-angle)+"rad)";
-      raf=requestAnimationFrame(tick);
-    };
-    const onMotionChange=(event:MediaQueryListEvent)=>{reduced=event.matches;if(reduced){pointer=null;pos=home();target={...pos};vel={x:0,y:0};}};motionQuery.addEventListener("change",onMotionChange);window.addEventListener("pointermove",move);window.addEventListener("pointerdown",down);window.addEventListener("pointerup",up);
-    document.documentElement.addEventListener("pointerleave",leave);window.addEventListener("resize",resize);
-    pos=home();target={...pos};update();raf=requestAnimationFrame(tick);
-    return()=>{cancelAnimationFrame(raf);cancelAnimationFrame(passwordFrame);window.removeEventListener("pointermove",move);window.removeEventListener("pointerdown",down);window.removeEventListener("pointerup",up);document.documentElement.removeEventListener("pointerleave",leave);window.removeEventListener("resize",resize);motionQuery.removeEventListener("change",onMotionChange);passwordInput?.removeEventListener("input",onPassword);activeForm.removeEventListener("runaway:wobble",wobble);activeForm.removeEventListener("auth:success",onSuccess);};
-  }, [signup]);
+
 
   function updatePassword(value:string) { setPassword(value); setNotice(""); }
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -203,15 +121,14 @@ useEffect(() => {
         </section>}
         {!forgotPassword&&signup&&<label className="auth-field"><span>Confirm password</span><input type={showPassword?"text":"password"} value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} autoComplete="new-password" placeholder="Re-enter your password" minLength={8} required/></label>}
         {!forgotPassword&&!adminMode&&signup&&<label className="auth-terms"><input type="checkbox" required/><span>I agree to the <Link href="/terms">Terms</Link> and <Link href="/privacy">Privacy Policy</Link>.</span></label>}
-        {!forgotPassword&&signup&&<div ref={slotRef} className="runaway-slot" aria-hidden="true"/>}
+        {!forgotPassword&&signup&&<div className="runaway-slot" aria-hidden="true"/>}
         {!forgotPassword&&mode==="login"&&!adminMode&&<button type="button" className="auth-forgot" onClick={()=>{setForgotPassword(true);setNotice("");setShowPhoneOtp(false);}}>Forgot password?</button>}
         {notice&&<p className="auth-notice" role="status">{notice}</p>}
         {!adminMode&&!forgotPassword&&!showPhoneOtp&&<><div className="auth-divider"><i/> OR CONTINUE WITH <i/></div><button className="auth-google" type="button" onClick={googleSignIn} disabled={busy}><svg aria-hidden="true" viewBox="0 0 48 48" width="19" height="19"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.9 6-15z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.7-5.1c-1.8 1.2-4 1.9-6.8 1.9-5.2 0-9.6-3.5-11.2-8.2H5.9v5.3A20 20 0 0 0 24 44z"/><path fill="#FBBC05" d="M12.8 27.7a12 12 0 0 1 0-7.4V15H5.9a20 20 0 0 0 0 17.9z"/><path fill="#EA4335" d="M24 12.1c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.1 29.5 4 24 4A20 20 0 0 0 5.9 15l6.9 5.3c1.6-4.7 6-8.2 11.2-8.2z"/></svg> Continue with Google</button><button className="auth-google" type="button" onClick={appleSignIn} disabled={busy}><svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="currentColor"><path d="M16.37 12.5c.02 2.2 1.93 2.93 1.95 2.94-.02.05-.3 1.04-.99 2.06-.6.9-1.23 1.8-2.22 1.82-.97.02-1.28-.59-2.39-.59-1.1 0-1.45.57-2.36.61-.95.04-1.67-.98-2.27-1.88-1.23-1.82-2.17-5.14-.91-7.38.62-1.11 1.73-1.81 2.94-1.83.92-.02 1.79.64 2.36.64.56 0 1.62-.79 2.73-.67.47.02 1.8.19 2.65 1.44-.07.04-1.58.92-1.56 2.84ZM14.58 6.99c.5-.61.84-1.45.75-2.29-.72.03-1.59.48-2.11 1.09-.46.53-.87 1.39-.76 2.21.8.06 1.62-.41 2.12-1.01Z"/></svg> Continue with Apple</button><p className="auth-switch">{forgotPassword?"Remembered your password?":mode==="login"?"Don't have an account?":"Already have an account?"} <button type="button" onClick={()=>{if(forgotPassword){setForgotPassword(false);setNotice("");return;}setMode(mode==="login"?"signup":"login");setNotice("");setPassword("");setConfirmPassword("");setShowPassword(false);setSuccess(false);}}>{forgotPassword?"Back to sign in":mode==="login"?"Sign up":"Sign in"}</button></p></>}
         </>}
       </form>
 
-        {!showPhoneOtp&&<button ref={submitRef} className={`auth-submit ${signup&&!forgotPassword?(success?"runaway-submit done":"runaway-submit"):success?"done":""}`} type="submit" form="auth-form" disabled={busy}><span>{signup&&!forgotPassword?null:<>{busy?"Please wait…":forgotPassword?"Send reset link":adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></>}</span><span>{signup&&!forgotPassword?null:<><Check size={18}/> You're in</>}</span></button>
-        }
+        {!showPhoneOtp&&<button ref={submitRef} className={`auth-submit ${success?"done":""}`} type="submit" form="auth-form" disabled={busy}><span>{busy?"Please wait…":forgotPassword?"Send reset link":adminMode?"Admin sign in":signup?"Create account":"Sign in"} <ArrowRight size={17}/></span><span><Check size={18}/> {signup?"Account created":"You're in"}</span></button>}
       {adminMode&&<p className="auth-admin-foot">Admin access is checked against the Supabase Auth app_metadata role.</p>}
     </main>
   );
