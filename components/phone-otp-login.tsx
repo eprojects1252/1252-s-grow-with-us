@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ArrowLeftRight } from "lucide-react";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { firebaseApp } from "@/lib/firebase";
 
@@ -92,10 +93,13 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
         .otp-digit.filled{background:#e1f6ed;border-color:#168363}
         .otp-hidden{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
         .otp-message{font-size:12px;text-align:center;color:#168363;overflow-wrap:anywhere}
+        .otp-change-number{justify-self:center;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 14px;border:1px solid rgba(37,132,81,.2);border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(229,248,236,.8));color:#28784b;font-size:11px;font-weight:750;box-shadow:0 5px 16px rgba(40,120,75,.08);transition:transform .2s,box-shadow .2s,border-color .2s}
+        .otp-change-number:hover{transform:translateY(-1px);border-color:rgba(37,132,81,.42);box-shadow:0 8px 20px rgba(40,120,75,.14)}
         .otp-error{color:#ffaaa7}
-        .otp-arena{width:220px;height:220px;position:relative;margin:auto}
-        .otp-ring{position:absolute;inset:18px;border:1px solid rgba(22,131,99,.24);border-radius:50%}
-        .otp-orbit-digit{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px;border-radius:9px;display:grid;place-items:center;background:#e1f6ed;border:1px solid #168363;color:#168363;font-weight:800;animation:orbit 1.6s cubic-bezier(.65,0,.35,1) both}
+        .otp-arena{width:220px;height:220px;position:relative;margin:auto;isolation:isolate}
+        .otp-orbit-digit{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#f5fff8,#d9f5e3);border:1px solid rgba(22,131,99,.5);color:#168363;font-weight:850;animation:orbit 1.6s cubic-bezier(.65,0,.35,1) both;box-shadow:0 0 10px 3px rgba(38,190,111,.22),0 0 24px 7px rgba(38,190,111,.16),inset 0 1px 0 rgba(255,255,255,.95)}
+        .otp-orbit-digit:before{content:"";position:absolute;inset:-8px;border-radius:14px;background:radial-gradient(circle,rgba(57,220,133,.32),rgba(57,220,133,0) 72%);filter:blur(5px);z-index:-1;animation:tileGlow .8s ease-in-out infinite alternate}
+        @keyframes tileGlow{from{opacity:.35;transform:scale(.82)}to{opacity:1;transform:scale(1.16)}}
         .otp-orbit-digit:nth-child(2){animation-delay:-.08s}.otp-orbit-digit:nth-child(3){animation-delay:-.16s}.otp-orbit-digit:nth-child(4){animation-delay:-.24s}.otp-orbit-digit:nth-child(5){animation-delay:-.32s}.otp-orbit-digit:nth-child(6){animation-delay:-.4s}
         @keyframes orbit{from{transform:rotate(var(--start)) translateX(76px) rotate(var(--counter-start))}to{transform:rotate(calc(var(--start) + 360deg)) translateX(76px) rotate(calc(var(--counter-start) - 360deg))}}
         .otp-success{display:grid;justify-items:center;gap:10px;padding:16px 0;animation:fade .4s ease both}
@@ -127,7 +131,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
           <button type="button" className="text-xs text-center text-teal-200 underline" onClick={()=>{setCode("");setPhase("phone");setConfirmation(null);setMessage("");}}>Change phone number</button>
         </div>
       </>}
-      {phase === "orbit" && <><div className="otp-arena"><div className="otp-ring"/>{code.split("").map((digit,i)=><span key={i} className="otp-orbit-digit" style={{"--start":`${i*60-90}deg`,"--counter-start":`${90-i*60}deg`} as React.CSSProperties}>{digit}</span>)}</div><p className="otp-kicker">VERIFYING SECURELY…</p></>}
+      {phase === "orbit" && <><div className="otp-arena">{code.split("").map((digit,i)=><span key={i} className="otp-orbit-digit" style={{"--start":`${i*60-90}deg`,"--counter-start":`${90-i*60}deg`} as React.CSSProperties}>{digit}</span>)}</div><p className="otp-kicker">VERIFYING SECURELY…</p></>}
       {phase === "verified" && <div className="otp-success"><div className="otp-check">✓</div><strong>VERIFIED</strong><p className="otp-copy">Your phone number is verified.</p></div>}
       {message && <p role="status" className={`otp-message ${phase==="otp" && message.toLowerCase().includes("incorrect")?"otp-error":""}`}>{message}</p>}
       <div ref={recaptchaContainerRef} />
