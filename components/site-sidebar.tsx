@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useState, type CSSProperties } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Search, WalletCards, ReceiptText, ChevronDown,
+  Search, WalletCards, ReceiptText,
   UserRound, BadgePercent, Heart, ClipboardList, SlidersHorizontal, Store
 } from "lucide-react";
 
@@ -56,16 +56,16 @@ function AffiliateNetworkIcon(props: {size?:number;strokeWidth?:number}) {
 const items = [
   { label: "Search", icon: Search, href: "/?search=1", key: "search" },
   { label: "All Categories", icon: CategoryOrbitIcon, href: "/#categories" },
-  { label: "UPI & Wallet", icon: WalletCards, group: "wallet", children: [{ label: "Saved Payments", href: "/wallet/saved-payments" }, { label: "Sri Digital Wallet", href: "/wallet" }, { label: "Saved UPI", href: "/wallet/saved-upi" }] },
+  { label: "UPI & Wallet", icon: WalletCards, href: "/wallet" },
   { label: "Bills & Recharges", icon: ReceiptText, href: "/recharge-bills" },
   { label: "My Account", icon: UserRound, href: "/login" },
-  { label: "Offers", icon: BadgePercent, group: "offers", children: [{ label: "Coupons", href: "/offers/coupons" }, { label: "Discount Vouchers", href: "/offers/discount-vouchers" }, { label: "Rewards", href: "/offers/rewards" }, { label: "Gift Coupons", href: "/offers/gift-coupons" }, { label: "Gift Vouchers", href: "/offers/gift-vouchers" }] },
+  { label: "Offers", icon: BadgePercent, href: "/offers" },
   { label: "Favorite", icon: Heart, href: "/#favorites" },
   { label: "Orders", icon: ClipboardList, href: "/login" },
   { label: "Cart", icon: CartLineIcon, href: "/#cart" },
   { label: "Followed Stores", icon: Store, href: "/#stores" },
   { label: "Affiliate Program", icon: AffiliateNetworkIcon, href: "/#affiliate" },
-  { label: "Settings", icon: SlidersHorizontal, group: "settings", children: [{ label: "Themes", href: "/settings/themes" }, { label: "Notification", href: "/settings/notification" }, { label: "Manage Devices", href: "/settings/manage-devices" }, { label: "Terms & Policies", href: "/settings/terms-policies" }, { label: "Feedback", href: "/settings/feedback" }, { label: "About Us", href: "/about" }] },
+  { label: "Settings", icon: SlidersHorizontal, href: "/settings" },
   { label: "Stores", icon: StoresNetworkIcon, href: "/stores" },
 ];
 
@@ -73,11 +73,11 @@ export default function SiteSidebar() {
   const [expanded, setExpanded] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [trail, setTrail] = useState<{x:number;y:number;dx:number;dy:number;key:number}|null>(null);
   const swipeStart = useRef<{x:number;y:number}|null>(null);
   const suppressClick = useRef(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   function handleItem(label: string, href: string, key?: string, target?: HTMLButtonElement) {
     if (key === "search") {
@@ -95,24 +95,11 @@ export default function SiteSidebar() {
       window.dispatchEvent(new CustomEvent("amirthaa:open-cart"));
       return;
     }
-    window.location.assign(href);
+    router.push(href);
   }
 
   return (
     <>
-      <div className="site-dust-field" aria-hidden="true">
-        {Array.from({ length: 34 }, (_, i) => (
-          <i key={i} style={{
-            left: ((i * 37 + 11) % 100) + "%",
-            top: ((i * 53 + 7) % 100) + "%",
-            animationDelay: ((i * 0.37) % 8) + "s",
-            animationDuration: (9 + (i % 7) * 2) + "s",
-            opacity: 0.22 + (i % 5) * 0.09,
-            "--dust-x": (((i * 19) % 90) - 45) + "px",
-            "--dust-y": (-35 - (i % 6) * 18) + "px",
-          } as CSSProperties} />
-        ))}
-      </div>
       {trail && <div className="site-dust-trail" key={trail.key} aria-hidden="true">
         {Array.from({ length: 18 }, (_, i) => <i key={i} style={{
           left: trail.x + "px", top: trail.y + "px",
@@ -149,24 +136,17 @@ export default function SiteSidebar() {
         <nav aria-label="Site navigation">
           {items.map((item) => {
             const Icon = item.icon;
-            const group = "group" in item ? item.group : undefined;
-            const children = "children" in item ? item.children : undefined;
             const href = "href" in item ? item.href : undefined;
             const key = "key" in item ? item.key : undefined;
-            const active = (item.label === "UPI & Wallet" && pathname.startsWith("/wallet")) || (item.label === "Offers" && pathname.startsWith("/offers")) || (item.label === "Settings" && pathname.startsWith("/settings"));
+            const active = (item.label === "UPI & Wallet" && pathname.startsWith("/wallet")) || (item.label === "Offers" && pathname.startsWith("/offers")) || (item.label === "Settings" && pathname.startsWith("/settings")) || (!!href && href.startsWith("/") && !href.includes("#") && !href.includes("?") && href !== "/login" && pathname === href);
             return (
               <div key={item.label} className="site-sidebar-entry">
                 <button type="button" className={`site-sidebar-item ${item.label === "Stores" ? "site-sidebar-stores-item" : ""} ${active ? "active" : ""}`} onClick={(event) => {
                   event.stopPropagation();
-                  if (group) { setOpenGroups((current) => ({ ...current, [group]: !current[group] })); return; }
                   if (href) handleItem(item.label, href, key, event.currentTarget);
-                }} title={expanded ? undefined : item.label} aria-expanded={group ? !!openGroups[group] : key === "search" ? searchOpen : undefined}>
-                  <Icon size={19} strokeWidth={1.9}/><span>{item.label}</span>
-                  {group && expanded && <ChevronDown className={`site-sidebar-chevron ${openGroups[group] ? "is-open" : ""}`} size={15}/>}
+                }} title={expanded ? undefined : item.label} aria-expanded={key === "search" ? searchOpen : undefined}>
+                  <Icon size={19} strokeWidth={1.9}/>{active && <span className="site-active-dust" aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i} style={{"--dust-angle":`${i*20}deg`,"--dust-delay":`${(i%6)*-.32}s`} as CSSProperties}/>)}</span>}<span>{item.label}</span>
                 </button>
-                {group && expanded && openGroups[group] && <div className="site-sidebar-submenu">
-                  {children?.map((child) => <button type="button" key={child.href} className={`site-sidebar-subitem ${pathname === child.href ? "active" : ""}`} onClick={(event) => { event.stopPropagation(); window.location.assign(child.href); }}>{child.label}</button>)}
-                </div>}
               </div>
             );
           })}        </nav>
