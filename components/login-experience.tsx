@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { ArrowRight, Eye, EyeOff, Check } from "lucide-react";
+import PhoneOtpLogin from "@/components/phone-otp-login";
 
 type Props = { initialMode?: "login" | "signup"; adminMode?: boolean; onAuthenticated?: () => void };
 const PASSWORD_RULES = [
@@ -27,6 +28,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
+  const [showPhoneOtp, setShowPhoneOtp] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
   const passwordRef = useRef(password);
@@ -163,6 +165,7 @@ useEffect(() => {
       <form id="auth-form" ref={formRef} className="auth-form" onSubmit={submit} onKeyDown={e=>{if(signup&&e.key==="Enter"&&score<4)formRef.current?.dispatchEvent(new Event("runaway:wobble"));}} noValidate>
         <Link className="auth-brand" href="/">1252's <strong>GROW WITH US</strong></Link>
         <div className="auth-heading"><span>{adminMode?"SECURE ADMIN ACCESS":"SRI AMIRTHAA ID"}</span><h1>{adminMode?<>Admin <em>Sign in</em></>:mode==="login"?<>Welcome <em>Back</em></>:<>Create <em>Account</em></>}</h1><p>{adminMode?"Sign in with an account assigned the Admin role.":mode==="login"?"One secure account for your Sri Amirthaa services.":"Create one account to use across participating websites."}</p></div>
+        {!adminMode && mode==="login" && <><button type="button" className="auth-google" onClick={()=>setShowPhoneOtp(v=>!v)} aria-expanded={showPhoneOtp}>📱 {showPhoneOtp?"Hide phone OTP login":"Continue with Phone Number + OTP"}</button>{showPhoneOtp && <PhoneOtpLogin onAuthenticated={()=>{setSuccess(true);setNotice("Phone verified. Opening your account…");formRef.current?.dispatchEvent(new Event("auth:success"));window.setTimeout(()=>window.location.assign("/account"),900);}} />}</>}
         {signup&&<label className="auth-field"><span>Full name</span><input value={name} onChange={e=>setName(e.target.value)} autoComplete="name" placeholder="Your full name" required/></label>}
         <label className="auth-field auth-email"><span>Email address</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="username" placeholder="name@example.com" required/></label>
         <label className="auth-field"><span>Password</span><div className="auth-password"><input type={showPassword?"text":"password"} value={password} onChange={e=>updatePassword(e.target.value)} autoComplete={signup?"new-password":"current-password"} placeholder="Enter your password" minLength={signup?8:1} required/><button type="button" aria-label={showPassword?"Hide password":"Show password"} onClick={()=>setShowPassword(!showPassword)}>{showPassword?<EyeOff size={18}/>:<Eye size={18}/>}</button></div></label>
