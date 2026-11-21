@@ -55,7 +55,16 @@ export async function POST(request: Request) {
     const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
     const { data, error } = await admin.from("profiles").select("firebase_uid,supabase_user_id").ilike("email", email).limit(1);
     if (error) throw error;
-    if (data?.length) return NextResponse.json({ available: false, message: "Email already registered. Please sign in with that email account." });
+    let alreadyRegistered = Boolean(data?.length);
+    // Also check Supabase Auth directly so accounts created after the profile backfill are detected.
+    for (let page = 1; !alreadyRegistered; page += 1) {
+      const { data: usersPage, error: usersError } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (usersError) throw usersError;
+      const users = usersPage.users ?? [];
+      alreadyRegistered = users.some(user => user.email?.trim().toLowerCase() === email);
+      if (alreadyRegistered || users.length < 1000) break;
+    }
+    if (alreadyRegistered) return NextResponse.json({ available: false, message: "Email already registered. Please sign in with that email account." });
     return NextResponse.json({ available: true, message: "This email is available." });
   } catch (error) {
     console.error("Email availability check failed:", error);
