@@ -812,3 +812,13 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 
 /* Keep vertical scrolling native while allowing horizontal sidebar swipe gestures. */
 .site-sidebar{touch-action:pan-y!important}
+
+
+/* Sidebar expandable navigation groups */
+.site-sidebar-entry{width:100%;min-width:0}
+.site-sidebar-chevron{margin-left:auto;flex:0 0 15px;transition:transform .2s ease}
+.site-sidebar-chevron.is-open{transform:rotate(180deg)}
+.site-sidebar-submenu{display:flex;flex-direction:column;gap:3px;padding:3px 0 7px 14px}
+.site-sidebar-subitem{width:100%;min-height:34px;padding:6px 8px;border:0;border-left:2px solid rgba(35,126,71,.2);border-radius:0 8px 8px 0;background:transparent;color:#285b3b;text-align:left;font-size:11px;font-weight:650;white-space:normal;cursor:pointer}
+.site-sidebar-subitem:hover,.site-sidebar-subitem.active{background:rgba(255,255,255,.3);border-left-color:#23804a;color:#105b30}
+.site-sidebar.is-collapsed .site-sidebar-submenu{display:none}
