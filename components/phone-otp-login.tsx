@@ -21,8 +21,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
 
   useEffect(() => () => { verifier.current?.clear(); verifier.current = null; }, []);
 
-  async function sendCode(event: React.FormEvent) {
-    event.preventDefault();
+  async function sendCode() {
     setMessage("");
     const normalized = phone.replace(/[\s()-]/g, "");
     if (!/^\+?[1-9]\d{7,14}$/.test(normalized)) {
@@ -56,8 +55,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
     }
   }
 
-  async function verifyCode(event: React.FormEvent) {
-    event.preventDefault();
+  async function verifyCode() {
     if (!confirmation || code.length !== DIGITS) {
       setMessage("Enter the 6-digit OTP.");
       return;
@@ -78,9 +76,9 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
   }
 
   return (
-    <div className="phone-otp-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}><section className="phone-otp-panel" role="dialog" aria-modal="true" aria-label="Phone number OTP sign in"><button type="button" className="otp-close" aria-label="Close phone sign in" onClick={onClose}>×</button>
+    <section className="phone-otp-panel" aria-label="Phone number OTP sign in">
       <style jsx>{`
-        .phone-otp-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:rgba(5,18,15,.38);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}.phone-otp-panel{position:relative;width:min(100%,430px);max-height:min(88vh,720px);overflow:auto;padding:30px 22px 24px;border-radius:26px;background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(231,249,242,.84));color:#12352b;border:1px solid rgba(255,255,255,.78);box-shadow:0 28px 90px rgba(5,35,25,.28),inset 0 1px rgba(255,255,255,.9);display:grid;gap:16px;font-family:inherit}.otp-close{position:absolute;right:14px;top:12px;width:34px;height:34px;border:1px solid rgba(20,90,65,.15);border-radius:50%;background:rgba(255,255,255,.7);color:#174c3b;font-size:21px;cursor:pointer}
+        .phone-otp-panel{position:relative;width:100%;margin:18px 0 0;padding:0;border:0;border-radius:0;background:transparent;color:#234632;box-shadow:none;display:grid;gap:14px;font-family:inherit}.otp-back{justify-self:start;padding:0;border:0;background:transparent;color:#28784b;font-size:10px;font-weight:800;cursor:pointer}
         .otp-kicker{font:700 10px/1.4 ui-monospace,monospace;letter-spacing:2px;color:#168363;text-align:center}
         .otp-title{text-align:center;font-size:19px;font-weight:700;color:#12352b}
         .otp-copy{text-align:center;font-size:12px;line-height:1.6;color:#607b70}
@@ -107,31 +105,32 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
         @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
         @media(prefers-reduced-motion:reduce){.otp-orbit-digit,.otp-success,.otp-check{animation:none}}
       `}</style>
+      <button type="button" className="otp-back" onClick={onClose}>← Back to sign-in options</button>
       <div className="otp-kicker">SRI AMIRTHAA ID · SECURE ACCESS</div>
       {phase === "phone" && <>
         <div><h3 className="otp-title">Continue with phone</h3><p className="otp-copy">We’ll send a one-time password to verify your number.</p></div>
-        <form onSubmit={sendCode} className="grid gap-3">
+        <div className="grid gap-3">
           <label className="otp-field">Mobile number (with country code)
             <input type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+91 9876543210" required />
           </label>
-          <button className="otp-action" type="submit" disabled={busy}>{busy ? "Sending OTP…" : "Send OTP"}</button>
-        </form>
+          <button className="otp-action" type="button" onClick={()=>sendCode()} disabled={busy}>{busy ? "Sending OTP…" : "Send OTP"}</button>
+        </div>
       </>}
       {phase === "otp" && <>
         <div><h3 className="otp-title">Enter your OTP</h3><p className="otp-copy">Enter the 6-digit code sent to {phone}.</p></div>
-        <form onSubmit={verifyCode} className="grid gap-3">
+        <div className="grid gap-3">
           <div className="otp-boxes" onClick={()=>inputRef.current?.focus()}>
             {Array.from({length:DIGITS},(_,i)=><div className={`otp-digit ${code[i]?"filled":""}`} key={i}>{code[i] || (i===code.length?"•":"")}</div>)}
           </div>
           <input ref={inputRef} className="otp-hidden" type="tel" inputMode="numeric" autoComplete="one-time-code" maxLength={DIGITS} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,DIGITS))} aria-label="6-digit OTP" />
-          <button className="otp-action" type="submit" disabled={busy || code.length!==DIGITS}>{busy ? "Verifying…" : "Verify OTP"}</button>
+          <button className="otp-action" type="button" onClick={()=>verifyCode()} disabled={busy || code.length!==DIGITS}>{busy ? "Verifying…" : "Verify OTP"}</button>
           <button type="button" className="text-xs text-center text-teal-200 underline" onClick={()=>{setCode("");setPhase("phone");setConfirmation(null);setMessage("");}}>Change phone number</button>
-        </form>
+        </div>
       </>}
       {phase === "orbit" && <><div className="otp-arena"><div className="otp-ring"/>{code.split("").map((digit,i)=><span key={i} className="otp-orbit-digit" style={{"--start":`${i*60-90}deg`,"--counter-start":`${90-i*60}deg`} as React.CSSProperties}>{digit}</span>)}</div><p className="otp-kicker">VERIFYING SECURELY…</p></>}
       {phase === "verified" && <div className="otp-success"><div className="otp-check">✓</div><strong>VERIFIED</strong><p className="otp-copy">Your phone number is verified.</p></div>}
       {message && <p role="status" className={`otp-message ${phase==="otp" && message.toLowerCase().includes("incorrect")?"otp-error":""}`}>{message}</p>}
       <div ref={recaptchaContainerRef} />
-    </section></div>
+    </section>
   );
 }
