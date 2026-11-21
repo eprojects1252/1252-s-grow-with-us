@@ -15,8 +15,8 @@ export default function PhoneAccountLink() {
 
   async function sendOtp() {
     setMessage(""); setError(false);
-    const normalized = phone.replace(/[\\s()-]/g, "");
-    if (!/^\\+?[1-9]\\d{7,14}$/.test(normalized)) {
+    const normalized = phone.replace(/[\s()-]/g, "");
+    if (!/^\+?[1-9]\d{7,14}$/.test(normalized)) {
       setError(true); setMessage("Enter a valid phone number with country code, for example +91 9876543210."); return;
     }
     const e164 = normalized.startsWith("+") ? normalized : "+" + normalized;
@@ -71,7 +71,7 @@ export default function PhoneAccountLink() {
         </div>
       ) : (
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-          <input aria-label="Six digit OTP" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={e=>setOtp(e.target.value.replace(/\\D/g,"").slice(0,6))} placeholder="6-digit OTP" style={{flex:"1 1 150px",padding:"11px 12px",border:"1px solid #cfe4d5",borderRadius:10,background:"white"}} />
+          <input aria-label="Six digit OTP" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={e=>setOtp(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="6-digit OTP" style={{flex:"1 1 150px",padding:"11px 12px",border:"1px solid #cfe4d5",borderRadius:10,background:"white"}} />
           <button type="button" disabled={busy || otp.length!==6} onClick={verifyAndLink} style={{padding:"11px 16px",borderRadius:10,background:"#176b3a",color:"white",fontWeight:700}}>{busy?"Verifying…":"Verify & Link"}</button>
         </div>
       )}
