@@ -92,7 +92,7 @@ export default function PhoneOtpLogin({ onAuthenticated }: Props) {
         .otp-ring{position:absolute;inset:18px;border:1px solid rgba(32,220,180,.24);border-radius:50%}
         .otp-orbit-digit{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px;border-radius:9px;display:grid;place-items:center;background:#0d2a1e;border:1px solid #20dcb4;color:#20dcb4;font-weight:800;animation:orbit 1.6s cubic-bezier(.65,0,.35,1) both}
         .otp-orbit-digit:nth-child(2){animation-delay:-.08s}.otp-orbit-digit:nth-child(3){animation-delay:-.16s}.otp-orbit-digit:nth-child(4){animation-delay:-.24s}.otp-orbit-digit:nth-child(5){animation-delay:-.32s}.otp-orbit-digit:nth-child(6){animation-delay:-.4s}
-        @keyframes orbit{from{transform:rotate(var(--start)) translateX(76px) rotate(calc(-1 * var(--start)))}to{transform:rotate(calc(var(--start) + 360deg)) translateX(76px) rotate(calc(-1 * (var(--start) + 360deg)))}}
+        @keyframes orbit{from{transform:rotate(var(--start)) translateX(76px) rotate(var(--counter-start))}to{transform:rotate(calc(var(--start) + 360deg)) translateX(76px) rotate(calc(var(--counter-start) - 360deg))}}
         .otp-success{display:grid;justify-items:center;gap:10px;padding:16px 0;animation:fade .4s ease both}
         .otp-check{width:72px;height:72px;border:2px solid #20dcb4;border-radius:18px;background:#1a3a2e;display:grid;place-items:center;color:#20dcb4;font-size:36px;animation:pop .45s cubic-bezier(.68,-.55,.27,1.55) both}
         .otp-success strong{font-size:19px;letter-spacing:3px;color:#20dcb4}
@@ -121,7 +121,7 @@ export default function PhoneOtpLogin({ onAuthenticated }: Props) {
           <button type="button" className="text-xs text-center text-teal-200 underline" onClick={()=>{setCode("");setPhase("phone");setConfirmation(null);setMessage("");}}>Change phone number</button>
         </form>
       </>}
-      {phase === "orbit" && <><div className="otp-arena"><div className="otp-ring"/>{code.split("").map((digit,i)=><span key={i} className="otp-orbit-digit" style={{"--start":`${i*60-90}deg`} as React.CSSProperties}>{digit}</span>)}</div><p className="otp-kicker">VERIFYING SECURELY…</p></>}
+      {phase === "orbit" && <><div className="otp-arena"><div className="otp-ring"/>{code.split("").map((digit,i)=><span key={i} className="otp-orbit-digit" style={{"--start":`${i*60-90}deg`,"--counter-start":`${90-i*60}deg`} as React.CSSProperties}>{digit}</span>)}</div><p className="otp-kicker">VERIFYING SECURELY…</p></>}
       {phase === "verified" && <div className="otp-success"><div className="otp-check">✓</div><strong>VERIFIED</strong><p className="otp-copy">Your phone number is verified.</p></div>}
       {message && <p role="status" className={`otp-message ${phase==="otp" && message.toLowerCase().includes("incorrect")?"otp-error":""}`}>{message}</p>}
       <div id="phone-otp-recaptcha" />
