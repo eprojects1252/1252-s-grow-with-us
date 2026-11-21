@@ -964,3 +964,11 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 .phone-email-message.registered,.phone-email-message.error{border:1px solid rgba(190,65,65,.18);background:#fff2f0;color:#a33b35}
 .phone-email-message.available{border:1px solid rgba(45,139,79,.18);background:#eaf8ee;color:#28784b}
 @media(max-width:520px){.phone-email-check{padding:16px}.phone-email-form{grid-template-columns:minmax(0,1fr)}.phone-email-form label{grid-column:1}.phone-email-form button{width:100%}}
+
+
+/* Sri Amirthaa Groups identity logo on the shared sign-in/sign-up experience. */
+.auth-brand{display:inline-flex;align-items:center;min-height:42px}
+.auth-brand img{display:block;width:clamp(138px,18vw,190px);height:auto;max-height:58px;object-fit:contain;object-position:left center}
+.auth-monogram{display:flex;align-items:center;min-height:100px;margin:52px 0 24px}
+.auth-monogram img{display:block;width:min(100%,280px);height:auto;max-height:132px;object-fit:contain;object-position:left center}
+@media(max-width:680px){.auth-monogram{min-height:68px;margin:26px 0 14px}.auth-monogram img{width:min(76%,230px);max-height:86px}}
