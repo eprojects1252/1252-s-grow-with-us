@@ -23,6 +23,12 @@ create index if not exists profiles_phone_e164_idx
 
 alter table public.profiles enable row level security;
 
+-- Restrict client privileges: identity keys are writable only by trusted server code.
+revoke all on public.profiles from anon, authenticated;
+grant select on public.profiles to authenticated;
+grant update (full_name, avatar_url) on public.profiles to authenticated;
+grant all on public.profiles to service_role;
+
 -- A signed-in Supabase user can read and update only their own linked profile.
 -- Profile creation and Firebase UID linking are reserved for trusted server code.
 drop policy if exists "Users can read their own profile" on public.profiles;
