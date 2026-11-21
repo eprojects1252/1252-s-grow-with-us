@@ -923,3 +923,26 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 @media(max-width:900px){.auth-page{grid-template-columns:minmax(0,1fr) minmax(340px,440px);gap:22px;padding:24px}.auth-showcase{min-height:580px;padding:28px}.auth-monogram{margin-top:42px}}
 @media(max-width:680px){.auth-page{grid-template-columns:minmax(0,1fr);gap:18px;padding:18px 13px 30px}.auth-showcase{width:100%;min-height:0;padding:22px 23px;border-radius:23px}.auth-monogram{margin:26px 0 14px;font-size:48px}.auth-showcase h2{font-size:30px}.auth-showcase-content>p{margin:10px 0 16px;font-size:11px}.auth-feature{display:none}.auth-showcase-foot{position:static;margin-top:22px;font-size:7px}.auth-form{max-width:none;padding:24px 20px;border-radius:23px}.auth-heading{margin:20px 0 17px}.auth-heading h1{font-size:32px}.phone-otp-panel{grid-column:1;width:100%;margin:0!important;padding:19px 15px!important}.auth-admin-foot{color:#6d8978}}
 @media(prefers-reduced-motion:reduce){.auth-google{transition:none}}
+
+
+/* Auth layout: keep the primary action aligned with the form and OTP below it. */
+.auth-submit:not(.runaway-submit){grid-column:2;grid-row:2;align-self:start;margin-top:-2px}
+.auth-page:has(.phone-otp-panel) .phone-otp-panel{grid-column:2;grid-row:2}
+.auth-page:has(.phone-otp-panel) .auth-submit:not(.runaway-submit){grid-row:3;margin-top:0}
+.auth-admin-foot{grid-column:2}
+.reset-auth-page{display:grid;grid-template-columns:minmax(0,440px);place-content:center}
+.reset-auth-card{width:100%;max-width:440px}
+.reset-auth-card form{display:grid;gap:8px}
+.reset-submit{position:relative!important;left:auto!important;top:auto!important;transform:none!important;width:100%!important;margin:8px 0 0!important}
+.reset-done{display:grid;justify-items:center;gap:12px;padding:16px 0;text-align:center;color:#52755d}
+.reset-done>span{display:grid;place-items:center;width:64px;height:64px;border-radius:20px;background:#e3f3e7;color:#28784b}
+.reset-done b{font-size:18px;color:#245337}
+.reset-done p{font-size:12px;line-height:1.6}
+.reset-done a{font-size:12px;font-weight:800;color:#28784b}
+@media(max-width:680px){
+ .auth-submit:not(.runaway-submit){grid-column:1;grid-row:auto;margin-top:0}
+ .auth-page:has(.phone-otp-panel) .phone-otp-panel{grid-column:1;grid-row:auto}
+ .auth-page:has(.phone-otp-panel) .auth-submit:not(.runaway-submit){grid-column:1;grid-row:auto}
+ .auth-admin-foot{grid-column:1}
+ .reset-auth-page{grid-template-columns:minmax(0,1fr)}
+}
