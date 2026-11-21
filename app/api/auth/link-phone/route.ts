@@ -41,9 +41,12 @@ function getFirebaseAdminAuth() {
     async getAccessToken() {
       const { token } = await externalAccountClient.getAccessToken();
       if (!token) throw new Error("Google Cloud did not return an access token.");
+      const expiryDate = externalAccountClient.credentials.expiry_date;
       return {
         access_token: token,
-        expiration_time: externalAccountClient.credentials.expiry_date ?? Date.now() + 3_300_000,
+        expires_in: typeof expiryDate === "number"
+          ? Math.max(1, Math.floor((expiryDate - Date.now()) / 1000))
+          : 3300,
       };
     },
   } as Credential;
