@@ -1,15 +1,54 @@
 import { NextResponse } from "next/server";
-import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { cert, getApps, initializeApp, type Credential } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { ExternalAccountClient } from "google-auth-library";
+import { getVercelOidcToken } from "@vercel/oidc";
 import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
 function getFirebaseAdminAuth() {
-  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  if (!raw) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured on the server.");
-  const serviceAccount = JSON.parse(raw);
-  const app = getApps().length ? getApps()[0] : initializeApp({ credential: cert(serviceAccount) });
+  const projectId = process.env.GCP_PROJECT_ID;
+  const projectNumber = process.env.GCP_PROJECT_NUMBER;
+  const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID;
+  const providerId = process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID;
+  const serviceAccountEmail = process.env.GCP_SERVICE_ACCOUNT_EMAIL;
+
+  if (!projectId || !projectNumber || !poolId || !providerId || !serviceAccountEmail) {
+    throw new Error("Missing Google Cloud Workload Identity environment variables.");
+  }
+
+  const existingApp = getApps().find((app) => app.name === "[DEFAULT]");
+  if (existingApp) return getAuth(existingApp);
+
+  const audience = `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
+  const externalAccountClient = ExternalAccountClient.fromJSON({
+    type: "external_account",
+    audience,
+    subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
+    token_url: "https://sts.googleapis.com/v1/token",
+    service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${serviceAccountEmail}:generateAccessToken`,
+    subject_token_supplier: {
+      getSubjectToken: () => getVercelOidcToken(),
+    },
+  });
+
+  if (!externalAccountClient) {
+    throw new Error("Unable to initialize Google Cloud Workload Identity credentials.");
+  }
+
+  const credential = {
+    async getAccessToken() {
+      const { token } = await externalAccountClient.getAccessToken();
+      if (!token) throw new Error("Google Cloud did not return an access token.");
+      return {
+        access_token: token,
+        expiration_time: externalAccountClient.credentials.expiry_date ?? Date.now() + 3_300_000,
+      };
+    },
+  } as Credential;
+
+  const app = initializeApp({ credential, projectId });
   return getAuth(app);
 }
 
