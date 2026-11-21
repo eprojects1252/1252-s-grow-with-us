@@ -15,6 +15,8 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [confirmation, setConfirmation] = useState<ConfirmationResult | null>(null);
@@ -88,6 +90,8 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
     if (phase === "email") {
       if (emailAvailable !== true) { setMessage("Check that this email address is available before requesting OTP."); return; }
       if (!fullName.trim()) { setMessage("Enter your full name."); return; }
+      if (password !== confirmPassword) { setMessage("Passwords do not match."); return; }
+      if (!acceptedTerms) { setMessage("Please accept the Terms and Privacy Policy."); return; }
       if (password.length < 8 || !/[A-Z]/.test(password) || !/\\d/.test(password) || !/[^\\w\\s]/.test(password)) {
         setMessage("Password must contain 8 characters, a capital letter, a number and a symbol."); return;
       }
@@ -165,7 +169,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
 
   function resetPhone() {
     verifier.current?.clear(); verifier.current = null; recaptchaContainerRef.current?.replaceChildren();
-    setPhase("phone"); setConfirmation(null); setCode(""); setPassword(""); setEmail(""); setEmailAvailable(null);
+    setPhase("phone"); setConfirmation(null); setCode(""); setPassword(""); setConfirmPassword(""); setAcceptedTerms(false); setEmail(""); setEmailAvailable(null);
     setExistingEmail(""); setMessage("");
   }
 
@@ -222,8 +226,10 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
         {emailAvailable===true && <>
           <label className="otp-field"><span>Full name</span><input value={fullName} onChange={e=>setFullName(e.target.value)} autoComplete="name" placeholder="Your full name"/></label>
           <label className="otp-field"><span>Create password</span><input type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} autoComplete="new-password" placeholder="8+ characters, capital, number & symbol"/></label>
+          <label className="otp-field"><span>Confirm password</span><input type={showPassword?"text":"password"} value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} autoComplete="new-password" placeholder="Re-enter your password"/></label>
+          <label style={{display:"flex",alignItems:"flex-start",gap:8,fontSize:11,color:"#607b70",lineHeight:1.5}}><input type="checkbox" checked={acceptedTerms} onChange={e=>setAcceptedTerms(e.target.checked)} style={{marginTop:2}}/><span>I agree to the Terms and Privacy Policy.</span></label>
         </>}
-        <button className="otp-action" type="button" onClick={sendCode} disabled={busy||emailAvailable!==true||!fullName.trim()||password.length<8}>{busy?"Sending OTP…":"Send OTP"}</button>
+        <button className="otp-action" type="button" onClick={sendCode} disabled={busy||emailAvailable!==true||!fullName.trim()||password.length<8||password!==confirmPassword||!acceptedTerms}>{busy?"Sending OTP…":"Send OTP"}</button>
         {emailAvailable===false && <p className="otp-message error">Email already registered. OTP cannot be sent. Please sign in with your existing account.</p>}
       </>}
 
