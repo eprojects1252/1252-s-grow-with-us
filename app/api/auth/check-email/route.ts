@@ -16,17 +16,12 @@ export async function POST(request: Request) {
     if (!url || !serviceKey) {
       return NextResponse.json({ error: "Email availability check is not configured." }, { status: 500 });
     }
-
     const admin = createClient(url, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
 
     const { data: profile, error: profileError } = await admin
-      .from("profiles")
-      .select("id")
-      .ilike("email", email)
-      .limit(1)
-      .maybeSingle();
+      .from("profiles").select("id").ilike("email", email).limit(1).maybeSingle();
     if (profileError) throw profileError;
 
     let alreadyRegistered = Boolean(profile);
