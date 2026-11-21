@@ -89,10 +89,10 @@ export default function SiteSidebar() {
       setTrail({ x: a.left + a.width / 2, y: a.top + a.height / 2, dx: b.left + b.width / 2 - (a.left + a.width / 2), dy: b.top + b.height / 2 - (a.top + a.height / 2), key: Date.now() });
     }
     if (label === "Cart" && pathname === "/") {
-      window.setTimeout(() => window.dispatchEvent(new CustomEvent("amirthaa:open-cart")), 560);
+      window.dispatchEvent(new CustomEvent("amirthaa:open-cart"));
       return;
     }
-    window.setTimeout(() => window.location.assign(href), 560);
+    window.location.assign(href);
   }
 
   return (
@@ -124,7 +124,7 @@ export default function SiteSidebar() {
         </button>
         <nav aria-label="Site navigation">
           {items.map(({ label, icon: Icon, href, key }) => (
-            <button key={label} type="button" className={`site-sidebar-item ${label === "Stores" ? "site-sidebar-stores-item" : ""} ${(label === "UPI & Wallet" && pathname === "/wallet") ? "active" : ""}`} onClick={(event) => handleItem(label, href, key, event.currentTarget)} title={expanded ? undefined : label} aria-expanded={key === "search" ? searchOpen : undefined}>
+            <button key={label} type="button" className={`site-sidebar-item ${label === "Stores" ? "site-sidebar-stores-item" : ""} ${(label === "UPI & Wallet" && pathname === "/wallet") ? "active" : ""}`} onClick={(event) => { event.stopPropagation(); handleItem(label, href, key, event.currentTarget); }} title={expanded ? undefined : label} aria-expanded={key === "search" ? searchOpen : undefined}>
               <Icon size={19} strokeWidth={1.9}/><span>{label}</span>
             </button>
           ))}
