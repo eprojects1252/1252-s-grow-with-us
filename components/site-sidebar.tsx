@@ -5,20 +5,22 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   Search, WalletCards, ReceiptText,
-  UserRound, BadgePercent, Heart, ClipboardList, Store, SlidersHorizontal
+  UserRound, BadgePercent, Heart, ClipboardList, SlidersHorizontal
 } from "lucide-react";
 
 
 function StoresNetworkIcon(props: {size?:number;strokeWidth?:number}) {
   return <svg width={props.size ?? 20} height={props.size ?? 20} viewBox="0 0 48 48" fill="none" aria-hidden="true">
     <g stroke="currentColor" strokeWidth={props.strokeWidth ?? 1.9} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 18 5.5 9h13l2.5 9v2a3.8 3.8 0 0 1-7 2 3.8 3.8 0 0 1-7 0 3.8 3.8 0 0 1-4-2z"/>
-      <path d="M6 23v16h13V23M10 39V29h6v10"/>
-      <path d="m22 18 2.5-9h13l2.5 9v2a3.8 3.8 0 0 1-7 2 3.8 3.8 0 0 1-7 0 3.8 3.8 0 0 1-4-2z"/>
-      <path d="M25 23v16h13V23M29 39V29h6v10"/>
-      <path d="M19 26h3M19 31h3M41 26h4v13h-7"/>
-      <path d="M8 13h10M27 13h10"/>
+      <path d="M3 18 5.5 11h11L19 18v2a3.2 3.2 0 0 1-6 1.5A3.2 3.2 0 0 1 7 21.5 3.2 3.2 0 0 1 3 20z"/>
+      <path d="M6 23v13h10V23M9 36v-7h4v7"/>
+      <path d="m29 18 2.5-7h11l2.5 7v2a3.2 3.2 0 0 1-6 1.5 3.2 3.2 0 0 1-6 0 3.2 3.2 0 0 1-4-1.5z"/>
+      <path d="M32 23v13h10V23M35 36v-7h4v7"/>
+      <path d="m15 17 2.5-9h13l2.5 9v3a4 4 0 0 1-7.5 2 4 4 0 0 1-7.5 0A4 4 0 0 1 15 20z"/>
+      <path d="M18 23v19h13V23M22 42V30h5v12"/>
+      <path d="M16 27h-3m22 0h3M14 39h-3m26 0h-3"/>
     </g>
+    <circle cx="24.5" cy="5" r="1.5" fill="currentColor"/>
   </svg>;
 }
 
@@ -80,7 +82,6 @@ export default function SiteSidebar() {
       return;
     }
     setSearchOpen(false);
-    setExpanded(true);
     const source = document.querySelector<HTMLButtonElement>(".site-sidebar-item.active") || document.querySelector<HTMLButtonElement>(".site-sidebar-item");
     if (source && target) {
       const a = source.getBoundingClientRect();
