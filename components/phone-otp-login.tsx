@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { firebaseApp } from "@/lib/firebase";
 
-type Props = { onAuthenticated: () => void };
+type Props = { onAuthenticated: () => void; onClose: () => void };
 
 const DIGITS = 6;
 
-export default function PhoneOtpLogin({ onAuthenticated }: Props) {
+export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [confirmation, setConfirmation] = useState<ConfirmationResult | null>(null);
@@ -78,30 +78,30 @@ export default function PhoneOtpLogin({ onAuthenticated }: Props) {
   }
 
   return (
-    <section className="phone-otp-panel" aria-label="Phone number OTP sign in">
+    <div className="phone-otp-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}><section className="phone-otp-panel" role="dialog" aria-modal="true" aria-label="Phone number OTP sign in"><button type="button" className="otp-close" aria-label="Close phone sign in" onClick={onClose}>×</button>
       <style jsx>{`
-        .phone-otp-panel{margin:18px 0;padding:22px 18px;border-radius:20px;background:#0d1b2a;color:#dffbf4;border:1px solid rgba(32,220,180,.18);display:grid;gap:16px;font-family:Arial,sans-serif}
-        .otp-kicker{font:700 10px/1.4 ui-monospace,monospace;letter-spacing:2px;color:#20dcb4;text-align:center}
-        .otp-title{text-align:center;font-size:19px;font-weight:700;color:#f0fffb}
-        .otp-copy{text-align:center;font-size:12px;line-height:1.6;color:#8ba8b5}
+        .phone-otp-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:rgba(5,18,15,.38);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}.phone-otp-panel{position:relative;width:min(100%,430px);max-height:min(88vh,720px);overflow:auto;padding:30px 22px 24px;border-radius:26px;background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(231,249,242,.84));color:#12352b;border:1px solid rgba(255,255,255,.78);box-shadow:0 28px 90px rgba(5,35,25,.28),inset 0 1px rgba(255,255,255,.9);display:grid;gap:16px;font-family:inherit}.otp-close{position:absolute;right:14px;top:12px;width:34px;height:34px;border:1px solid rgba(20,90,65,.15);border-radius:50%;background:rgba(255,255,255,.7);color:#174c3b;font-size:21px;cursor:pointer}
+        .otp-kicker{font:700 10px/1.4 ui-monospace,monospace;letter-spacing:2px;color:#168363;text-align:center}
+        .otp-title{text-align:center;font-size:19px;font-weight:700;color:#12352b}
+        .otp-copy{text-align:center;font-size:12px;line-height:1.6;color:#607b70}
         .otp-field{display:grid;gap:7px;font-size:12px;color:#9cb9c6}
-        .otp-field input{width:100%;height:46px;border:1px solid rgba(32,220,180,.28);border-radius:11px;background:#0f2233;color:#eafff9;padding:0 13px;outline:none}
-        .otp-field input:focus{border-color:#20dcb4;box-shadow:0 0 0 3px rgba(32,220,180,.1)}
-        .otp-action{height:44px;border:0;border-radius:11px;background:#20dcb4;color:#06221b;font-weight:800;cursor:pointer}
+        .otp-field input{width:100%;height:46px;border:1px solid rgba(20,110,78,.22);border-radius:11px;background:rgba(255,255,255,.78);color:#12352b;padding:0 13px;outline:none}
+        .otp-field input:focus{border-color:#168363;box-shadow:0 0 0 3px rgba(22,131,99,.12)}
+        .otp-action{height:44px;border:0;border-radius:11px;background:linear-gradient(110deg,#167a5b,#24ad83);color:white;font-weight:800;cursor:pointer}
         .otp-action:disabled{opacity:.55;cursor:wait}
         .otp-boxes{display:flex;justify-content:center;gap:clamp(4px,2vw,10px)}
-        .otp-digit{width:clamp(35px,10vw,44px);height:52px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(32,220,180,.3);background:#0f2233;color:#20dcb4;font-size:22px;font-weight:800}
-        .otp-digit.filled{background:#0d2a1e;border-color:#20dcb4}
+        .otp-digit{width:clamp(35px,10vw,44px);height:52px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(20,110,78,.22);background:rgba(255,255,255,.8);color:#168363;font-size:22px;font-weight:800}
+        .otp-digit.filled{background:#e1f6ed;border-color:#168363}
         .otp-hidden{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-        .otp-message{font-size:12px;text-align:center;color:#8cebd5;overflow-wrap:anywhere}
+        .otp-message{font-size:12px;text-align:center;color:#168363;overflow-wrap:anywhere}
         .otp-error{color:#ffaaa7}
         .otp-arena{width:220px;height:220px;position:relative;margin:auto}
-        .otp-ring{position:absolute;inset:18px;border:1px solid rgba(32,220,180,.24);border-radius:50%}
-        .otp-orbit-digit{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px;border-radius:9px;display:grid;place-items:center;background:#0d2a1e;border:1px solid #20dcb4;color:#20dcb4;font-weight:800;animation:orbit 1.6s cubic-bezier(.65,0,.35,1) both}
+        .otp-ring{position:absolute;inset:18px;border:1px solid rgba(22,131,99,.24);border-radius:50%}
+        .otp-orbit-digit{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px;border-radius:9px;display:grid;place-items:center;background:#e1f6ed;border:1px solid #168363;color:#168363;font-weight:800;animation:orbit 1.6s cubic-bezier(.65,0,.35,1) both}
         .otp-orbit-digit:nth-child(2){animation-delay:-.08s}.otp-orbit-digit:nth-child(3){animation-delay:-.16s}.otp-orbit-digit:nth-child(4){animation-delay:-.24s}.otp-orbit-digit:nth-child(5){animation-delay:-.32s}.otp-orbit-digit:nth-child(6){animation-delay:-.4s}
         @keyframes orbit{from{transform:rotate(var(--start)) translateX(76px) rotate(var(--counter-start))}to{transform:rotate(calc(var(--start) + 360deg)) translateX(76px) rotate(calc(var(--counter-start) - 360deg))}}
         .otp-success{display:grid;justify-items:center;gap:10px;padding:16px 0;animation:fade .4s ease both}
-        .otp-check{width:72px;height:72px;border:2px solid #20dcb4;border-radius:18px;background:#1a3a2e;display:grid;place-items:center;color:#20dcb4;font-size:36px;animation:pop .45s cubic-bezier(.68,-.55,.27,1.55) both}
+        .otp-check{width:72px;height:72px;border:2px solid #168363;border-radius:18px;background:#e1f6ed;display:grid;place-items:center;color:#168363;font-size:36px;animation:pop .45s cubic-bezier(.68,-.55,.27,1.55) both}
         .otp-success strong{font-size:19px;letter-spacing:3px;color:#20dcb4}
         @keyframes fade{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
         @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
@@ -132,6 +132,6 @@ export default function PhoneOtpLogin({ onAuthenticated }: Props) {
       {phase === "verified" && <div className="otp-success"><div className="otp-check">✓</div><strong>VERIFIED</strong><p className="otp-copy">Your phone number is verified.</p></div>}
       {message && <p role="status" className={`otp-message ${phase==="otp" && message.toLowerCase().includes("incorrect")?"otp-error":""}`}>{message}</p>}
       <div ref={recaptchaContainerRef} />
-    </section>
+    </section></div>
   );
 }
