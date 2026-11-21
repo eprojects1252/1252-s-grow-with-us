@@ -838,3 +838,5 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 @keyframes siteSelectedDust{0%,100%{opacity:.18;transform:rotate(var(--dust-angle)) translateX(12px) scale(.55)}35%{opacity:1;transform:rotate(var(--dust-angle)) translateX(23px) scale(1.2)}68%{opacity:.8;transform:rotate(var(--dust-angle)) translateX(16px) scale(.8)}}
 .site-dust-trail i{background:radial-gradient(circle,#fff 0%,#8cffbd 42%,rgba(50,190,105,0) 100%)!important;box-shadow:0 0 12px 3px rgba(82,238,145,.7)!important}
 @media(prefers-reduced-motion:reduce){.site-active-dust i{animation:none!important;opacity:.7!important}}
+
+.site-active-dust{opacity:1!important;visibility:visible!important;display:block!important}
