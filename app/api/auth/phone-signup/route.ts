@@ -93,6 +93,14 @@ export async function POST(request: Request) {
     }, { onConflict: "supabase_user_id" });
     if (saveError) throw saveError;
 
+    const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_SITE_URL;
+    const { error: emailError } = await admin.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: origin ? `${origin}/auth/callback` : undefined }
+    });
+    if (emailError) throw emailError;
+
     return NextResponse.json({ success: true, requiresEmailConfirmation: true });
   } catch (error) {
     if (createdUserId) {
