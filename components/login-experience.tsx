@@ -209,7 +209,7 @@ useEffect(() => {
       </form>
       {showPhoneOtp && !adminMode && <PhoneOtpLogin onClose={()=>setShowPhoneOtp(false)} onAuthenticated={()=>{setSuccess(true);setNotice("Phone verified. Opening your account…");formRef.current?.dispatchEvent(new Event("auth:success"));window.setTimeout(()=>window.location.assign("/account"),900);}} />}
         {!showPhoneOtp&&<button ref={submitRef} className={`auth-submit ${signup&&!forgotPassword?(success?"runaway-submit done":"runaway-submit"):success?"done":""}`} type="submit" form="auth-form" disabled={busy}><span>{signup&&!forgotPassword?null:<>{busy?"Please wait…":forgotPassword?"Send reset link":adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></>}</span><span>{signup&&!forgotPassword?null:<><Check size={18}/> You're in</>}</span></button>
-        </>}
+        }
       {adminMode&&<p className="auth-admin-foot">Admin access is checked against the Supabase Auth app_metadata role.</p>}
     </main>
   );
