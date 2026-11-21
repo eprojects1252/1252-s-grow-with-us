@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import PhoneAccountLink from "@/components/phone-account-link";
 import Link from "next/link";
 import {
   UserRound, Tag, CreditCard, MapPin, Wallet, Heart, ShoppingCart,
@@ -67,9 +68,12 @@ export default function CustomerDashboard() {
         <section className="customer-dash-content">
           <div className="customer-dash-section-title"><span className="customer-dash-section-icon"><Icon size={20}/></span><div><small>ACCOUNT MENU</small><h2>{current.title}</h2></div></div>
           {current.id === "account-details" ? (
+            <>
+            <PhoneAccountLink />
             <div className="customer-dash-grid">
               {current.items.map((item, index) => <article className="customer-dash-tile" key={item}><span className="customer-dash-number">0{index + 1}</span><strong>{item}</strong><small>{item === "Refer & Earn" ? "Referral programme" : "Profile information"}</small></article>)}
             </div>
+            </>
           ) : current.items.length ? (
             <div className="customer-dash-list">
               {current.items.map(item => {
