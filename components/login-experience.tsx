@@ -126,7 +126,7 @@ useEffect(() => {
       if(!name.trim()){setNotice("Enter your full name.");return;}
       const terms=formRef.current?.querySelector<HTMLInputElement>(".auth-terms input");
       if(!terms?.checked){setNotice("Please accept the Terms and Privacy Policy.");return;}
-      async function appleSignIn(){\n    setNotice("");const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;\n    if(!url||!key){setNotice("Apple sign-in is not configured yet.");return;}\n    setBusy(true);\n    try{const supabase=createClient(url,key);const {error}=await supabase.auth.signInWithOAuth({provider:"apple",options:{redirectTo:window.location.origin+"/auth/callback"}});if(error)throw error;}\n    catch(error){setNotice(error instanceof Error?error.message:"Apple sign-in could not start.");setBusy(false);}\n  }\n  const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
+  const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
       if(missing){setNotice("Please add "+missing.label+" to your password.");formRef.current?.dispatchEvent(new Event("runaway:wobble"));return;}
       if(password!==confirmPassword){setNotice("Passwords do not match.");return;}
     }
@@ -157,6 +157,21 @@ useEffect(() => {
     try{const supabase=createClient(url,key);const {error}=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:window.location.origin+"/auth/callback"}});if(error)throw error;}
     catch(error){setNotice(error instanceof Error?error.message:"Google sign-in could not start.");setBusy(false);}
   }
+  async function appleSignIn(){
+    setNotice("");
+    const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    if(!url||!key){setNotice("Apple sign-in is not configured yet.");return;}
+    setBusy(true);
+    try{
+      const supabase=createClient(url,key);
+      const {error}=await supabase.auth.signInWithOAuth({provider:"apple",options:{redirectTo:window.location.origin+"/auth/callback"}});
+      if(error)throw error;
+    }catch(error){
+      setNotice(error instanceof Error?error.message:"Apple sign-in could not start.");
+      setBusy(false);
+    }
+  }
+
   const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
   const tone=PASSWORD_TONES[score];
   return (
