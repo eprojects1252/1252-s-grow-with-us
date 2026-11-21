@@ -180,7 +180,7 @@ useEffect(() => {
         {!adminMode&&<><div className="auth-divider"><i/> OR CONTINUE WITH <i/></div><button className="auth-google" type="button" onClick={googleSignIn} disabled={busy}><b>G</b> Continue with Google</button><p className="auth-switch">{mode==="login"?"Don't have an account?":"Already have an account?"} <button type="button" onClick={()=>{setMode(mode==="login"?"signup":"login");setNotice("");setPassword("");setConfirmPassword("");setShowPassword(false);setSuccess(false);}}>{mode==="login"?"Sign up":"Sign in"}</button></p></>}
       </form>
       {showPhoneOtp && !adminMode && mode==="login" && <PhoneOtpLogin onAuthenticated={()=>{setSuccess(true);setNotice("Phone verified. Opening your account…");formRef.current?.dispatchEvent(new Event("auth:success"));window.setTimeout(()=>window.location.assign("/account"),900);}} />}
-        <button ref={submitRef> className={`auth-submit ${signup?(success?"runaway-submit done":"runaway-submit"):success?"done":""}`} type="submit" form="auth-form" disabled={busy}><span>{signup?null:<>{busy?"Please wait…":adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></>}</span><span>{signup?null:<><Check size={18}/> You're in</>}</span></button>
+        <button ref={submitRef} className={`auth-submit ${signup?(success?"runaway-submit done":"runaway-submit"):success?"done":""}`} type="submit" form="auth-form" disabled={busy}><span>{signup?null:<>{busy?"Please wait…":adminMode?"Admin sign in":"Sign in"} <ArrowRight size={17}/></>}</span><span>{signup?null:<><Check size={18}/> You're in</>}</span></button>
       {adminMode&&<p className="auth-admin-foot">Admin access is checked against the Supabase Auth app_metadata role.</p>}
     </main>
   );
