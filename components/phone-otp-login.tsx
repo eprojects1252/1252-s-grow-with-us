@@ -16,9 +16,10 @@ export default function PhoneOtpLogin({ onAuthenticated }: Props) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const verifier = useRef<RecaptchaVerifier | null>(null);
+  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => () => { verifier.current?.clear(); }, []);
+  useEffect(() => () => { verifier.current?.clear(); verifier.current = null; }, []);
 
   async function sendCode(event: React.FormEvent) {
     event.preventDefault();
@@ -32,10 +33,15 @@ export default function PhoneOtpLogin({ onAuthenticated }: Props) {
     setBusy(true);
     try {
       const auth = getAuth(firebaseApp);
-      if (!verifier.current) {
-        verifier.current = new RecaptchaVerifier(auth, "phone-otp-recaptcha", { size: "invisible" });
-      }
-      const result = await signInWithPhoneNumber(auth, e164, verifier.current);
+      verifier.current?.clear();
+      verifier.current = null;
+      const container = recaptchaContainerRef.current;
+      if (!container) throw new Error("reCAPTCHA container is not available. Please refresh and try again.");
+      container.replaceChildren();
+      const nextVerifier = new RecaptchaVerifier(auth, container, { size: "invisible" });
+      verifier.current = nextVerifier;
+      await nextVerifier.render();
+      const result = await signInWithPhoneNumber(auth, e164, nextVerifier);
       setConfirmation(result);
       setPhase("otp");
       setMessage("OTP sent. Check your phone.");
@@ -43,6 +49,7 @@ export default function PhoneOtpLogin({ onAuthenticated }: Props) {
     } catch (error) {
       verifier.current?.clear();
       verifier.current = null;
+      recaptchaContainerRef.current?.replaceChildren();
       setMessage(error instanceof Error ? error.message : "Unable to send OTP. Please try again.");
     } finally {
       setBusy(false);
@@ -124,7 +131,7 @@ export default function PhoneOtpLogin({ onAuthenticated }: Props) {
       {phase === "orbit" && <><div className="otp-arena"><div className="otp-ring"/>{code.split("").map((digit,i)=><span key={i} className="otp-orbit-digit" style={{"--start":`${i*60-90}deg`,"--counter-start":`${90-i*60}deg`} as React.CSSProperties}>{digit}</span>)}</div><p className="otp-kicker">VERIFYING SECURELY…</p></>}
       {phase === "verified" && <div className="otp-success"><div className="otp-check">✓</div><strong>VERIFIED</strong><p className="otp-copy">Your phone number is verified.</p></div>}
       {message && <p role="status" className={`otp-message ${phase==="otp" && message.toLowerCase().includes("incorrect")?"otp-error":""}`}>{message}</p>}
-      <div id="phone-otp-recaptcha" />
+      <div ref={recaptchaContainerRef} />
     </section>
   );
 }
