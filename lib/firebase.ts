@@ -1,7 +1,7 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAIWa7lrnmhmh0prZc4v584CTF_yBsO34",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
   authDomain: "sri-amirthaa-id-core.firebaseapp.com",
   projectId: "sri-amirthaa-id-core",
   storageBucket: "sri-amirthaa-id-core.firebasestorage.app",
