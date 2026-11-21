@@ -946,3 +946,21 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
  .auth-admin-foot{grid-column:1}
  .reset-auth-page{grid-template-columns:minmax(0,1fr)}
 }
+
+
+/* Phone-authenticated account email registration check */
+.phone-email-check{margin:18px 0 24px;padding:20px;border:1px solid rgba(61,139,84,.2);border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.84),rgba(237,249,240,.78));box-shadow:0 14px 36px rgba(37,91,54,.08)}
+.phone-email-heading{display:flex;align-items:center;gap:12px;margin-bottom:17px}
+.phone-email-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border:1px solid rgba(50,137,79,.16);border-radius:14px;background:linear-gradient(145deg,#fff,#e6f7eb);color:#28784b;box-shadow:0 5px 15px rgba(40,120,75,.09)}
+.phone-email-heading h3{margin:0;color:#214c34;font-size:15px;font-weight:800}
+.phone-email-heading p{margin:4px 0 0;color:#789080;font-size:11px;line-height:1.5}
+.phone-email-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
+.phone-email-form label{grid-column:1/-1;color:#45634f;font-size:11px;font-weight:750}
+.phone-email-form input{width:100%;min-width:0;height:45px;padding:0 13px;border:1px solid rgba(54,112,73,.2);border-radius:12px;outline:0;background:rgba(255,255,255,.9);color:#214c34;font-size:12px}
+.phone-email-form input:focus{border-color:#65a87b;box-shadow:0 0 0 4px rgba(76,153,100,.1)}
+.phone-email-form button{height:45px;padding:0 15px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:12px;background:linear-gradient(110deg,#1e7148,#55a66f);color:#fff;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 8px 18px rgba(38,119,70,.16)}
+.phone-email-form button:disabled{opacity:.6;cursor:wait}
+.phone-email-message{margin:12px 0 0;padding:10px 12px;border-radius:10px;font-size:11px;line-height:1.5}
+.phone-email-message.registered,.phone-email-message.error{border:1px solid rgba(190,65,65,.18);background:#fff2f0;color:#a33b35}
+.phone-email-message.available{border:1px solid rgba(45,139,79,.18);background:#eaf8ee;color:#28784b}
+@media(max-width:520px){.phone-email-check{padding:16px}.phone-email-form{grid-template-columns:minmax(0,1fr)}.phone-email-form label{grid-column:1}.phone-email-form button{width:100%}}
