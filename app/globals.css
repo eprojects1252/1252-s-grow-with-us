@@ -1055,3 +1055,19 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
   .auth-page{padding-left:16px!important;padding-right:16px!important}
   .auth-monogram{width:min(68vw,240px)!important;height:min(68vw,240px)!important}
 }
+
+
+/* Auth corrections: original brand colours, no logo tile, functional stationary actions. */
+@media(max-width:680px){
+  .auth-monogram{display:flex!important;place-items:initial!important;width:auto!important;height:auto!important;min-height:0!important;margin:0 auto 26px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+  .auth-monogram img{width:min(78vw,300px)!important;max-width:300px!important;height:auto!important;max-height:125px!important;object-fit:contain!important;object-position:center!important;filter:none!important}
+  .auth-form>.auth-google{cursor:pointer!important;pointer-events:auto!important}
+  .phone-otp-panel{order:2!important;width:100%!important;margin:8px 0 16px!important;padding:18px 15px!important;border:1px solid #42464e!important;border-radius:18px!important;background:#111316!important;color:#f4f5f6!important}
+  .phone-otp-panel .otp-title{color:#f4f5f6!important}
+  .phone-otp-panel .otp-copy,.phone-otp-panel .otp-field{color:#c4c8ce!important}
+  .phone-otp-panel .otp-field input{background:#050506!important;border-color:#454951!important;color:#f7f7f8!important}
+  .phone-otp-panel .otp-action{background:#f2f4f5!important;color:#111316!important}
+  .phone-otp-panel .otp-secondary,.phone-otp-panel .otp-change-number{background:#17191d!important;border-color:#454951!important;color:#f2f4f5!important}
+}
+.auth-submit:not(.runaway-submit){position:relative!important;left:auto!important;top:auto!important;transform:none!important;cursor:pointer!important}
+.auth-submit:not(.runaway-submit):disabled{opacity:.6!important;cursor:wait!important}
