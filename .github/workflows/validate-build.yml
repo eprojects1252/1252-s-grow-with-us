@@ -2,7 +2,9 @@ name: Validate Next.js build
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - feature/sri-amirthaa-id-oidc
   pull_request:
 
 permissions:
