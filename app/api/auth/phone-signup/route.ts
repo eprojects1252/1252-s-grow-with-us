@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     const decoded = await getFirebaseAdminAuth().verifyIdToken(firebaseIdToken, true);
     if (!decoded.uid || !decoded.phone_number) return NextResponse.json({ error: "Verified Firebase phone details are missing." }, { status: 400 });
 
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !serviceKey) return NextResponse.json({ error: "Account creation is not configured." }, { status: 500 });
     const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, requiresEmailConfirmation: true });
   } catch (error) {
     if (createdUserId) {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const url = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
       const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
       if (url && key) {
         const admin = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
