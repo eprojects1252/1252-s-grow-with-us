@@ -114,7 +114,7 @@ export default function Storefront() {
   }, []);
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [justAddedId, setJustAddedId] = useState<number | null>(null);
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
   const [lastAddedProduct, setLastAddedProduct] = useState<Product | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -138,7 +138,7 @@ export default function Storefront() {
     setJustAddedId(p.id);
     window.setTimeout(() => setJustAddedId(current => current === p.id ? null : current), 1350);
   };
-  const updateQty = (id: number, delta: number) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + delta } : i).filter(i => i.qty > 0));
+  const updateQty = (id: string, delta: number) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + delta } : i).filter(i => i.qty > 0));
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
 
