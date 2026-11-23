@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { ArrowLeft, Check, Copy, CreditCard, QrCode, ShieldCheck, Wallet, Smartphone, Info } from "lucide-react";
 import Link from "next/link";
 
