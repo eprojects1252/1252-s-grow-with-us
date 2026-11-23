@@ -25,9 +25,9 @@ export async function POST(request: Request) {
     }
 
     const issuerValue = process.env.SRI_AMIRTHAA_ID_ISSUER;
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_PUBLISHABLE_KEY;
     if (!issuerValue || !supabaseUrl || !serviceKey || !publishableKey) {
       return NextResponse.json({ error: "Sri Amirthaa ID or E-Commerce authentication is not configured." }, { status: 503 });
     }
