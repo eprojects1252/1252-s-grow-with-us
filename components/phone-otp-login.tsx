@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { firebaseApp } from "@/lib/firebase";
 
-type Props = { onAuthenticated: () => void; onClose: () => void };
+type Props = { onClose: () => void };
 type Phase = "phone" | "password" | "email" | "review" | "otp" | "orbit" | "verified";
 const DIGITS = 6;
 const validEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
-export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
+export default function PhoneOtpLogin({ onClose }: Props) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +24,6 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [emailChecking, setEmailChecking] = useState(false);
   const [existingEmail, setExistingEmail] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const verifier = useRef<RecaptchaVerifier | null>(null);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
