@@ -47,11 +47,11 @@ export default function PhoneOtpLogin({ onClose }: Props) {
       if (!response.ok) throw new Error(result.error || "Unable to check this phone number.");
       setPhone(e164);
       if (result.registered) {
-        if (!result.canPasswordLogin || !result.email) {
+        if (!result.canPasswordLogin) {
           throw new Error("This phone number is already registered but its account needs secure recovery. Please contact support.");
         }
-        setExistingEmail(result.email);
-        setEmail(result.email);
+        setExistingEmail("");
+        setEmail("");
         setPhase("password");
         setMessage("Existing account found. Verify your phone number to continue.");
       } else {
