@@ -7,9 +7,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const rawPhone = typeof body.phone === "string" ? body.phone.trim() : "";
-    const normalized = rawPhone.replace(/[\\s()-]/g, "");
+    const normalized = rawPhone.replace(/[\s()-]/g, "");
     const e164 = normalized.startsWith("+") ? normalized : `+${normalized}`;
-    if (!/^\\+[1-9]\\d{7,14}$/.test(e164)) {
+    if (!/^\+[1-9]\d{7,14}$/.test(e164)) {
       return NextResponse.json({ error: "Enter a valid phone number with country code." }, { status: 400 });
     }
 
