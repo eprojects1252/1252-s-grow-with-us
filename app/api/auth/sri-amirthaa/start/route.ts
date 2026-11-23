@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
@@ -56,6 +57,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Sri Amirthaa ID account verification failed (" + reason + ")." }, {
         status: identitySync.status >= 400 && identitySync.status < 600 ? identitySync.status : 502
       });
+    }
+
+    // Keep the central identity email in sync from the trusted E-Commerce profile.
+    // pendingEmail is deliberately unverified in Core until its own email verification completes.
+    const syncedIdentity = await identitySync.clone().json().catch(() => ({}));
+    const verifiedPhone = syncedIdentity?.user?.phoneNumber;
+    const ecommerceUrl = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (typeof verifiedPhone === "string" && ecommerceUrl && serviceKey) {
+      const admin = createClient(ecommerceUrl, serviceKey, {
+        auth: { persistSession: false, autoRefreshToken: false }
+      });
+      const { data: profile, error: profileError } = await admin
+        .from("profiles")
+        .select("email")
+        .eq("phone_e164", verifiedPhone)
+        .maybeSingle();
+      if (profileError) throw profileError;
+      const profileEmail = typeof profile?.email === "string" ? profile.email.trim().toLowerCase() : "";
+      if (profileEmail) {
+        const emailSync = await fetch(issuer + "/v1/auth/firebase/session", {
+          method: "POST",
+          cache: "no-store",
+          headers: { "content-type": "application/json", accept: "application/json" },
+          body: JSON.stringify({ idToken: firebaseIdToken, pendingEmail: profileEmail })
+        });
+        if (!emailSync.ok) {
+          return NextResponse.json({ error: "Sri Amirthaa ID email synchronization failed." }, { status: 502 });
+        }
+      }
     }
 
     const authorization = await fetch(issuer + "/oauth/authorize", {
