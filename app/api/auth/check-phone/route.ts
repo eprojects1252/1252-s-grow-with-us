@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Enter a valid phone number with country code." }, { status: 400 });
     }
 
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !serviceRoleKey) {
       return NextResponse.json({ error: "Phone account lookup is not configured." }, { status: 500 });
