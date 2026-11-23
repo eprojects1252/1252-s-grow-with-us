@@ -104,6 +104,8 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
 
   const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
   const tone=PASSWORD_TONES[score];
+  if (showPhoneOtp && !adminMode) return <PhoneOtpLogin onClose={()=>{setShowPhoneOtp(false);setNotice("");}} onAuthenticated={()=>{setSuccess(true);setNotice("Phone verified. Opening your account…");window.location.assign("/account");}} />;
+
   return (
     <main className="auth-page">
       <aside className="auth-showcase"><div className="auth-orb auth-orb-one"/><div className="auth-orb auth-orb-two"/><div className="auth-showcase-content"><span className="auth-live"><i/> SRI AMIRTHAA IDENTITY NETWORK</span><div className="auth-monogram"><Image src="/images/sri-amirthaa-groups-1252.png" alt="Sri Amirthaa Groups" width={300} height={120} priority /></div><h2>One identity.<br/><em>Everywhere you belong.</em></h2><p>One trusted identity. Seamless access across the Sri Amirthaa digital ecosystem.</p><div className="auth-feature"><span>01</span><div><b>One secure account</b><small>Access connected Sri Amirthaa services.</small></div></div><div className="auth-feature"><span>02</span><div><b>Protected sign-in</b><small>OTP and trusted identity providers.</small></div></div><div className="auth-feature"><span>03</span><div><b>Your account, your control</b><small>Privacy-first access and recovery.</small></div></div></div><div className="auth-showcase-foot">SRI AMIRTHAA GROUPS <span>•</span> SECURE IDENTITY</div></aside>
