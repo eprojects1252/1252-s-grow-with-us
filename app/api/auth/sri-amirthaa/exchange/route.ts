@@ -35,8 +35,8 @@ export async function POST(request: Request) {
     const tokenResponse = await fetch(issuer + "/oauth/token", {
       method: "POST",
       cache: "no-store",
-      headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json" },
-      body: new URLSearchParams({
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({
         grant_type: "authorization_code",
         code,
         client_id: CLIENT_ID,
