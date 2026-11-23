@@ -18,7 +18,7 @@ export async function GET() {
   const [{ data: categories, error: categoryError }, { data: products, error: productError }] = await Promise.all([
     supabase.from("categories").select("id,parent_id,name,slug,icon,sort_order").eq("is_active", true).order("sort_order"),
     supabase.from("products")
-      .select("id,category_id,sku,name,short_description,price,compare_at_price,is_featured,stock_status,product_images(image_url,alt_text,is_primary,sort_order),categories(name)")
+      .select("id,category_id,sku,name,short_description,price,compare_at_price,is_featured,stock_status,product_images(image_url,alt_text,is_primary,sort_order)")
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(100),
@@ -29,15 +29,17 @@ export async function GET() {
     return NextResponse.json({ error: "Unable to load the store catalog." }, { status: 503 });
   }
 
+  const categoryNames = new Map((categories ?? []).map((category: { id: string; name: string }) => [category.id, category.name]));
+  const productRows = (products ?? []) as Array<{ id: string; category_id: string | null; product_images?: Array<{ image_url: string | null; alt_text: string | null; is_primary: boolean; sort_order: number }> | null; [key: string]: unknown }>;
   return NextResponse.json({
     categories: categories ?? [],
-    products: (products ?? []).map((product) => {
+    products: productRows.map((product) => {
       const images = [...(product.product_images ?? [])].sort((a, b) =>
         Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)) || a.sort_order - b.sort_order
       );
       return {
         ...product,
-        category_name: Array.isArray(product.categories) ? product.categories[0]?.name ?? "" : product.categories?.name ?? "",
+        category_name: product.category_id ? categoryNames.get(product.category_id) ?? "" : "",
         image_url: images[0]?.image_url ?? null,
       };
     }),
