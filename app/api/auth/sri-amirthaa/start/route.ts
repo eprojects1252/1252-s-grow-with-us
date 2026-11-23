@@ -41,6 +41,22 @@ export async function POST(request: Request) {
     const verifier = randomValue();
     const challenge = createHash("sha256").update(verifier).digest("base64url");
 
+    // Sync the verified Firebase identity into the central account registry first.
+    // This lets a customer authenticate from a participating site without first visiting the ID portal.
+    const identitySync = await fetch(issuer + "/v1/auth/firebase/session", {
+      method: "POST",
+      cache: "no-store",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ idToken: firebaseIdToken })
+    });
+    if (!identitySync.ok) {
+      const syncResult = await identitySync.json().catch(() => ({}));
+      const reason = typeof syncResult.error === "string" ? syncResult.error : "IDENTITY_SYNC_FAILED";
+      return NextResponse.json({ error: "Sri Amirthaa ID account verification failed (" + reason + ")." }, {
+        status: identitySync.status >= 400 && identitySync.status < 600 ? identitySync.status : 502
+      });
+    }
+
     const authorization = await fetch(issuer + "/oauth/authorize", {
       method: "POST",
       redirect: "manual",
