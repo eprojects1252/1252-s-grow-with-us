@@ -2,7 +2,6 @@
 
 import { useRef, useState, type CSSProperties } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Search, WalletCards, ReceiptText,
   UserRound, BadgePercent, Heart, ClipboardList, SlidersHorizontal, Store
@@ -76,6 +75,7 @@ export default function SiteSidebar() {
   const [trail, setTrail] = useState<{x:number;y:number;dx:number;dy:number;key:number}|null>(null);
   const swipeStart = useRef<{x:number;y:number}|null>(null);
   const suppressClick = useRef(false);
+  const trailSequence = useRef(0);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -89,7 +89,7 @@ export default function SiteSidebar() {
     if (source && target) {
       const a = source.getBoundingClientRect();
       const b = target.getBoundingClientRect();
-      setTrail({ x: a.left + a.width / 2, y: a.top + a.height / 2, dx: b.left + b.width / 2 - (a.left + a.width / 2), dy: b.top + b.height / 2 - (a.top + a.height / 2), key: Date.now() });
+      setTrail({ x: a.left + a.width / 2, y: a.top + a.height / 2, dx: b.left + b.width / 2 - (a.left + a.width / 2), dy: b.top + b.height / 2 - (a.top + a.height / 2), key: ++trailSequence.current });
     }
     if (label === "Cart" && pathname === "/") {
       window.dispatchEvent(new CustomEvent("amirthaa:open-cart"));
