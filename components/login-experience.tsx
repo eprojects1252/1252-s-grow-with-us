@@ -20,7 +20,7 @@ const passwordScore = (value: string) => PASSWORD_RULES.filter(rule => rule.test
 
 export default function LoginExperience({ initialMode = "login", adminMode = false, onAuthenticated }: Props) {
   const [mode, setMode] = useState<"login" | "signup">(adminMode ? "login" : initialMode);
-  const [showPhoneOtp, setShowPhoneOtp] = useState(false);
+  const [showPhoneOtp, setShowPhoneOtp] = useState(!adminMode);
   const [forgotPassword, setForgotPassword] = useState(false);
   const signup = mode === "signup" && !adminMode && !showPhoneOtp && !forgotPassword;
   const [showPassword, setShowPassword] = useState(false);
