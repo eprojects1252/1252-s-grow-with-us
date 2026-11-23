@@ -32,6 +32,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const firebaseIdToken = typeof body.firebaseIdToken === "string" ? body.firebaseIdToken : "";
+    const pendingEmail = typeof body.pendingEmail === "string" ? body.pendingEmail.trim().toLowerCase() : "";
     if (firebaseIdToken.length < 100 || firebaseIdToken.length > 10000) {
       return NextResponse.json({ error: "Complete phone verification before continuing." }, { status: 401 });
     }
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
       method: "POST",
       cache: "no-store",
       headers: { "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ idToken: firebaseIdToken })
+      body: JSON.stringify({ idToken: firebaseIdToken, ...(pendingEmail ? { pendingEmail } : {}) })
     });
     if (!identitySync.ok) {
       const syncResult = await identitySync.json().catch(() => ({}));
