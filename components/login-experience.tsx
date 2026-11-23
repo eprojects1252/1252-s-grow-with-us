@@ -6,6 +6,7 @@ import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
 import { ArrowRight, Eye, EyeOff, Check } from "lucide-react";
 import PhoneOtpLogin from "@/components/phone-otp-login";
+import SriAmirthaaIdLogin from "@/components/sri-amirthaa-id-login";
 
 type Props = { initialMode?: "login" | "signup"; adminMode?: boolean; onAuthenticated?: () => void };
 const PASSWORD_RULES = [
@@ -21,6 +22,7 @@ const passwordScore = (value: string) => PASSWORD_RULES.filter(rule => rule.test
 export default function LoginExperience({ initialMode = "login", adminMode = false, onAuthenticated }: Props) {
   const [mode, setMode] = useState<"login" | "signup">(adminMode ? "login" : initialMode);
   const [showPhoneOtp, setShowPhoneOtp] = useState(false);
+  const [showSriIdLogin, setShowSriIdLogin] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
   const signup = mode === "signup" && !adminMode && !showPhoneOtp && !forgotPassword;
   const [showPassword, setShowPassword] = useState(false);
@@ -110,7 +112,9 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
       <form id="auth-form" ref={formRef} className="auth-form" onSubmit={submit} onKeyDown={e=>{if(signup&&e.key==="Enter"&&score<4)formRef.current?.dispatchEvent(new Event("runaway:wobble"));}} noValidate>
         <Link className="auth-brand" href="/" aria-label="Sri Amirthaa Groups home"><Image src="/images/sri-amirthaa-groups-1252.png" alt="Sri Amirthaa Groups" width={190} height={76} priority /></Link>
         <div className="auth-heading"><span>{adminMode?"SECURE ADMIN ACCESS":forgotPassword?"ACCOUNT RECOVERY":"SRI AMIRTHAA ID"}</span><h1>{adminMode?<>Admin <em>Sign in</em></>:forgotPassword?<>Reset <em>Password</em></>:mode==="login"?<>Welcome <em>Back</em></>:<>Create <em>Account</em></>}</h1><p>{adminMode?"Sign in with an account assigned the Admin role.":forgotPassword?"We’ll email you a secure link to create a new password.":mode==="login"?"Your secure gateway to the Sri Amirthaa ecosystem.":"Create one account to use across participating websites."}</p></div>
-        {!adminMode && !forgotPassword && <button type="button" className="auth-google" onClick={()=>setShowPhoneOtp(v=>!v)} aria-expanded={showPhoneOtp}><span aria-hidden="true">📱</span> {showPhoneOtp?"Back to sign-in options":"Continue with Phone"}</button>}
+        {!adminMode && !forgotPassword && <button type="button" className="auth-google" onClick={()=>{setShowPhoneOtp(v=>!v);setShowSriIdLogin(false);}} aria-expanded={showPhoneOtp}><span aria-hidden="true">📱</span> {showPhoneOtp?"Back to sign-in options":"Continue with Phone"}</button>
+        {!showPhoneOtp && <button type="button" className="auth-google" onClick={()=>setShowSriIdLogin(v=>!v)} aria-expanded={showSriIdLogin}><span aria-hidden="true">🛡️</span> {showSriIdLogin?"Hide Sri Amirthaa ID":"Continue with Sri Amirthaa ID"}</button>}
+        {showSriIdLogin && !showPhoneOtp && <SriAmirthaaIdLogin />}}
         {showPhoneOtp && !adminMode && <PhoneOtpLogin onClose={()=>{setShowPhoneOtp(false);setNotice("");}} onAuthenticated={()=>{setSuccess(true);setNotice("Phone verified. Opening your account…");formRef.current?.dispatchEvent(new Event("auth:success"));window.setTimeout(()=>window.location.assign("/account"),900);}} />}
         {!showPhoneOtp&&!forgotPassword&&signup&&<label className="auth-field"><span>Full name</span><input value={name} onChange={e=>setName(e.target.value)} autoComplete="name" placeholder="Your full name" required/></label>}
         {!showPhoneOtp&&<><div className="auth-method-label">{forgotPassword?"RECOVERY EMAIL":"CONTINUE WITH EMAIL"}</div><label className="auth-field auth-email"><span>Email address</span><input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="username" placeholder="name@example.com" required/></label>
