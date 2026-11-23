@@ -48,7 +48,7 @@ export default function CustomerDashboard() {
   return (
     <main className="customer-dashboard">
       <header className="customer-dash-header">
-        <div><span className="customer-dash-kicker">1252'S GROW WITH US</span><h1>My Account</h1><p>Your account, shopping and membership space.</p></div>
+        <div><span className="customer-dash-kicker">1252&apos;S GROW WITH US</span><h1>My Account</h1><p>Your account, shopping and membership space.</p></div>
         <Link href="/" className="customer-dash-shop-link">Continue Shopping <ArrowUpRight size={15}/></Link>
       </header>
 
