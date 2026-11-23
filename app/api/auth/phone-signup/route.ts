@@ -47,8 +47,8 @@ export async function POST(request: Request) {
     const password = typeof body.password === "string" ? body.password : "";
     const fullName = typeof body.fullName === "string" ? body.fullName.trim() : "";
     if (!firebaseIdToken) return NextResponse.json({ error: "Verify your phone number first." }, { status: 401 });
-    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
-    if (password.length < 8 || !/[A-Z]/.test(password) || !/\\d/.test(password) || !/[^\\w\\s]/.test(password)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+    if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^\w\s]/.test(password)) {
       return NextResponse.json({ error: "Password must contain 8 characters, a capital letter, a number and a symbol." }, { status: 400 });
     }
     if (!fullName) return NextResponse.json({ error: "Enter your full name." }, { status: 400 });
