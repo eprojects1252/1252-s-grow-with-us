@@ -153,7 +153,7 @@ export default function PhoneOtpLogin({ onClose }: Props) {
   function resetPhone() {
     verifier.current?.clear(); verifier.current = null; recaptchaContainerRef.current?.replaceChildren();
     setPhase("phone"); setConfirmation(null); setCode(""); setPassword(""); setConfirmPassword(""); setAcceptedTerms(false); setEmail(""); setEmailAvailable(null);
-    setExistingEmail(""); setMessage("");
+    setExistingEmail(""); setFullName(""); setAcceptedTerms(false); setMessage("");
   }
 
   return (
