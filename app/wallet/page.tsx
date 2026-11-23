@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { ArrowLeft, Check, Copy, CreditCard, QrCode, ShieldCheck, Wallet, Smartphone, Info } from "lucide-react";
+import Link from "next/link";
 
 const UPI_ID = "s2h1252bank-5@okhdfcbank";
 const formatINR = (value: number) => new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(value);
