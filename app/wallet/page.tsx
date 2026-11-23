@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useState } from "react";
 import { ArrowLeft, Check, Copy, CreditCard, QrCode, ShieldCheck, Wallet, Smartphone, Info } from "lucide-react";
 
 const UPI_ID = "s2h1252bank-5@okhdfcbank";
@@ -12,7 +12,7 @@ export default function WalletPage() {
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState("");
   const validAmount = /^\d+$/.test(amount) && Number(amount) >= 1 && Number(amount) <= 100000;
-  const reference = useMemo(() => `AMC${Date.now().toString().slice(-8)}`, []);
+  const reference = `SRI${useId().replace(/[^a-zA-Z0-9]/g, "").slice(-8).toUpperCase()}`;
   const upiUri = useMemo(() => {
     if (!validAmount) return "";
     const params = new URLSearchParams({
@@ -47,7 +47,7 @@ export default function WalletPage() {
   return (
     <main className="amc-page">
       <div className="amc-shell">
-        <a className="amc-back" href="/"><ArrowLeft size={17}/> Back to store</a>
+        <Link className="amc-back" href="/"><ArrowLeft size={17}/> Back to store</Link>
         <header className="amc-heading">
           <div className="amc-brand-icon"><Wallet size={25}/></div>
           <div><span> SRI AMIRTHAA · DIGITAL WALLET</span><h1>Add coins to your wallet</h1><p>Top up when you need. Coins appear after payment verification.</p></div>
@@ -55,11 +55,11 @@ export default function WalletPage() {
 
         <section className="amc-layout">
           <div className="amc-card amc-amount-card">
-            <div className="amc-section-title"><span className="amc-step">01</span><div><h2>Choose top-up amount</h2><p>₹1 = 1 Amirthaa Coin (illustrative rate)</p></div></div>
+            <div className="amc-section-title"><span className="amc-step">01</span><div><h2>Choose top-up amount</h2><p>₹1 = 1 Sri</p></div></div>
             <label className="amc-label" htmlFor="amc-amount">Amount in INR</label>
             <div className="amc-amount-input"><span>₹</span><input id="amc-amount" inputMode="numeric" type="number" min="1" max="100000" step="1" value={amount} onChange={(event) => { setAmount(event.target.value); setNotice(""); }} placeholder="Enter amount"/></div>
             <div className="amc-presets">{[100, 250, 500, 1000].map((value) => <button type="button" key={value} className={amount === String(value) ? "selected" : ""} onClick={() => { setAmount(String(value)); setNotice(""); }}>₹{value.toLocaleString("en-IN")}</button>)}</div>
-            <div className="amc-credit-preview"><div><span>You will receive</span><small>After Admin confirms the payment</small></div><strong>{validAmount ? `${formatINR(Number(amount))} AMC` : "— AMC"}</strong></div>
+            <div className="amc-credit-preview"><div><span>You will receive</span><small>After Admin confirms the payment</small></div><strong>{validAmount ? `${formatINR(Number(amount))} Sri` : "— Sri"}</strong></div>
             {!validAmount && <p className="amc-validation">Enter a whole amount between ₹1 and ₹1,00,000.</p>}
           </div>
 
