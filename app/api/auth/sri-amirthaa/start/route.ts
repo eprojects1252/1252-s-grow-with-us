@@ -87,7 +87,8 @@ export async function POST(request: Request) {
     const location = authorization.headers.get("location");
     if (!location) return NextResponse.json({ error: "Identity provider did not return an authorization redirect." }, { status: 502 });
     const redirect = new URL(location);
-    if (redirect.origin !== issuerUrl.origin || redirect.pathname !== new URL(REDIRECT_URI).pathname) {
+    const callbackUrl = new URL(REDIRECT_URI);
+    if (redirect.origin !== callbackUrl.origin || redirect.pathname !== callbackUrl.pathname) {
       return NextResponse.json({ error: "Identity provider returned an unexpected redirect." }, { status: 502 });
     }
 
