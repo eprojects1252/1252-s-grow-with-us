@@ -17,7 +17,7 @@ const pages: Record<string, PageInfo> = {
   account: { title: "My Account", description: "Manage your profile, saved addresses and account preferences.", section: "Account" },
   offers: { title: "Offers & Deals", description: "Explore coupons, vouchers and rewards in one place.", section: "Explore" },
   settings: { title: "Settings", description: "Manage your website preferences, account security and support options.", section: "Preferences" },
-  about: { title: "About Us", description: "Learn about 1252's grow with us and our promise to customers.", section: "Information" },
+  about: { title: "About Us", description: "Learn about 1252&apos;s grow with us and our promise to customers.", section: "Information" },
   contact: { title: "Contact Us", description: "Find the right way to contact our customer support team.", section: "Information" },
   faq: { title: "Frequently Asked Questions", description: "Find answers about shopping, orders, payments, wallet and recharge.", section: "Help" },
   terms: { title: "Terms & Conditions", description: "Read the terms that apply when using this website.", section: "Policies" },
