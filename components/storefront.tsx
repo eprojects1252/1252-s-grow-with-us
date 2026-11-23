@@ -55,6 +55,18 @@ export default function Storefront() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [pincode, setPincode] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
+  const [lastAddedProduct, setLastAddedProduct] = useState<Product | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [rechargeOpen, setRechargeOpen] = useState(false);
+  const [rechargeSent, setRechargeSent] = useState(false);
+  const [selectedSub, setSelectedSub] = useState("");
+
 
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
@@ -116,17 +128,6 @@ export default function Storefront() {
     window.addEventListener("amirthaa:open-cart", openCart);
     return () => window.removeEventListener("amirthaa:open-cart", openCart);
   }, []);
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [justAddedId, setJustAddedId] = useState<string | null>(null);
-  const [lastAddedProduct, setLastAddedProduct] = useState<Product | null>(null);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [categoryOpen, setCategoryOpen] = useState(false);
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
-  const [rechargeOpen, setRechargeOpen] = useState(false);
-  const [rechargeSent, setRechargeSent] = useState(false);
-  const [selectedSub, setSelectedSub] = useState("");
 
   const filtered = useMemo(() => products.filter(p =>
     (activeCategory === "All" || p.category === activeCategory) &&
