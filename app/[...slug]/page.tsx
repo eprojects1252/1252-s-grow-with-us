@@ -56,7 +56,7 @@ export default async function StructurePage({ params }: { params: Promise<{ slug
     <main style={{ minHeight: "100vh", background: "linear-gradient(145deg, #f1fff7 0%, #f7fbf8 55%, #eaf8f0 100%)", padding: "28px 18px", color: "#172033" }}>
       <div style={{ maxWidth: 980, margin: "0 auto" }}>
         <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", padding: "10px 0 30px" }}>
-          <Link href="/" style={{ fontWeight: 800, letterSpacing: ".04em" }}>1252's grow with us</Link>
+          <Link href="/" style={{ fontWeight: 800, letterSpacing: ".04em" }}>1252&#39;s grow with us</Link>
           <Link href="/" style={{ color: "#23804a", fontWeight: 700, fontSize: 14 }}>← Back to Home</Link>
         </header>
         <section style={{ background: "#ffffffdf", border: "1px solid #dcefe3", borderRadius: 24, padding: "clamp(24px, 6vw, 48px)", boxShadow: "0 22px 60px rgba(37,75,50,.08)" }}>
