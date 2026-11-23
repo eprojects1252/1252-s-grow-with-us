@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeftRight, Eye, EyeOff, Mail, ShieldCheck, Smartphone } from "lucide-react";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { firebaseApp } from "@/lib/firebase";
-import { createClient } from "@supabase/supabase-js";
 
 type Props = { onAuthenticated: () => void; onClose: () => void };
 type Phase = "phone" | "password" | "email" | "review" | "otp" | "orbit" | "verified";
@@ -122,42 +120,6 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
     } finally { setBusy(false); }
   }
 
-  async function resetExistingPassword() {
-    setMessage("");
-    try {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-      if (!url || !key) throw new Error("Password recovery is not configured.");
-      const supabase = createClient(url, key);
-      const { error } = await supabase.auth.resetPasswordForEmail(existingEmail, {
-        redirectTo: window.location.origin + "/auth/reset-password"
-      });
-      if (error) throw error;
-      setMessage("If password recovery is available, a reset link has been sent to your registered email.");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to send a password reset link.");
-    }
-  }
-
-  async function signInWithPhonePassword() {
-    if (!password) { setMessage("Enter your password."); return; }
-    if (!validEmail(existingEmail)) { setMessage("The account email is unavailable. Please contact support."); return; }
-    setBusy(true); setMessage("");
-    try {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-      if (!url || !key) throw new Error("Authentication setup is incomplete.");
-      const supabase = createClient(url, key);
-      const { error } = await supabase.auth.signInWithPassword({ email: existingEmail, password });
-      if (error) throw error;
-      setPhase("verified");
-      setMessage("Signed in successfully. Opening your account…");
-      window.setTimeout(onAuthenticated, 700);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to sign in. Check your password.");
-    } finally { setBusy(false); }
-  }
-
   async function verifyCode() {
     if (!confirmation || code.length !== DIGITS) { setMessage("Enter the 6-digit OTP."); return; }
     setBusy(true); setMessage("");
@@ -237,7 +199,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
           <div className="core-login-cardtop"><span className="core-login-mini">SA</span><span className="core-login-step">{phase==="phone"?"PHONE CHECK":phase==="email"?"NEW ACCOUNT • EMAIL":phase==="review"?"CONFIRM DETAILS":phase==="password"?"EXISTING ACCOUNT":phase==="otp"?"PHONE VERIFICATION":phase==="orbit"?"SECURE CHECK":"ACCOUNT STATUS"}</span></div>
           {phase==="phone" && <><h2>Continue with Phone</h2><p className="core-login-sub">உங்கள் மொபைல் எண்ணை உள்ளிடுங்கள். ஏற்கெனவே கணக்கு உள்ளதா எனச் சரிபார்க்கிறோம்.</p><label className="core-login-label">PHONE NUMBER</label><input className="core-login-input" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+91 9876543210"/><button className="core-login-btn" type="button" onClick={checkPhone} disabled={busy}>{busy?"Checking…":"Continue"}</button></>}
           {phase==="password" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change phone number</button><h2>Welcome back</h2><p className="core-login-sub">இந்த Phone Number ஏற்கெனவே பதிவு செய்யப்பட்டுள்ளது. OTP மூலம் உறுதிப்படுத்துங்கள்.</p><div className="core-login-summary"><small>YOUR LOGIN ID</small><strong>{phone}</strong></div><button className="core-login-btn" type="button" onClick={sendCode} disabled={busy}>{busy?"Sending…":"Verify phone & Send OTP"}</button></>}
-          {phase==="email" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change phone number</button><h2>Welcome, New User!</h2><p className="core-login-sub">புதிய கணக்கிற்காக Email ID-ஐ உள்ளிட்டு சரிபார்க்கவும்.</p><label className="core-login-label">EMAIL ADDRESS</label><input className="core-login-input" type="email" autoComplete="email" value={email} onChange={e=>{setEmail(e.target.value);setEmailAvailable(null);setMessage("");}} placeholder="you@example.com"/><button className="core-login-btn" type="button" onClick={checkEmail} disabled={emailChecking||!validEmail(email)}>{emailChecking?"Checking…":"Verify Email"}</button></>}
+          {phase==="email" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change phone number</button><h2>Welcome, New User!</h2><p className="core-login-sub">புதிய கணக்கிற்காக விவரங்களை உள்ளிட்டு Email ID-ஐ சரிபார்க்கவும்.</p><label className="core-login-label">EMAIL ADDRESS</label><input className="core-login-input" type="email" autoComplete="email" value={email} onChange={e=>{setEmail(e.target.value);setEmailAvailable(null);setMessage("");}} placeholder="you@example.com"/><label className="core-login-label">FULL NAME</label><input className="core-login-input" value={fullName} onChange={e=>setFullName(e.target.value)} autoComplete="name" placeholder="Your full name"/><label className="core-login-label">LOGIN PASSWORD</label><input className="core-login-input" type="password" value={password} onChange={e=>setPassword(e.target.value)} autoComplete="new-password" placeholder="8+ characters, capital, number & symbol"/><label className="core-login-label">CONFIRM PASSWORD</label><input className="core-login-input" type="password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} autoComplete="new-password" placeholder="Re-enter password"/><label className="core-login-check"><input type="checkbox" checked={acceptedTerms} onChange={e=>setAcceptedTerms(e.target.checked)}/> I agree to the Terms and Privacy Policy.</label><button className="core-login-btn" type="button" onClick={checkEmail} disabled={emailChecking||!validEmail(email)||!fullName.trim()||password.length<8||password!==confirmPassword||!acceptedTerms}>{emailChecking?"Checking…":"Verify Email"}</button></>}
           {phase==="review" && <><button className="core-login-back" type="button" onClick={()=>{setPhase("email");setMessage("");}}>← Change email</button><h2>Confirm your details</h2><p className="core-login-sub">OTP அனுப்புவதற்கு முன் விவரங்களைச் சரிபார்க்கவும்.</p><div className="core-login-summary"><small>EMAIL STATUS</small><strong>✓ AVAILABLE — CHECKED</strong><small>SRI USER ID</small><strong>{phone}</strong><small>REGISTERED PHONE</small><strong>{phone}</strong><small>EMAIL ADDRESS</small><strong>{email.trim().toLowerCase()}</strong><small>FULL NAME</small><strong>{fullName}</strong></div><button className="core-login-btn" type="button" onClick={sendCode} disabled={busy||!fullName.trim()||password.length<8||password!==confirmPassword||!acceptedTerms}>{busy?"Sending OTP…":"Verify phone & Send OTP"}</button></>}
           {phase==="otp" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change number</button><h2>Verify your number</h2><p className="core-login-sub">இந்த எண்ணிற்கு அனுப்பிய 6 இலக்க OTP-ஐ உள்ளிடுங்கள்.</p><div className="core-login-summary"><small>OTP SENT TO</small><strong>{phone}</strong></div><label className="core-login-label">6-DIGIT VERIFICATION CODE</label><input ref={inputRef} className="core-login-input core-login-otp" type="tel" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={e=>setCode(e.target.value.replace(/\\D/g,"").slice(0,6))} placeholder="••••••"/><button className="core-login-btn" type="button" onClick={verifyCode} disabled={busy||code.length!==6}>{busy?"Verifying securely…":"Verify OTP"}</button></>}
           {phase==="orbit" && <><h2>Verifying securely…</h2><p className="core-login-sub">உங்கள் கணக்கை பாதுகாப்பாக இணைக்கிறோம்.</p></>}
