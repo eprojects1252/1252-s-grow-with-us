@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     });
     const { data: profile, error } = await admin
       .from("profiles")
-      .select("email, supabase_user_id")
+      .select("supabase_user_id, email")
       .eq("phone_e164", e164)
       .maybeSingle();
     if (error) throw error;
@@ -31,7 +31,6 @@ export async function POST(request: Request) {
     const registered = Boolean(profile?.supabase_user_id);
     return NextResponse.json({
       registered,
-      email: profile?.email ?? null,
       canPasswordLogin: registered && Boolean(profile?.email)
     });
   } catch (error) {
