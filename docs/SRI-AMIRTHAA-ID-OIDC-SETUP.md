@@ -18,7 +18,7 @@ Never expose the Supabase service-role key or OIDC signing private key in a \`NE
 
 ## Core API environment
 
-Configure on the Sri Amirthaa ID Core Render Web Service:
+Configure as Supabase Edge Function secrets on the Core project (project ref `nvtfaynhjwycfctsuzxf`):
 
 - \`OIDC_ISSUER\`: exactly the public HTTPS origin of the Core API, matching \`SRI_AMIRTHAA_ID_ISSUER\`.
 - \`OIDC_PRIVATE_JWK\`: a stable P-256 EC private JWK with \`kty=EC\`, \`crv=P-256\`, private parameter \`d\`, and a stable \`kid\`. Keep it secret and do not commit it.
