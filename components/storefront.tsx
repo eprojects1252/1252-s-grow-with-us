@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Search, ShoppingBag, UserRound, Wallet, Menu, X, ChevronDown, ArrowRight, MapPin,
   Sparkles, Truck, ShieldCheck, Headphones, Smartphone, Zap, Heart,
@@ -101,11 +102,14 @@ export default function Storefront() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const requestedSearch = params.get("search");
-    if (requestedSearch && requestedSearch !== "1") setQuery(requestedSearch);
     const requestedCategory = params.get("category");
-    if (requestedCategory === "Electronics") setActiveCategory("Electronics");
-    if (requestedCategory === "Fashion") setActiveCategory("Fashion – Men");
-    if (requestedCategory === "Home Appliances") setActiveCategory("Home Appliances");
+    const frame = window.requestAnimationFrame(() => {
+      if (requestedSearch && requestedSearch !== "1") setQuery(requestedSearch);
+      if (requestedCategory === "Electronics") setActiveCategory("Electronics");
+      if (requestedCategory === "Fashion") setActiveCategory("Fashion – Men");
+      if (requestedCategory === "Home Appliances") setActiveCategory("Home Appliances");
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
   useEffect(() => {
     const openCart = () => setCartOpen(true);
@@ -127,7 +131,7 @@ export default function Storefront() {
   const filtered = useMemo(() => products.filter(p =>
     (activeCategory === "All" || p.category === activeCategory) &&
     (p.name.toLowerCase().includes(query.toLowerCase()) || p.category.toLowerCase().includes(query.toLowerCase()))
-  ), [query, activeCategory]);
+  ), [products, query, activeCategory]);
 
   const addToCart = (p: Product) => {
     setCart(prev => {
@@ -185,7 +189,7 @@ export default function Storefront() {
 
       <section className="recharge-banner wrap" id="recharge"><div className="recharge-icon"><Smartphone size={34}/></div><div><span className="eyebrow">QUICK & CONVENIENT</span><h2>Recharge, without the hassle.</h2><p>Submit your mobile recharge request. Our team will process it manually after payment confirmation.</p></div><button className="primary-btn" onClick={() => setRechargeOpen(true)}>Recharge now <ArrowRight size={17}/></button></section>
 
-      <footer className="footer"><div className="footer-main"><div className="brand footer-brand"><span className="brand-mark">A</span><span>SRI AMIRTHAA<small>SHOPPING, REIMAGINED</small></span></div><p>A more thoughtful place for all the things you need and love.</p><div className="footer-links"><a href="#products">Shop</a><a href="#products">Categories</a><button onClick={() => setRechargeOpen(true)}>Recharge</button><a href="/admin">Admin</a></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} Sri Amirthaa. All rights reserved.</span><span>Built for a better everyday.</span></div></footer>
+      <footer className="footer"><div className="footer-main"><div className="brand footer-brand"><span className="brand-mark">A</span><span>SRI AMIRTHAA<small>SHOPPING, REIMAGINED</small></span></div><p>A more thoughtful place for all the things you need and love.</p><div className="footer-links"><a href="#products">Shop</a><a href="#products">Categories</a><button onClick={() => setRechargeOpen(true)}>Recharge</button><Link href="/admin">Admin</Link></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} Sri Amirthaa. All rights reserved.</span><span>Built for a better everyday.</span></div></footer>
 
 
       {cart.length > 0 && <div className="cart-float-bar" role="status" aria-live="polite">
