@@ -9,7 +9,7 @@ import {
   ChevronRight, Grid2X2, LogIn, Home as HomeIcon, Monitor, Shirt, House, PanelLeftClose, PanelLeftOpen, Tag, Package
 } from "lucide-react";
 
-type Product = { id: number; name: string; category: string; price: number; oldPrice: number; rating: string; tag: string; emoji: string; color: string };
+type Product = { id: string; name: string; category: string; price: number; oldPrice: number; rating: string; tag: string; emoji: string; color: string };
 type CartItem = Product & { qty: number };
 
 const categories = [
@@ -41,21 +41,16 @@ const categories = [
   { name: "Digital Products", icon: "🖥️", subs: ["Software", "E-books", "Digital Subscriptions", "Gift Cards"] },
 ];
 
-const products: Product[] = [
-  { id: 1, name: "AeroSound Wireless Headphones", category: "Electronics", price: 2499, oldPrice: 3999, rating: "4.8", tag: "BESTSELLER", emoji: "🎧", color: "lavender" },
-  { id: 2, name: "Nova X5 5G Smartphone", category: "Mobiles & Tablets", price: 14999, oldPrice: 17999, rating: "4.7", tag: "HOT DEAL", emoji: "📱", color: "blue" },
-  { id: 3, name: "Minimal Ceramic Table Lamp", category: "Home & Kitchen", price: 1299, oldPrice: 1899, rating: "4.6", tag: "NEW", emoji: "💡", color: "peach" },
-  { id: 4, name: "Everyday Classic Sneakers", category: "Fashion – Men", price: 1899, oldPrice: 2599, rating: "4.5", tag: "TRENDING", emoji: "👟", color: "mint" },
-  { id: 5, name: "PulseFit Smart Watch", category: "Electronics", price: 3299, oldPrice: 4999, rating: "4.6", tag: "HOT DEAL", emoji: "⌚", color: "pink" },
-  { id: 6, name: "BrewMate Coffee Maker", category: "Home Appliances", price: 2799, oldPrice: 3499, rating: "4.4", tag: "POPULAR", emoji: "☕", color: "cream" },
-  { id: 7, name: "Urban Carry Backpack", category: "Travel & Luggage", price: 999, oldPrice: 1499, rating: "4.5", tag: "VALUE PICK", emoji: "🎒", color: "peach" },
-  { id: 8, name: "Studio Wireless Speaker", category: "Electronics", price: 2199, oldPrice: 2999, rating: "4.7", tag: "BESTSELLER", emoji: "🔊", color: "blue" },
-];
+const productColors = ["lavender", "blue", "peach", "mint", "pink", "cream"];
 
 const money = (n: number) => "₹" + n.toLocaleString("en-IN");
 
 export default function Storefront() {
   const [query, setQuery] = useState("");
+  const [storeCategories, setStoreCategories] = useState(categories);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [pincode, setPincode] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -63,6 +58,45 @@ export default function Storefront() {
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/storefront/catalog", { cache: "no-store" })
+      .then(async response => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Unable to load store catalog.");
+        return result;
+      })
+      .then(result => {
+        if (!active) return;
+        const rows = Array.isArray(result.categories) ? result.categories : [];
+        const parents = rows.filter((item: { parent_id: string | null }) => !item.parent_id);
+        const nextCategories = parents.map((parent: { id: string; name: string; icon: string | null }) => ({
+          name: parent.name, icon: parent.icon || "🛍️",
+          subs: rows.filter((item: { parent_id: string | null }) => item.parent_id === parent.id).map((item: { name: string }) => item.name),
+        }));
+        if (nextCategories.length) setStoreCategories(nextCategories);
+        const categoryById = new Map(rows.map((item: { id: string; name: string; parent_id: string | null }) => [item.id, item]));
+        const nextProducts = (Array.isArray(result.products) ? result.products : []).map((item: {
+          id: string; name: string; price: number; compare_at_price: number | null; category_id: string | null;
+          category_name?: string; is_featured: boolean; stock_status: string;
+        }, index: number) => {
+          const category = item.category_id ? categoryById.get(item.category_id) as { name: string; parent_id: string | null } | undefined : undefined;
+          const parent = category?.parent_id ? categoryById.get(category.parent_id) as { name: string } | undefined : category;
+          return {
+            id: item.id, name: item.name, category: parent?.name || item.category_name || "General",
+            price: Number(item.price), oldPrice: Number(item.compare_at_price ?? item.price),
+            rating: "New", tag: item.is_featured ? "FEATURED" : item.stock_status === "in_stock" ? "AVAILABLE" : "PRODUCT",
+            emoji: "🛍️", color: productColors[index % productColors.length],
+          };
+        });
+        setProducts(nextProducts);
+        setCatalogError("");
+      })
+      .catch(error => { if (active) setCatalogError(error instanceof Error ? error.message : "Catalog connection failed."); })
+      .finally(() => { if (active) setCatalogLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -124,7 +158,7 @@ export default function Storefront() {
 
       {categoryOpen && <section className="mega-menu">
         <div className="mega-head"><div><span className="eyebrow">EXPLORE OUR STORE</span><h3>Shop by category</h3></div><button className="icon-btn" onClick={() => setCategoryOpen(false)}><X/></button></div>
-        <div className="category-grid">{categories.map(c => <div className="category-column" key={c.name}><button className="category-title" onClick={() => {setActiveCategory(c.name);setCategoryOpen(false);}}><span>{c.icon}</span>{c.name}<ChevronRight size={14}/></button>{c.subs.map(s => <button className="subcategory" key={s} onClick={() => {setActiveCategory(c.name);setSelectedSub(s);setCategoryOpen(false);}}>{s}</button>)}</div>)}</div>
+        <div className="category-grid">{storeCategories.map(c => <div className="category-column" key={c.name}><button className="category-title" onClick={() => {setActiveCategory(c.name);setCategoryOpen(false);}}><span>{c.icon}</span>{c.name}<ChevronRight size={14}/></button>{c.subs.map(s => <button className="subcategory" key={s} onClick={() => {setActiveCategory(c.name);setSelectedSub(s);setCategoryOpen(false);}}>{s}</button>)}</div>)}</div>
       </section>}
 
       <section className="hero wrap">
@@ -140,13 +174,13 @@ export default function Storefront() {
 
       <section className="quick-cats wrap" id="categories">
         <div className="section-heading"><div><span className="eyebrow">A WORLD OF CHOICE</span><h2>Explore categories</h2></div><button className="text-btn" onClick={() => setCategoryOpen(true)}>View all categories <ArrowRight size={16}/></button></div>
-        <div className="quick-cat-row">{categories.slice(0, 9).map(c => <button className={`quick-cat ${activeCategory === c.name ? "selected" : ""}`} key={c.name} onClick={() => {setActiveCategory(c.name);setSelectedSub("");}}><span>{c.icon}</span><b>{c.name}</b></button>)}</div>
+        <div className="quick-cat-row">{storeCategories.slice(0, 9).map(c => <button className={`quick-cat ${activeCategory === c.name ? "selected" : ""}`} key={c.name} onClick={() => {setActiveCategory(c.name);setSelectedSub("");}}><span>{c.icon}</span><b>{c.name}</b></button>)}</div>
       </section>
 
       <section className="products-section wrap" id="products">
         <div className="section-heading"><div><span className="eyebrow">HANDPICKED FOR YOU</span><h2>{activeCategory === "All" ? "Popular right now" : activeCategory}</h2><p>{selectedSub ? `Browsing ${selectedSub}` : "A few things we think you'll love."}</p></div><button className="outline-btn" onClick={() => {setActiveCategory("All");setSelectedSub("");}}>View all products <ArrowRight size={15}/></button></div>
-        <div className="filter-row"><span>{filtered.length} products shown</span><button onClick={() => {setActiveCategory("All");setQuery("");}}>Clear filters <X size={13}/></button></div>
-        {filtered.length ? <div className="product-grid">{filtered.map(p => <article className="product-card" key={p.id}><div className={`product-art ${p.color}`}><span className="product-tag">{p.tag}</span><button className="heart-btn" aria-label="Save item"><Heart size={17}/></button><div>{p.emoji}</div></div><div className="product-info"><span className="product-category">{p.category}</span><h3>{p.name}</h3><div className="rating">★ {p.rating} <small> · Customer favourite</small></div><div className="price-row"><strong>{money(p.price)}</strong><del>{money(p.oldPrice)}</del><span>{Math.round((1-p.price/p.oldPrice)*100)}% off</span></div><button className={`add-btn ${justAddedId === p.id ? "add-btn-added" : ""}`} onClick={() => addToCart(p)}>{justAddedId === p.id ? <><CheckCircle2 size={16}/> Added</> : <><Plus size={16}/> Add to cart</>}</button></div></article>)}</div> : <div className="empty-state"><Search/><h3>No products found</h3><p>Try another search or explore all products.</p><button className="primary-btn" onClick={() => {setQuery("");setActiveCategory("All");}}>Show all products</button></div>}
+        <div className="filter-row"><span>{catalogLoading ? "Loading products…" : `${filtered.length} products shown`}</span><button onClick={() => {setActiveCategory("All");setQuery("");}}>Clear filters <X size={13}/></button></div>
+        {catalogLoading ? <div className="empty-state"><ShoppingBag/><h3>Loading products</h3><p>Connecting to Sri Amirthaa E-Commerce.</p></div> : catalogError ? <div className="empty-state"><ShoppingBag/><h3>Catalog connection pending</h3><p>{catalogError}</p></div> : filtered.length ? <div className="product-grid">{filtered.map(p => <article className="product-card" key={p.id}><div className={`product-art ${p.color}`}><span className="product-tag">{p.tag}</span><button className="heart-btn" aria-label="Save item"><Heart size={17}/></button><div>{p.emoji}</div></div><div className="product-info"><span className="product-category">{p.category}</span><h3>{p.name}</h3><div className="rating">★ {p.rating} <small> · Customer favourite</small></div><div className="price-row"><strong>{money(p.price)}</strong><del>{money(p.oldPrice)}</del><span>{Math.round((1-p.price/p.oldPrice)*100)}% off</span></div><button className={`add-btn ${justAddedId === p.id ? "add-btn-added" : ""}`} onClick={() => addToCart(p)}>{justAddedId === p.id ? <><CheckCircle2 size={16}/> Added</> : <><Plus size={16}/> Add to cart</>}</button></div></article>)}</div> : <div className="empty-state"><Search/><h3>No products published yet</h3><p>Products added and published from the Admin Panel will appear here.</p><button className="primary-btn" onClick={() => {setQuery("");setActiveCategory("All");}}>Show all products</button></div>}
       </section>
 
       <section className="recharge-banner wrap" id="recharge"><div className="recharge-icon"><Smartphone size={34}/></div><div><span className="eyebrow">QUICK & CONVENIENT</span><h2>Recharge, without the hassle.</h2><p>Submit your mobile recharge request. Our team will process it manually after payment confirmation.</p></div><button className="primary-btn" onClick={() => setRechargeOpen(true)}>Recharge now <ArrowRight size={17}/></button></section>
