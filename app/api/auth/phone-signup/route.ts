@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     }, { onConflict: "supabase_user_id" });
     if (saveError) throw saveError;
 
-    const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_SITE_URL;
+    const origin = new URL(request.url).origin;
     const { error: emailError } = await admin.auth.resend({
       type: "signup",
       email,
