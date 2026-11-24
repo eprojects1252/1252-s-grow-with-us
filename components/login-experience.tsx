@@ -17,10 +17,14 @@ const PASSWORD_RULES = [
 const PASSWORD_TONES = ["#D93D42", "#C2410C", "#F5A524", "#9BD04A", "#15803D"];
 const PASSWORD_WORDS = ["Too weak", "Weak", "Fair", "Good", "Strong"];
 const passwordScore = (value: string) => PASSWORD_RULES.filter(rule => rule.test.test(value)).length;
+const emailFieldStyle: React.CSSProperties = {width:"100%",height:48,padding:"0 14px",border:"1px solid #d5e2ef",borderRadius:11,background:"#fff",color:"#243b57",outline:"none",boxSizing:"border-box"};
+const providerButtonStyle: React.CSSProperties = {width:"100%",height:52,border:"1px solid #d5e2ef",borderRadius:12,background:"#fff",color:"#263b57",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:11,marginBottom:12,cursor:"pointer"};
+const textButtonStyle: React.CSSProperties = {border:0,background:"transparent",color:"#315a7c",cursor:"pointer",padding:0,fontSize:12};
 
 export default function LoginExperience({ initialMode = "login", adminMode = false, onAuthenticated }: Props) {
   const [mode, setMode] = useState<"login" | "signup">(adminMode ? "login" : initialMode);
   const [showPhoneOtp, setShowPhoneOtp] = useState(false);
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
   const signup = mode === "signup" && !adminMode && !showPhoneOtp && !forgotPassword;
   const [showPassword, setShowPassword] = useState(false);
@@ -120,9 +124,33 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
   const tone=PASSWORD_TONES[score];
 
-  // Customer login offers exactly one Google option and one phone OTP option.
-  // The phone flow is shown only after the user selects Continue with Phone.
+  // Customer sign-in chooser: exactly four providers, all presented in a light theme.
   if (!adminMode && showPhoneOtp) return <div><button type="button" onClick={()=>setShowPhoneOtp(false)} style={{position:"fixed",zIndex:20,top:14,left:14,padding:"9px 13px",border:"1px solid #d5e2ef",borderRadius:10,background:"#fff",color:"#315a7c"}}>← Back</button><PhoneOtpLogin /></div>;
+  if (!adminMode && showEmailLogin) return (
+    <main style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:"28px 18px",background:"linear-gradient(135deg,#f7fbff 0%,#f0f8f5 55%,#fff7ef 100%)",color:"#17243b",fontFamily:"Inter,ui-sans-serif,system-ui,sans-serif"}}>
+      <section style={{position:"relative",width:"min(100%,440px)",padding:"34px",border:"1px solid #dbe6f1",borderRadius:24,background:"#ffffffed",boxShadow:"0 24px 70px #567aa51c"}}>
+        <button type="button" onClick={()=>{setShowEmailLogin(false);setNotice("");}} style={{position:"absolute",top:16,left:18,border:0,background:"transparent",color:"#315a7c",cursor:"pointer"}}>← Back</button>
+        <div style={{textAlign:"center",margin:"20px 0 24px"}}>
+          <Image src="/images/sri-amirthaa-groups-1252.png" alt="Sri Amirthaa Groups" width={170} height={68} priority style={{objectFit:"contain",margin:"0 auto"}} />
+          <h1 style={{fontSize:26,margin:"12px 0 6px",color:"#1d3151"}}>{forgotPassword?"Reset password":mode==="signup"?"Create account":"Continue with Email"}</h1>
+          <p style={{fontSize:13,color:"#62748e",margin:0}}>{forgotPassword?"We’ll send a secure password reset link.":"Sign in or create your account using your email."}</p>
+        </div>
+        <form ref={formRef} onSubmit={submit} noValidate style={{display:"grid",gap:13}}>
+          {signup&&!forgotPassword&&<input value={name} onChange={e=>setName(e.target.value)} placeholder="Full name" autoComplete="name" required style={emailFieldStyle}/>}
+          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email address" autoComplete="username" required style={emailFieldStyle}/>
+          {!forgotPassword&&<input type={showPassword?"text":"password"} value={password} onChange={e=>updatePassword(e.target.value)} placeholder="Password" autoComplete={signup?"new-password":"current-password"} required style={emailFieldStyle}/>}
+          {signup&&!forgotPassword&&<input type={showPassword?"text":"password"} value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} placeholder="Confirm password" autoComplete="new-password" required style={emailFieldStyle}/>}
+          {signup&&!forgotPassword&&<label className="auth-terms" style={{fontSize:12,color:"#536780"}}><input type="checkbox" required/> I agree to the <Link href="/terms">Terms</Link> and <Link href="/privacy">Privacy Policy</Link>.</label>}
+          {notice&&<p role="status" style={{fontSize:12,color:"#b44d4a",margin:0}}>{notice}</p>}
+          <button type="submit" disabled={busy} style={{height:50,border:0,borderRadius:12,background:"#d9eee7",color:"#23416b",fontWeight:800,cursor:"pointer"}}>{busy?"Please wait…":forgotPassword?"Send reset link":signup?"Create account":"Sign in with Email"}</button>
+        </form>
+        <div style={{display:"flex",justifyContent:"space-between",gap:12,flexWrap:"wrap",marginTop:17,fontSize:12}}>
+          <button type="button" onClick={()=>{setForgotPassword(!forgotPassword);setNotice("");}} style={textButtonStyle}>{forgotPassword?"Back to sign in":"Forgot password?"}</button>
+          {!forgotPassword&&<button type="button" onClick={()=>{setMode(mode==="login"?"signup":"login");setNotice("");}} style={textButtonStyle}>{mode==="login"?"Create account":"Already registered? Sign in"}</button>}
+        </div>
+      </section>
+    </main>
+  );
   if (!adminMode) return (
     <main style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:"28px 18px",background:"linear-gradient(135deg,#f7fbff 0%,#f0f8f5 55%,#fff7ef 100%)",color:"#17243b",fontFamily:"Inter,ui-sans-serif,system-ui,sans-serif"}}>
       <section style={{width:"min(100%,440px)",padding:"34px",border:"1px solid #dbe6f1",borderRadius:24,background:"#ffffffed",boxShadow:"0 24px 70px #567aa51c"}}>
@@ -131,14 +159,14 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
           <h1 style={{fontSize:27,margin:"18px 0 8px",color:"#1d3151"}}>Welcome to Sri Amirthaa</h1>
           <p style={{fontSize:13,lineHeight:1.7,color:"#62748e",margin:0}}>Choose one way to continue to your account.</p>
         </div>
-        <button type="button" onClick={googleSignIn} disabled={busy} style={{width:"100%",height:52,border:"1px solid #d5e2ef",borderRadius:12,background:"#fff",color:"#263b57",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:11,marginBottom:13,cursor:"pointer",opacity:busy ? 0.6 : 1}}>
+        <button type="button" onClick={googleSignIn} disabled={busy} style={providerButtonStyle}>
           <svg aria-hidden="true" viewBox="0 0 48 48" width="20" height="20"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.9 6-15z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.7-5.1c-1.8 1.2-4 1.9-6.8 1.9-5.2 0-9.6-3.5-11.2-8.2H5.9v5.3A20 20 0 0 0 24 44z"/><path fill="#FBBC05" d="M12.8 27.7a12 12 0 0 1 0-7.4V15H5.9a20 20 0 0 0 0 17.9z"/><path fill="#EA4335" d="M24 12.1c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.1 29.5 4 24 4A20 20 0 0 0 5.9 15l6.9 5.3c1.6-4.7 6-8.2 11.2-8.2z"/></svg>
-          {busy ? "Please wait…" : "Continue with Google"}
+          Continue with Google
         </button>
-        <button type="button" onClick={()=>setShowPhoneOtp(true)} style={{width:"100%",height:52,border:0,borderRadius:12,background:"linear-gradient(100deg,#d9f3eb,#dcecff)",color:"#23416b",fontWeight:800,cursor:"pointer"}}>
-          Continue with Phone
-        </button>
-        {notice && <p role="status" style={{fontSize:12,color:"#b44d4a",marginTop:14,textAlign:"center"}}>{notice}</p>}
+        <button type="button" onClick={()=>setShowPhoneOtp(true)} style={{...providerButtonStyle,background:"linear-gradient(100deg,#d9f3eb,#dcecff)",border:0}}>Continue with Phone</button>
+        <button type="button" onClick={()=>setShowEmailLogin(true)} style={providerButtonStyle}>✉️ Continue with Email</button>
+        <button type="button" onClick={appleSignIn} disabled={busy} style={providerButtonStyle}> Continue with Apple</button>
+        {notice&&<p role="status" style={{fontSize:12,color:"#b44d4a",marginTop:14,textAlign:"center"}}>{notice}</p>}
       </section>
     </main>
   );
