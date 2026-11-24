@@ -177,7 +177,7 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
     const linked = await linkWithCredential(currentUser,phoneCredential);
     setProviderNeedsPhone(false);
     setShowOtp(false);
-    await startCentralSession(await linked.user.getIdToken(true));
+    await startCentralSession(await provisionProvider(linked.user));
   }
 
   async function run(action:()=>Promise<void>) {
