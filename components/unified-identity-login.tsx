@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
 import {
-  EmailAuthProvider, GoogleAuthProvider, OAuthProvider, getAuth,
+  EmailAuthProvider, GoogleAuthProvider, OAuthProvider, PhoneAuthProvider, getAuth, updateProfile,
   linkWithCredential, signInWithEmailAndPassword, signInWithPhoneNumber,
   signInWithPopup, type ConfirmationResult
 } from "firebase/auth";
@@ -27,6 +27,8 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
   const [notice,setNotice] = useState("");
   const [busy,setBusy] = useState(false);
   const [showOtp,setShowOtp] = useState(false);
+  const [providerNeedsPhone,setProviderNeedsPhone] = useState(false);
+  const [providerVerificationId,setProviderVerificationId] = useState("");
   const recaptchaRef = useRef<HTMLDivElement>(null);
   const auth = getAuth(firebaseApp);
 
@@ -102,7 +104,7 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
     const phoneCredential = await confirmation.confirm(otp);
     const emailCredential = EmailAuthProvider.credential(email.trim().toLowerCase(),password);
     const linked = await linkWithCredential(phoneCredential.user,emailCredential);
-    await linked.user.updateProfile({displayName:fullName.trim()});
+    await updateProfile(linked.user,{displayName:fullName.trim()});
     const firebaseIdToken = await linked.user.getIdToken(true);
     const response = await fetch("/api/auth/phone-signup",{
       method:"POST",headers:{"Content-Type":"application/json"},cache:"no-store",
