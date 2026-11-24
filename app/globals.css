@@ -1071,3 +1071,11 @@ main,main:has(.store-sidebar-expanded){padding-left:0!important}
 }
 .auth-submit:not(.runaway-submit){position:relative!important;left:auto!important;top:auto!important;transform:none!important;cursor:pointer!important}
 .auth-submit:not(.runaway-submit):disabled{opacity:.6!important;cursor:wait!important}
+
+
+/* Login method selector: phone and email remain equally discoverable. */
+.auth-method-switch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 4px}
+.auth-method-switch button{min-height:46px;padding:10px 12px;border:1px solid rgba(53,112,72,.18);border-radius:13px;background:rgba(255,255,255,.58);color:#496b52;font-size:11px;font-weight:750;transition:background .2s,border-color .2s,box-shadow .2s}
+.auth-method-switch button.active{border-color:#58a875;background:linear-gradient(135deg,#e9f7ec,#fff);color:#176b45;box-shadow:0 6px 18px rgba(41,100,60,.09)}
+.auth-method-switch button:focus-visible{outline:3px solid rgba(49,145,88,.25);outline-offset:2px}
+@media(max-width:520px){.auth-method-switch{gap:7px}.auth-method-switch button{font-size:10px;padding:9px 7px;min-height:44px}}
