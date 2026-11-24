@@ -5,17 +5,13 @@ import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationRes
 import { firebaseApp } from "@/lib/firebase";
 
 type Props = { onClose: () => void };
-type Phase = "phone" | "password" | "email" | "review" | "otp" | "orbit" | "verified";
+type Phase = "phone" | "existing" | "email" | "review" | "otp" | "orbit" | "verified";
 const DIGITS = 6;
 const validEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
 export default function PhoneOtpLogin({ onClose }: Props) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [confirmation, setConfirmation] = useState<ConfirmationResult | null>(null);
   const [phase, setPhase] = useState<Phase>("phone");
@@ -23,7 +19,6 @@ export default function PhoneOtpLogin({ onClose }: Props) {
   const [message, setMessage] = useState("");
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [emailChecking, setEmailChecking] = useState(false);
-  const [existingEmail, setExistingEmail] = useState("");
   const verifier = useRef<RecaptchaVerifier | null>(null);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,12 +42,8 @@ export default function PhoneOtpLogin({ onClose }: Props) {
       if (!response.ok) throw new Error(result.error || "Unable to check this phone number.");
       setPhone(e164);
       if (result.registered) {
-        if (!result.canPasswordLogin) {
-          throw new Error("This phone number is already registered but its account needs secure recovery. Please contact support.");
-        }
-        setExistingEmail("");
         setEmail("");
-        setPhase("password");
+        setPhase("existing");
         setMessage("Existing account found. Verify your phone number to continue.");
       } else {
         setPhase("email");
@@ -85,15 +76,7 @@ export default function PhoneOtpLogin({ onClose }: Props) {
 
   async function sendCode() {
     setMessage("");
-    if (phase === "review") {
-      if (emailAvailable !== true) { setMessage("Check that this email address is available before requesting OTP."); return; }
-      if (!fullName.trim()) { setMessage("Enter your full name."); return; }
-      if (password !== confirmPassword) { setMessage("Passwords do not match."); return; }
-      if (!acceptedTerms) { setMessage("Please accept the Terms and Privacy Policy."); return; }
-      if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^\w\s]/.test(password)) {
-        setMessage("Password must contain 8 characters, a capital letter, a number and a symbol."); return;
-      }
-    }
+    if (phase === "review" && emailAvailable !== true) { setMessage("Check that this email address is available before requesting OTP."); return; }
     setBusy(true);
     try {
       const auth = getAuth(firebaseApp);
@@ -129,7 +112,7 @@ export default function PhoneOtpLogin({ onClose }: Props) {
       if (emailAvailable === true) {
         const response = await fetch("/api/auth/phone-signup", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ firebaseIdToken, email: email.trim(), password, fullName })
+          body: JSON.stringify({ firebaseIdToken, email: email.trim() })
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Unable to create your account.");
@@ -138,7 +121,7 @@ export default function PhoneOtpLogin({ onClose }: Props) {
       } else {
         const response = await fetch("/api/auth/sri-amirthaa/start", {
           method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", cache: "no-store",
-          body: JSON.stringify({ firebaseIdToken, pendingEmail: existingEmail || undefined })
+          body: JSON.stringify({ firebaseIdToken })
         });
         const result = await response.json();
         if (!response.ok || typeof result.authorizationUrl !== "string") throw new Error(result.error || "Secure sign-in could not start.");
@@ -152,8 +135,7 @@ export default function PhoneOtpLogin({ onClose }: Props) {
 
   function resetPhone() {
     verifier.current?.clear(); verifier.current = null; recaptchaContainerRef.current?.replaceChildren();
-    setPhase("phone"); setConfirmation(null); setCode(""); setPassword(""); setConfirmPassword(""); setAcceptedTerms(false); setEmail(""); setEmailAvailable(null);
-    setExistingEmail(""); setFullName(""); setAcceptedTerms(false); setMessage("");
+    setPhase("phone"); setConfirmation(null); setCode(""); setEmail(""); setEmailAvailable(null); setMessage("");
   }
 
   return (
@@ -197,11 +179,11 @@ export default function PhoneOtpLogin({ onClose }: Props) {
       <section className="core-login-layout">
         <div className="core-login-intro"><span className="core-login-eyebrow">✦ ONE ID. EVERY CONNECTION.</span><h1>Your world,<br/><em>one identity.</em></h1><p>ஒரே Sri Amirthaa account மூலம் இணைக்கப்பட்ட அனைத்து சேவைகளையும் பாதுகாப்பாக அணுகுங்கள்.</p><div className="core-login-trust"><span>◈ Verified identity</span><span>▣ Encrypted access</span></div></div>
         <section className="core-login-card">
-          <div className="core-login-cardtop"><span className="core-login-mini">SA</span><span className="core-login-step">{phase==="phone"?"PHONE CHECK":phase==="email"?"NEW ACCOUNT • EMAIL":phase==="review"?"CONFIRM DETAILS":phase==="password"?"EXISTING ACCOUNT":phase==="otp"?"PHONE VERIFICATION":phase==="orbit"?"SECURE CHECK":"ACCOUNT STATUS"}</span></div>
+          <div className="core-login-cardtop"><span className="core-login-mini">SA</span><span className="core-login-step">{phase==="phone"?"PHONE CHECK":phase==="email"?"NEW ACCOUNT • EMAIL":phase==="review"?"CONFIRM DETAILS":phase==="existing"?"EXISTING ACCOUNT":phase==="otp"?"PHONE VERIFICATION":phase==="orbit"?"SECURE CHECK":"ACCOUNT STATUS"}</span></div>
           {phase==="phone" && <><h2>Continue with Phone</h2><p className="core-login-sub">உங்கள் மொபைல் எண்ணை உள்ளிடுங்கள். ஏற்கெனவே கணக்கு உள்ளதா எனச் சரிபார்க்கிறோம்.</p><label className="core-login-label">PHONE NUMBER</label><input className="core-login-input" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+91 9876543210"/><button className="core-login-btn" type="button" onClick={checkPhone} disabled={busy}>{busy?"Checking…":"Continue"}</button></>}
           {phase==="password" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change phone number</button><h2>Welcome back</h2><p className="core-login-sub">இந்த Phone Number ஏற்கெனவே பதிவு செய்யப்பட்டுள்ளது. OTP மூலம் உறுதிப்படுத்துங்கள்.</p><div className="core-login-summary"><small>SRI USER ID</small><strong>{phone}</strong></div><button className="core-login-btn" type="button" onClick={sendCode} disabled={busy}>{busy?"Sending…":"Verify phone & Send OTP"}</button></>}
-          {phase==="email" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change phone number</button><h2>Welcome, New User!</h2><p className="core-login-sub">புதிய கணக்கிற்காக விவரங்களை உள்ளிட்டு Email ID-ஐ சரிபார்க்கவும்.</p><label className="core-login-label">EMAIL ADDRESS</label><input className="core-login-input" type="email" autoComplete="email" value={email} onChange={e=>{setEmail(e.target.value);setEmailAvailable(null);setMessage("");}} placeholder="you@example.com"/><label className="core-login-label">FULL NAME</label><input className="core-login-input" value={fullName} onChange={e=>setFullName(e.target.value)} autoComplete="name" placeholder="Your full name"/><label className="core-login-label">LOGIN PASSWORD</label><input className="core-login-input" type="password" value={password} onChange={e=>setPassword(e.target.value)} autoComplete="new-password" placeholder="8+ characters, capital, number & symbol"/><label className="core-login-label">CONFIRM PASSWORD</label><input className="core-login-input" type="password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} autoComplete="new-password" placeholder="Re-enter password"/><label className="core-login-check"><input type="checkbox" checked={acceptedTerms} onChange={e=>setAcceptedTerms(e.target.checked)}/> I agree to the Terms and Privacy Policy.</label><button className="core-login-btn" type="button" onClick={checkEmail} disabled={emailChecking||!validEmail(email)||!fullName.trim()||password.length<8||password!==confirmPassword||!acceptedTerms}>{emailChecking?"Checking…":"Verify Email"}</button></>}
-          {phase==="review" && <><button className="core-login-back" type="button" onClick={()=>{setPhase("email");setMessage("");}}>← Change email</button><h2>Confirm your details</h2><p className="core-login-sub">OTP அனுப்புவதற்கு முன் விவரங்களைச் சரிபார்க்கவும்.</p><div className="core-login-summary"><small>EMAIL STATUS</small><strong>✓ AVAILABLE — CHECKED</strong><small>SRI USER ID</small><strong>{phone}</strong><small>REGISTERED PHONE</small><strong>{phone}</strong><small>EMAIL ADDRESS</small><strong>{email.trim().toLowerCase()}</strong><small>FULL NAME</small><strong>{fullName}</strong></div><button className="core-login-btn" type="button" onClick={sendCode} disabled={busy||!fullName.trim()||password.length<8||password!==confirmPassword||!acceptedTerms}>{busy?"Sending OTP…":"Verify phone & Send OTP"}</button></>}
+          {phase==="email" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change phone number</button><h2>Welcome, New User!</h2><p className="core-login-sub">புதிய கணக்கிற்காக விவரங்களை உள்ளிட்டு Email ID-ஐ சரிபார்க்கவும்.</p><label className="core-login-label">EMAIL ADDRESS</label><input className="core-login-input" type="email" autoComplete="email" value={email} onChange={e=>{setEmail(e.target.value);setEmailAvailable(null);setMessage("");}} placeholder="you@example.com"/><button className="core-login-btn" type="button" onClick={checkEmail} disabled={emailChecking||!validEmail(email)}>{emailChecking?"Checking…":"Verify Email"}</button></>}
+          {phase==="review" && <><button className="core-login-back" type="button" onClick={()=>{setPhase("email");setMessage("");}}>← Change email</button><h2>Confirm your details</h2><p className="core-login-sub">OTP அனுப்புவதற்கு முன் விவரங்களைச் சரிபார்க்கவும்.</p><div className="core-login-summary"><small>EMAIL STATUS</small><strong>✓ AVAILABLE — CHECKED</strong><small>SRI USER ID</small><strong>{phone}</strong><small>REGISTERED PHONE</small><strong>{phone}</strong><small>EMAIL ADDRESS</small><strong>{email.trim().toLowerCase()}</strong></div><button className="core-login-btn" type="button" onClick={sendCode} disabled={busy||emailAvailable!==true}>{busy?"Sending OTP…":"Verify phone & Send OTP"}</button></>}
           {phase==="otp" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change number</button><h2>Verify your number</h2><p className="core-login-sub">இந்த எண்ணிற்கு அனுப்பிய 6 இலக்க OTP-ஐ உள்ளிடுங்கள்.</p><div className="core-login-summary"><small>OTP SENT TO</small><strong>{phone}</strong></div><label className="core-login-label">6-DIGIT VERIFICATION CODE</label><input ref={inputRef} className="core-login-input core-login-otp" type="tel" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="••••••"/><button className="core-login-btn" type="button" onClick={verifyCode} disabled={busy||code.length!==6}>{busy?"Verifying securely…":"Verify OTP"}</button></>}
           {phase==="orbit" && <><h2>Verifying securely…</h2><p className="core-login-sub">உங்கள் கணக்கை பாதுகாப்பாக இணைக்கிறோம்.</p></>}
           {phase==="verified" && <><h2>Account status</h2><p className="core-login-sub">{message}</p></>}
