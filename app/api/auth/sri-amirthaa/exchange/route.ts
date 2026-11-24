@@ -6,10 +6,10 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 export const runtime = "nodejs";
 
 const CLIENT_ID = "sri-amirthaa-ecommerce";
-const REDIRECT_URI = "https://1252-s-grow-with-us.vercel.app/auth/sri-amirthaa/callback";
 const COOKIE_PATH = "/api/auth/sri-amirthaa";
 
 export async function POST(request: Request) {
+  const redirectUri = `${new URL(request.url).origin}/auth/sri-amirthaa/callback`;
   const jar = await cookies();
   const stateCookie = jar.get("sa_oidc_state")?.value ?? "";
   const nonceCookie = jar.get("sa_oidc_nonce")?.value ?? "";
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
         grant_type: "authorization_code",
         code,
         client_id: CLIENT_ID,
-        redirect_uri: REDIRECT_URI,
+        redirect_uri: redirectUri,
         code_verifier: verifier
       })
     });
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
     const { data: link, error: linkError } = await admin.auth.admin.generateLink({
       type: "magiclink",
       email: userResult.user.email,
-      options: { redirectTo: "https://1252-s-grow-with-us.vercel.app/auth/sri-amirthaa/callback" }
+      options: { redirectTo: redirectUri }
     });
     if (linkError) throw linkError;
     const tokenHash = link.properties?.hashed_token;
