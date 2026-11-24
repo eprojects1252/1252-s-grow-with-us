@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
@@ -7,43 +6,34 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
     }
 
-    const url = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!url || !serviceKey) {
-      return NextResponse.json({ error: "Email availability check is not configured." }, { status: 500 });
+    const issuer = process.env.SRI_AMIRTHAA_ID_ISSUER?.replace(/\\/+$/, "");
+    if (!issuer) {
+      return NextResponse.json({ error: "Sri Amirthaa ID Core is not configured for this deployment." }, { status: 503 });
     }
-    const admin = createClient(url, serviceKey, {
-      auth: { persistSession: false, autoRefreshToken: false }
+
+    // Check the centralized identity registry, not an individual app's users.
+    const response = await fetch(`${issuer}/v1/auth/check-contact`, {
+      method: "POST",
+      cache: "no-store",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ type: "email", value: email })
     });
-
-    const { data: profile, error: profileError } = await admin
-      .from("profiles").select("id").ilike("email", email).limit(1).maybeSingle();
-    if (profileError) throw profileError;
-
-    let alreadyRegistered = Boolean(profile);
-    for (let page = 1; !alreadyRegistered; page += 1) {
-      const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
-      if (error) throw error;
-      const users = data.users ?? [];
-      alreadyRegistered = users.some(user => user.email?.trim().toLowerCase() === email);
-      if (alreadyRegistered || users.length < 1000) break;
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || typeof result.available !== "boolean") {
+      console.error("Core email lookup failed:", response.status, result?.error);
+      return NextResponse.json({ error: "Unable to check this Sri Amirthaa ID email right now. Please try again." }, { status: response.status >= 400 && response.status < 500 ? response.status : 503 });
     }
 
-    if (alreadyRegistered) {
-      return NextResponse.json({
-        available: false,
-        message: "Email already registered. Please sign in with that email account."
-      });
-    }
-    return NextResponse.json({ available: true, message: "This email is available." });
+    return NextResponse.json({
+      available: result.available,
+      message: result.available ? "This email is available." : "Email already registered. Please sign in with your existing Sri Amirthaa ID."
+    });
   } catch (error) {
     console.error("Email availability check failed:", error);
-    return NextResponse.json({
-      error: error instanceof Error ? error.message : "Unable to check this email right now."
-    }, { status: 500 });
+    return NextResponse.json({ error: "Unable to check this email right now." }, { status: 500 });
   }
 }
