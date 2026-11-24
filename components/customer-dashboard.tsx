@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { createClient, type User } from "@supabase/supabase-js";
+import { getAuth, signOut as firebaseSignOut } from "firebase/auth";
+import { firebaseApp } from "@/lib/firebase";
 import Link from "next/link";
 import {
   UserRound, Tag, CreditCard, MapPin, Wallet, Heart, ShoppingCart,
@@ -68,6 +70,7 @@ export default function CustomerDashboard() {
     setSigningOut(true);
     const supabase = createClient(url, key);
     await supabase.auth.signOut();
+    await firebaseSignOut(getAuth(firebaseApp)).catch(() => undefined);
     setCustomer(null);
     setSigningOut(false);
     window.location.assign("/");
