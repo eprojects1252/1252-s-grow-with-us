@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import PhoneAccountLink from "@/components/phone-account-link";
+import { useEffect, useState } from "react";
+import { createClient, type User } from "@supabase/supabase-js";
 import Link from "next/link";
 import {
   UserRound, Tag, CreditCard, MapPin, Wallet, Heart, ShoppingCart,
@@ -42,19 +42,55 @@ const routeFor = (label: string) => {
 
 export default function CustomerDashboard() {
   const [active, setActive] = useState<string>("account-details");
+  const [customer, setCustomer] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  useEffect(() => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_PUBLISHABLE_KEY;
+    if (!url || !key) { setAuthReady(true); return; }
+    const supabase = createClient(url, key);
+    let alive = true;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (alive) { setCustomer(data.user); setAuthReady(true); }
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (alive) setCustomer(session?.user ?? null);
+    });
+    return () => { alive = false; listener.subscription.unsubscribe(); };
+  }, []);
+
+  async function signOut() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_PUBLISHABLE_KEY;
+    if (!url || !key) return;
+    setSigningOut(true);
+    const supabase = createClient(url, key);
+    await supabase.auth.signOut();
+    setCustomer(null);
+    setSigningOut(false);
+    window.location.assign("/");
+  }
+
+  const customerName = typeof customer?.user_metadata?.full_name === "string"
+    ? customer.user_metadata.full_name
+    : typeof customer?.user_metadata?.name === "string"
+      ? customer.user_metadata.name
+      : customer?.email?.split("@")[0] || "Customer";
   const current = sections.find(section => section.id === active) ?? sections[0];
   const Icon = current.icon;
 
   return (
     <main className="customer-dashboard">
       <header className="customer-dash-header">
-        <div><span className="customer-dash-kicker">1252&apos;S GROW WITH US</span><h1>My Account</h1><p>Your account, shopping and membership space.</p></div>
+        <div><span className="customer-dash-kicker">1252&apos;S GROW WITH US</span><h1>{customer ? "Welcome, " + customerName : "My Account"}</h1><p>{customer ? "You are signed in. Manage your account and shopping here." : "Your account, shopping and membership space."}</p></div>
         <Link href="/" className="customer-dash-shop-link">Continue Shopping <ArrowUpRight size={15}/></Link>
       </header>
 
       <div className="customer-dash-layout">
         <aside className="customer-dash-sidebar" aria-label="Customer account menu">
-          <div className="customer-dash-profile"><span className="customer-dash-avatar"><UserRound size={23}/></span><div><small>WELCOME</small><strong>My Account</strong></div><Link href="/login" className="customer-dash-profile-login">Login</Link></div>
+          <div className="customer-dash-profile"><span className="customer-dash-avatar"><UserRound size={23}/></span><div><small>{customer ? "WELCOME BACK" : "WELCOME"}</small><strong>{customer ? customerName : "My Account"}</strong></div>{authReady && (customer ? <button type="button" className="customer-dash-profile-login" onClick={signOut} disabled={signingOut}>{signingOut ? "Signing out…" : "Sign Out"}</button> : <Link href="/login" className="customer-dash-profile-login">Sign In</Link>)}</div>
           <nav>
             {sections.map(section => {
               const ItemIcon = section.icon;
@@ -69,7 +105,6 @@ export default function CustomerDashboard() {
           <div className="customer-dash-section-title"><span className="customer-dash-section-icon"><Icon size={20}/></span><div><small>ACCOUNT MENU</small><h2>{current.title}</h2></div></div>
           {current.id === "account-details" ? (
             <>
-            <PhoneAccountLink />
             <div className="customer-dash-grid">
               {current.items.map((item, index) => <article className="customer-dash-tile" key={item}><span className="customer-dash-number">0{index + 1}</span><strong>{item}</strong><small>{item === "Refer & Earn" ? "Referral programme" : "Profile information"}</small></article>)}
             </div>
