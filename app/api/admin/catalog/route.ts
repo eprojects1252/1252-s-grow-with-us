@@ -8,15 +8,15 @@ export async function GET(request: Request) {
   const context = await requireAdmin(request);
   if (!isAdminContext(context)) return context;
   const { admin } = context;
-  const [products, categories, orders, logs] = await Promise.all([
+  const [products, categories, orders, logs, team] = await Promise.all([
     admin.from("products").select("id,sku,slug,name,brand,hsn_code,gst_rate,price,compare_at_price,stock_quantity,stock_status,is_featured,is_active,category_id,created_at,updated_at").order("updated_at", { ascending: false }).limit(500),
     admin.from("categories").select("id,parent_id,name,slug,icon,description,sort_order,is_active").order("sort_order"),
     admin.from("orders").select("id,order_number,status,payment_status,grand_total,currency,placed_at").order("placed_at", { ascending: false }).limit(100),
     admin.from("audit_logs").select("id,actor_user_id,action,entity_type,entity_id,details,created_at").order("created_at", { ascending: false }).limit(100)
   ]);
-  const failure = products.error || categories.error || orders.error || logs.error;
+  const failure = products.error || categories.error || orders.error || logs.error || team.error;
   if (failure) return NextResponse.json({ error: "Unable to load the Admin workspace data." }, { status: 500 });
-  return NextResponse.json({ products: products.data, categories: categories.data, orders: orders.data, activity: logs.data, admin: { role: context.role } });
+  return NextResponse.json({ products: products.data, categories: categories.data, orders: orders.data, activity: logs.data, team: team.data, admin: { role: context.role } });
 }
 
 export async function POST(request: Request) {
