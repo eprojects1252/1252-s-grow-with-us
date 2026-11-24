@@ -104,7 +104,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
 
   const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
   const tone=PASSWORD_TONES[score];
-  if (showPhoneOtp && !adminMode) return <PhoneOtpLogin onClose={()=>{setShowPhoneOtp(false);setNotice("");}} />;
+  if (!adminMode) return <PhoneOtpLogin />;
 
   return (
     <main className="auth-page">
