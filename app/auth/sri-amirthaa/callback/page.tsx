@@ -35,15 +35,26 @@ export default function SriAmirthaaCallbackPage() {
         const key = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_PUBLISHABLE_KEY;
         if (!url || !key) throw new Error("E-Commerce authentication is not configured.");
         const supabase = createClient(url, key, { auth: { detectSessionInUrl: false } });
-        const { error } = await supabase.auth.verifyOtp({
+        const { data: sessionData, error } = await supabase.auth.verifyOtp({
           token_hash: result.tokenHash,
           type: "magiclink"
         });
         if (error) throw error;
+        const accessToken = sessionData.session?.access_token;
+        if (!accessToken) throw new Error("Secure sign-in session was not created.");
+        const destinationResponse = await fetch("/api/auth/post-login", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + accessToken },
+          cache: "no-store"
+        });
+        const destination = await destinationResponse.json().catch(() => ({}));
+        if (!destinationResponse.ok || !["/admin", "/account"].includes(destination.destination)) {
+          throw new Error(destination.error || "Unable to verify your account access.");
+        }
         if (!active) return;
         window.history.replaceState({}, "", "/auth/sri-amirthaa/callback");
-        setMessage("Sign-in successful. Opening your account...");
-        router.replace("/account");
+        setMessage(destination.destination === "/admin" ? "Admin access verified. Opening Admin Dashboard..." : "Sign-in successful. Opening your account...");
+        router.replace(destination.destination);
       } catch (error) {
         if (active) setMessage(error instanceof Error ? error.message : "Sri Amirthaa ID sign-in failed.");
       }
