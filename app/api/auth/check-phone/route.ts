@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !serviceRoleKey) {
-      return NextResponse.json({ error: "Phone account lookup is not configured." }, { status: 500 });
+      return NextResponse.json({ error: `Phone account lookup is not configured: ${[!url ? "NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL" : "", !serviceRoleKey ? "SUPABASE_SERVICE_ROLE_KEY" : ""].filter(Boolean).join(" and ")} is missing in this deployment environment.` }, { status: 500 });
     }
     const admin = createClient(url, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false }
