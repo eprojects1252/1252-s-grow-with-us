@@ -6,7 +6,6 @@ import { createClient } from "@supabase/supabase-js";
 export const runtime = "nodejs";
 
 const CLIENT_ID = "sri-amirthaa-ecommerce";
-const REDIRECT_URI = "https://1252-s-grow-with-us.vercel.app/auth/sri-amirthaa/callback";
 const COOKIE_PATH = "/api/auth/sri-amirthaa";
 
 function randomValue() {
@@ -16,6 +15,7 @@ function randomValue() {
 export async function POST(request: Request) {
   try {
     const requestOrigin = new URL(request.url).origin;
+    const redirectUri = `${requestOrigin}/auth/sri-amirthaa/callback`;
     const origin = request.headers.get("origin");
     if (origin && origin !== requestOrigin) {
       return NextResponse.json({ error: "Cross-site login request rejected." }, { status: 403 });
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
       headers: { "content-type": "application/json", accept: "application/json" },
       body: JSON.stringify({
         client_id: CLIENT_ID,
-        redirect_uri: REDIRECT_URI,
+        redirect_uri: redirectUri,
         response_type: "code",
         scope: "openid profile email phone",
         state,
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
     const location = authorization.headers.get("location");
     if (!location) return NextResponse.json({ error: "Identity provider did not return an authorization redirect." }, { status: 502 });
     const redirect = new URL(location);
-    const callbackUrl = new URL(REDIRECT_URI);
+    const callbackUrl = new URL(redirectUri);
     if (redirect.origin !== callbackUrl.origin || redirect.pathname !== callbackUrl.pathname) {
       return NextResponse.json({ error: "Identity provider returned an unexpected redirect." }, { status: 502 });
     }
