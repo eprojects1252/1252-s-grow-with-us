@@ -235,7 +235,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
       </form>
 
         {!showPhoneOtp&&<button ref={submitRef} className={`auth-submit ${success?"done":""}`} type="submit" form="auth-form" disabled={busy}><span>{busy?"Please wait…":forgotPassword?"Send reset link":adminMode?"Admin sign in":signup?"Create account":"Sign in"} <ArrowRight size={17}/></span><span><Check size={18}/> {signup?"Account created":"You're in"}</span></button>}
-      {adminMode&&<p className="auth-admin-foot">Admin access is checked against the Supabase Auth app_metadata role.</p>}
+      {adminMode&&<p className="auth-admin-foot">Admin access is checked against the active server-managed admin_members record.</p>}
     </main>
   );
 }
