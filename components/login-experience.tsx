@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { firebaseApp } from "@/lib/firebase";
 import { ArrowRight, Eye, EyeOff, Check } from "lucide-react";
 import PhoneOtpLogin from "@/components/phone-otp-login";
 
@@ -73,6 +75,27 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
         const {error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{full_name:name.trim()},emailRedirectTo:window.location.origin+"/auth/callback"}});
         if(error)throw error;
         setSuccess(true);formRef.current?.dispatchEvent(new Event("auth:success"));setNotice("Sign-up submitted. Check your email to confirm your account.");
+      }else if(!adminMode){
+        // Customer email sign-in must authenticate against the central Firebase
+        // identity and then complete the same Core OIDC flow as phone sign-in.
+        const firebaseApiKey=process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+        if(!firebaseApiKey)throw new Error("Sri Amirthaa ID email sign-in is not configured.");
+        const coreCheck=await fetch(url.replace(/\\/+$/,"")+"/functions/v1/identifier-login",{
+          method:"POST",headers:{"Content-Type":"application/json",apikey:key},
+          body:JSON.stringify({identifier:email.trim().toLowerCase(),password,firebaseApiKey})
+        });
+        const coreResult=await coreCheck.json().catch(()=>({}));
+        if(!coreCheck.ok)throw new Error(coreResult.error==="INVALID_CREDENTIALS"?"Email or password is incorrect.":coreResult.error==="IDENTITY_NOT_FOUND"?"This email is not linked to an active Sri Amirthaa ID.":"Unable to verify your Sri Amirthaa ID. Please try again.");
+        const credential=await signInWithEmailAndPassword(getAuth(firebaseApp),email.trim().toLowerCase(),password);
+        const firebaseIdToken=await credential.user.getIdToken(true);
+        const startResponse=await fetch("/api/auth/sri-amirthaa/start",{
+          method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",cache:"no-store",
+          body:JSON.stringify({firebaseIdToken})
+        });
+        const startResult=await startResponse.json().catch(()=>({}));
+        if(!startResponse.ok||typeof startResult.authorizationUrl!=="string")throw new Error(startResult.error||"Sri Amirthaa ID sign-in could not be completed.");
+        window.location.assign(startResult.authorizationUrl);
+        return;
       }else{
         const {data,error}=await supabase.auth.signInWithPassword({email:email.trim(),password});
         if(error)throw error;
