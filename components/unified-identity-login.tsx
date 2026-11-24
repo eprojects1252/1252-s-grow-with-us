@@ -16,7 +16,8 @@ const buttonStyle: React.CSSProperties = { width:"100%", minHeight:50, border:0,
 
 export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
   const [mode,setMode] = useState<"login"|"signup">(initialMode);
-  const [identifier,setIdentifier] = useState("");\n  const [loginMethod,setLoginMethod] = useState<"phone"|"email">("phone");
+  const [identifier,setIdentifier] = useState("");
+  const [loginMethod,setLoginMethod] = useState<"phone"|"email">("phone");
   const [email,setEmail] = useState("");
   const [phone,setPhone] = useState("");
   const [fullName,setFullName] = useState("");
@@ -66,7 +67,13 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
     const checked = await check.json().catch(()=>({}));
     if (!check.ok) throw new Error(checked.error==="INVALID_CREDENTIALS"?"Phone/email or password is incorrect.":checked.error==="IDENTITY_NOT_FOUND"?"No Sri Amirthaa ID was found for this phone/email.":checked.error==="ACCOUNT_NOT_ACTIVE"?"This account is inactive.": "Unable to verify your Sri Amirthaa ID. Please try again.");
     const credential = await signInWithEmailAndPassword(auth,checked.email || normalized,password);
-    const token = await credential.user.getIdToken(true);\n    const emailValue = credential.user.email?.trim().toLowerCase() || "";\n    if (!emailValue) throw new Error("This provider did not return an email address. Use phone/email sign-up instead.");\n    const provision = await fetch("/api/auth/phone-signup",{method:"POST",headers:{"Content-Type":"application/json"},cache:"no-store",body:JSON.stringify({firebaseIdToken:token,email:emailValue,fullName:credential.user.displayName || emailValue.split("@")[0]})});\n    const provisionResult = await provision.json().catch(()=>({}));\n    if (!provision.ok) throw new Error(provisionResult.error || "Unable to connect this provider to your Sri Amirthaa account.");\n    await startCentralSession(token);
+    const token = await credential.user.getIdToken(true);
+    const emailValue = credential.user.email?.trim().toLowerCase() || "";
+    if (!emailValue) throw new Error("This provider did not return an email address. Use phone/email sign-up instead.");
+    const provision = await fetch("/api/auth/phone-signup",{method:"POST",headers:{"Content-Type":"application/json"},cache:"no-store",body:JSON.stringify({firebaseIdToken:token,email:emailValue,fullName:credential.user.displayName || emailValue.split("@")[0]})});
+    const provisionResult = await provision.json().catch(()=>({}));
+    if (!provision.ok) throw new Error(provisionResult.error || "Unable to connect this provider to your Sri Amirthaa account.");
+    await startCentralSession(token);
     void supabase;
   }
 
@@ -165,7 +172,7 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
 
   async function verifyProviderPhoneOtp() {
     const currentUser = auth.currentUser;
-    if (!currentUser || !providerVerificationId || !/^\\d{6}$/.test(otp)) throw new Error("Enter the 6-digit OTP.");
+    if (!currentUser || !providerVerificationId || !/^\d{6}$/.test(otp)) throw new Error("Enter the 6-digit OTP.");
     const phoneCredential = PhoneAuthProvider.credential(providerVerificationId,otp);
     const linked = await linkWithCredential(currentUser,phoneCredential);
     setProviderNeedsPhone(false);
@@ -196,10 +203,10 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
           <p style={{fontSize:13,color:"#62748e",lineHeight:1.7}}>Link a verified +91 mobile number to this identity. Your Google/Apple account and phone will share one Sri Amirthaa UID.</p>
           {!showOtp ? <>
             <label style={{display:"block",fontSize:11,fontWeight:700,color:"#607b9c",margin:"12px 0 7px"}}>PHONE NUMBER</label>
-            <div style={{display:"grid",gridTemplateColumns:"76px 1fr",gap:8}}><div style={{...inputStyle,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,background:"#f5f9fd"}}>🇮🇳 +91</div><input style={inputStyle} type="tel" inputMode="numeric" maxLength={10} value={phone} onChange={e=>setPhone(e.target.value.replace(/\\D/g,"").slice(0,10))} placeholder="10-digit mobile number"/></div>
+            <div style={{display:"grid",gridTemplateColumns:"76px 1fr",gap:8}}><div style={{...inputStyle,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,background:"#f5f9fd"}}>🇮🇳 +91</div><input style={inputStyle} type="tel" inputMode="numeric" maxLength={10} value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,"").slice(0,10))} placeholder="10-digit mobile number"/></div>
             <button type="button" style={{...buttonStyle,marginTop:16}} disabled={busy} onClick={()=>run(sendProviderPhoneOtp)}>Send phone OTP</button>
           </> : <>
-            <input style={{...inputStyle,textAlign:"center",letterSpacing:".4em",fontSize:20}} value={otp} onChange={e=>setOtp(e.target.value.replace(/\\D/g,"").slice(0,6))} placeholder="••••••" inputMode="numeric" maxLength={6}/>
+            <input style={{...inputStyle,textAlign:"center",letterSpacing:".4em",fontSize:20}} value={otp} onChange={e=>setOtp(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="••••••" inputMode="numeric" maxLength={6}/>
             <button type="button" style={{...buttonStyle,marginTop:16}} disabled={busy} onClick={()=>run(verifyProviderPhoneOtp)}>Verify & link phone</button>
           </>}
         </> : mode==="login" ? <>
@@ -208,7 +215,7 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
             <button type="button" style={{...buttonStyle,background:loginMethod==="email"?"#e0f1ea":"#f3f7fb"}} onClick={()=>{setLoginMethod("email");setIdentifier("");}}>Continue with Email</button>
           </div>
           <label style={{display:"block",fontSize:11,fontWeight:700,color:"#607b9c",margin:"12px 0 7px"}}>{loginMethod==="phone"?"PHONE NUMBER":"EMAIL ADDRESS"}</label>
-          {loginMethod==="phone" ? <div style={{display:"grid",gridTemplateColumns:"76px 1fr",gap:8}}><div style={{...inputStyle,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,background:"#f5f9fd"}}>🇮🇳 +91</div><input style={inputStyle} type="tel" inputMode="numeric" maxLength={10} value={identifier} onChange={e=>setIdentifier(e.target.value.replace(/\\D/g,"").slice(0,10))} placeholder="10-digit mobile number" autoComplete="tel-national"/></div> : <input style={inputStyle} type="email" value={identifier} onChange={e=>setIdentifier(e.target.value)} placeholder="name@example.com" autoComplete="username"/>}
+          {loginMethod==="phone" ? <div style={{display:"grid",gridTemplateColumns:"76px 1fr",gap:8}}><div style={{...inputStyle,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,background:"#f5f9fd"}}>🇮🇳 +91</div><input style={inputStyle} type="tel" inputMode="numeric" maxLength={10} value={identifier} onChange={e=>setIdentifier(e.target.value.replace(/\D/g,"").slice(0,10))} placeholder="10-digit mobile number" autoComplete="tel-national"/></div> : <input style={inputStyle} type="email" value={identifier} onChange={e=>setIdentifier(e.target.value)} placeholder="name@example.com" autoComplete="username"/>}
           <label style={{display:"block",fontSize:11,fontWeight:700,color:"#607b9c",margin:"12px 0 7px"}}>PASSWORD</label>
           <input style={inputStyle} type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password" autoComplete="current-password"/>
           <button type="button" style={{...buttonStyle,marginTop:18}} disabled={busy} onClick={()=>run(signIn)}>{busy?"Please wait…":"Sign In"}</button>
