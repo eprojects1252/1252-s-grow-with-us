@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     const fullName = typeof body.fullName === "string" ? body.fullName.trim() : "";
     if (!firebaseIdToken) return NextResponse.json({ error: "Verify your phone number first." }, { status: 401 });
+    if (!fullName || fullName.length > 120) return NextResponse.json({ error: "Enter your full name." }, { status: 400 });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
 
     const issuerValue = process.env.SRI_AMIRTHAA_ID_ISSUER;
