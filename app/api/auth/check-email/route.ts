@@ -6,17 +6,17 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\\/+$/, "");
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/+$/, "");
     const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     if (!supabaseUrl || !publishableKey) {
       return NextResponse.json({ error: "Sri Amirthaa ID Core is not configured for this deployment." }, { status: 503 });
     }
 
-    const response = await fetch(`${supabaseUrl}/functions/v1/check-contact`, {
+    const response = await fetch(\`\${supabaseUrl}/functions/v1/check-contact\`, {
       method: "POST",
       cache: "no-store",
       headers: { "Content-Type": "application/json", apikey: publishableKey },
