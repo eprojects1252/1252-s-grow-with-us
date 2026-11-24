@@ -1,43 +1,8 @@
 import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
-import { getApps, initializeApp, type Credential } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { ExternalAccountClient } from "google-auth-library";
-import { getVercelOidcToken } from "@vercel/oidc";
 import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
-
-function getFirebaseAdminAuth() {
-  const projectId = process.env.GCP_PROJECT_ID;
-  const projectNumber = process.env.GCP_PROJECT_NUMBER;
-  const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID;
-  const providerId = process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID;
-  const serviceAccountEmail = process.env.GCP_SERVICE_ACCOUNT_EMAIL;
-  if (!projectId || !projectNumber || !poolId || !providerId || !serviceAccountEmail) {
-    throw new Error("Firebase server authentication is not configured.");
-  }
-  const existing = getApps().find(app => app.name === "[DEFAULT]");
-  if (existing) return getAuth(existing);
-  const audience = `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
-  const client = ExternalAccountClient.fromJSON({
-    type: "external_account", audience,
-    subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
-    token_url: "https://sts.googleapis.com/v1/token",
-    service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${serviceAccountEmail}:generateAccessToken`,
-    subject_token_supplier: { getSubjectToken: () => getVercelOidcToken() }
-  });
-  if (!client) throw new Error("Unable to initialize Firebase credentials.");
-  const credential = {
-    async getAccessToken() {
-      const { token } = await client.getAccessToken();
-      if (!token) throw new Error("Google Cloud did not return an access token.");
-      const expiry = client.credentials.expiry_date;
-      return { access_token: token, expires_in: typeof expiry === "number" ? Math.max(1, Math.floor((expiry-Date.now())/1000)) : 3300 };
-    }
-  } as Credential;
-  return getAuth(initializeApp({ credential, projectId }));
-}
 
 export async function POST(request: Request) {
   let createdUserId: string | null = null;
@@ -48,8 +13,22 @@ export async function POST(request: Request) {
     if (!firebaseIdToken) return NextResponse.json({ error: "Verify your phone number first." }, { status: 401 });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
 
-    const decoded = await getFirebaseAdminAuth().verifyIdToken(firebaseIdToken, true);
-    if (!decoded.uid || !decoded.phone_number) return NextResponse.json({ error: "Verified Firebase phone details are missing." }, { status: 400 });
+    const issuerValue = process.env.SRI_AMIRTHAA_ID_ISSUER;
+    if (!issuerValue) return NextResponse.json({ error: "Sri Amirthaa ID Core issuer is not configured." }, { status: 503 });
+    const identityResponse = await fetch(issuerValue.replace(/\/+$/, "") + "/v1/auth/firebase/session", {
+      method: "POST",
+      cache: "no-store",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ idToken: firebaseIdToken, pendingEmail: email })
+    });
+    const identityResult = await identityResponse.json().catch(() => ({}));
+    if (!identityResponse.ok) {
+      return NextResponse.json({ error: typeof identityResult.error === "string" ? identityResult.error : "Verified phone identity could not be created." }, { status: identityResponse.status });
+    }
+    const verifiedPhone = identityResult?.user?.phoneNumber;
+    if (typeof verifiedPhone !== "string" || !/^\+[1-9]\d{7,14}$/.test(verifiedPhone)) {
+      return NextResponse.json({ error: "Verified Firebase phone details are missing." }, { status: 401 });
+    }
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -57,7 +36,7 @@ export async function POST(request: Request) {
     const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
     const { data: existingProfile, error: profileError } = await admin.from("profiles")
-      .select("id, supabase_user_id, phone_e164").eq("phone_e164", decoded.phone_number).maybeSingle();
+      .select("id, supabase_user_id, phone_e164").eq("phone_e164", verifiedPhone).maybeSingle();
     if (profileError) throw profileError;
     if (existingProfile?.supabase_user_id) return NextResponse.json({ error: "Phone number already registered. Please sign in." }, { status: 409 });
 
@@ -79,14 +58,14 @@ export async function POST(request: Request) {
     const internalPassword = randomBytes(48).toString("base64url");
     const { data: created, error: createError } = await admin.auth.admin.createUser({
       email, password: internalPassword, email_confirm: false,
-      user_metadata: { phone_e164: decoded.phone_number }
+      user_metadata: { phone_e164: verifiedPhone }
     });
     if (createError) throw createError;
     createdUserId = created.user.id;
 
     const { error: saveError } = await admin.from("profiles").upsert({
       supabase_user_id: created.user.id,
-      phone_e164: decoded.phone_number,
+      phone_e164: verifiedPhone,
       email
     }, { onConflict: "supabase_user_id" });
     if (saveError) throw saveError;
