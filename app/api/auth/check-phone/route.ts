@@ -30,8 +30,7 @@ export async function POST(request: Request) {
 
     const registered = Boolean(profile?.supabase_user_id);
     return NextResponse.json({
-      registered,
-      canPasswordLogin: registered && Boolean(profile?.email)
+      registered
     });
   } catch (error) {
     console.error("Phone availability check failed:", error);
