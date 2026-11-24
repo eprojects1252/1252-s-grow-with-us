@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     });
     const { data: profile, error } = await admin
       .from("profiles")
-      .select("supabase_user_id, email")
+      .select("supabase_user_id")
       .eq("phone_e164", e164)
       .maybeSingle();
     if (error) throw error;
