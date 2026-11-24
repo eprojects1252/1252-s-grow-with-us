@@ -122,6 +122,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
 
   // Customer login offers exactly one Google option and one phone OTP option.
   // The phone flow is shown only after the user selects Continue with Phone.
+  if (!adminMode && showPhoneOtp) return <div><button type="button" onClick={()=>setShowPhoneOtp(false)} style={{position:"fixed",zIndex:20,top:14,left:14,padding:"9px 13px",border:"1px solid #d5e2ef",borderRadius:10,background:"#fff",color:"#315a7c"}}>← Back</button><PhoneOtpLogin /></div>;
   if (!adminMode) return (
     <main style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:"28px 18px",background:"linear-gradient(135deg,#f7fbff 0%,#f0f8f5 55%,#fff7ef 100%)",color:"#17243b",fontFamily:"Inter,ui-sans-serif,system-ui,sans-serif"}}>
       <section style={{width:"min(100%,440px)",padding:"34px",border:"1px solid #dbe6f1",borderRadius:24,background:"#ffffffed",boxShadow:"0 24px 70px #567aa51c"}}>
@@ -141,7 +142,6 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
       </section>
     </main>
   );
-  if (showPhoneOtp) return <div><button type="button" onClick={()=>setShowPhoneOtp(false)} style={{position:"fixed",zIndex:20,top:14,left:14,padding:"9px 13px",border:"1px solid #d5e2ef",borderRadius:10,background:"#fff",color:"#315a7c"}}>← Back</button><PhoneOtpLogin /></div>;
 
   return (
     <main className="auth-page">
