@@ -72,9 +72,24 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
     try{
       const supabase=createClient(url,key);
       if(signup){
+        const availabilityResponse = await fetch("/api/auth/check-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          cache: "no-store",
+          body: JSON.stringify({ email: email.trim().toLowerCase() })
+        });
+        const availability = await availabilityResponse.json().catch(() => ({}));
+        if (!availabilityResponse.ok) throw new Error(availability.error || "Unable to check this email address.");
+        if (availability.available !== true) {
+          setMode("login");
+          setPassword("");
+          setConfirmPassword("");
+          setNotice("This email is already registered. Please sign in with your existing account. No new confirmation email was sent.");
+          return;
+        }
         const {error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{full_name:name.trim()},emailRedirectTo:window.location.origin+"/auth/callback"}});
         if(error)throw error;
-        setSuccess(true);formRef.current?.dispatchEvent(new Event("auth:success"));setNotice("Sign-up submitted. Check your email to confirm your account.");
+        setSuccess(true);formRef.current?.dispatchEvent(new Event("auth:success"));setNotice("Your account is created. Please confirm your email to finish registration.");
       }else if(!adminMode){
         // Customer email sign-in must authenticate against the central Firebase
         // identity and then complete the same Core OIDC flow as phone sign-in.
