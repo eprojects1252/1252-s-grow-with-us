@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     if (!identityResponse.ok) {
       return NextResponse.json({ error: typeof identityResult.error === "string" ? identityResult.error : "Verified phone identity could not be created." }, { status: identityResponse.status });
     }
-    const verifiedPhone = identityResult?.user?.phoneNumber;
+    const verifiedPhone = identityResult?.user?.phoneNumber;\n    const firebaseUid = identityResult?.user?.firebaseUid;\n    const firebaseApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;\n    if (!firebaseApiKey) return NextResponse.json({ error: "Firebase verification is not configured." }, { status: 503 });\n    const lookupResponse = await fetch("https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" + encodeURIComponent(firebaseApiKey), { method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store", body: JSON.stringify({ idToken: firebaseIdToken }) });\n    const lookup = await lookupResponse.json().catch(() => ({}));\n    const firebaseUser = Array.isArray(lookup.users) ? lookup.users[0] : null;\n    if (!lookupResponse.ok || !firebaseUser || typeof firebaseUser.email !== "string" || firebaseUser.email.toLowerCase() !== email || typeof firebaseUid !== "string" || firebaseUser.localId !== firebaseUid) return NextResponse.json({ error: "Firebase identity details could not be verified." }, { status: 401 });\n    const emailVerified = firebaseUser.emailVerified === true;
     if (typeof verifiedPhone !== "string" || !/^\+[1-9]\d{7,14}$/.test(verifiedPhone)) {
       return NextResponse.json({ error: "Verified Firebase phone details are missing." }, { status: 401 });
     }
@@ -38,9 +38,9 @@ export async function POST(request: Request) {
     const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
     const { data: existingProfile, error: profileError } = await admin.from("profiles")
-      .select("id, supabase_user_id, phone_e164").eq("phone_e164", verifiedPhone).maybeSingle();
+      .select("id, supabase_user_id, phone_e164, firebase_uid").eq("phone_e164", verifiedPhone).maybeSingle();
     if (profileError) throw profileError;
-    if (existingProfile?.supabase_user_id) return NextResponse.json({ error: "Phone number already registered. Please sign in." }, { status: 409 });
+    if (existingProfile?.supabase_user_id) {\n      if (existingProfile.firebase_uid === firebaseUid) return NextResponse.json({ success: true, alreadyExists: true });\n      return NextResponse.json({ error: "Phone number already registered to another Sri Amirthaa ID." }, { status: 409 });\n    }
 
     const { data: emailProfile, error: emailProfileError } = await admin.from("profiles")
       .select("id").ilike("email", email).limit(1).maybeSingle();
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     // Password is never shown to the customer; phone OTP + central OIDC is the login method.
     const internalPassword = randomBytes(48).toString("base64url");
     const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email, password: internalPassword, email_confirm: false,
+      email, password: internalPassword, email_confirm: emailVerified,
       user_metadata: { phone_e164: verifiedPhone, full_name: fullName }
     });
     if (createError) throw createError;
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     });
     if (emailError) throw emailError;
 
-    return NextResponse.json({ success: true, requiresEmailConfirmation: true });
+    return NextResponse.json({ success: true, requiresEmailConfirmation: !emailVerified });
   } catch (error) {
     if (createdUserId) {
       const url = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
