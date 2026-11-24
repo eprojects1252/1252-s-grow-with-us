@@ -124,8 +124,38 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
     const credential = provider==="google"
       ? await signInWithPopup(auth,new GoogleAuthProvider())
       : await signInWithPopup(auth,new OAuthProvider("apple.com"));
-    if (!credential.user.phoneNumber) throw new Error("This Google/Apple account has no verified phone linked yet. Sign in with Phone once and link the same account before using this provider.");
+    if (!credential.user.phoneNumber) {
+      setProviderNeedsPhone(true);
+      setNotice("Add and verify your +91 phone number once to connect this provider to your Sri Amirthaa UID.");
+      return;
+    }
     await startCentralSession(await credential.user.getIdToken(true));
+  }
+
+  async function sendProviderPhoneOtp() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("Your Google/Apple session expired. Please sign in again.");
+    const e164 = phoneE164();
+    const { RecaptchaVerifier } = await import("firebase/auth");
+    const container = recaptchaRef.current;
+    if (!container) throw new Error("Security verification is not ready.");
+    container.replaceChildren();
+    const verifier = new RecaptchaVerifier(auth,container,{size:"invisible"});
+    await verifier.render();
+    const verificationId = await new PhoneAuthProvider(auth).verifyPhoneNumber({phoneNumber:e164,session:verifier},verifier);
+    setProviderVerificationId(verificationId);
+    setShowOtp(true);
+    setNotice("OTP sent. Verify your number to link it to your Google/Apple account.");
+  }
+
+  async function verifyProviderPhoneOtp() {
+    const currentUser = auth.currentUser;
+    if (!currentUser || !providerVerificationId || !/^\\d{6}$/.test(otp)) throw new Error("Enter the 6-digit OTP.");
+    const phoneCredential = PhoneAuthProvider.credential(providerVerificationId,otp);
+    const linked = await linkWithCredential(currentUser,phoneCredential);
+    setProviderNeedsPhone(false);
+    setShowOtp(false);
+    await startCentralSession(await linked.user.getIdToken(true));
   }
 
   async function run(action:()=>Promise<void>) {
@@ -147,7 +177,17 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
           <button type="button" onClick={()=>{setMode("login");setShowOtp(false);setNotice("");}} style={{...buttonStyle,background:mode==="login"?"#d8eee6":"#f3f7fb"}}>Sign In</button>
           <button type="button" onClick={()=>{setMode("signup");setShowOtp(false);setNotice("");}} style={{...buttonStyle,background:mode==="signup"?"#d8eee6":"#f3f7fb"}}>Sign Up</button>
         </div>
-        {mode==="login" ? <>
+        {mode==="login" && providerNeedsPhone ? <>
+          <p style={{fontSize:13,color:"#62748e",lineHeight:1.7}}>Link a verified +91 mobile number to this identity. Your Google/Apple account and phone will share one Sri Amirthaa UID.</p>
+          {!showOtp ? <>
+            <label style={{display:"block",fontSize:11,fontWeight:700,color:"#607b9c",margin:"12px 0 7px"}}>PHONE NUMBER</label>
+            <div style={{display:"grid",gridTemplateColumns:"76px 1fr",gap:8}}><div style={{...inputStyle,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,background:"#f5f9fd"}}>🇮🇳 +91</div><input style={inputStyle} type="tel" inputMode="numeric" maxLength={10} value={phone} onChange={e=>setPhone(e.target.value.replace(/\\D/g,"").slice(0,10))} placeholder="10-digit mobile number"/></div>
+            <button type="button" style={{...buttonStyle,marginTop:16}} disabled={busy} onClick={()=>run(sendProviderPhoneOtp)}>Send phone OTP</button>
+          </> : <>
+            <input style={{...inputStyle,textAlign:"center",letterSpacing:".4em",fontSize:20}} value={otp} onChange={e=>setOtp(e.target.value.replace(/\\D/g,"").slice(0,6))} placeholder="••••••" inputMode="numeric" maxLength={6}/>
+            <button type="button" style={{...buttonStyle,marginTop:16}} disabled={busy} onClick={()=>run(verifyProviderPhoneOtp)}>Verify & link phone</button>
+          </>}
+        </> : mode==="login" ? <>
           <label style={{display:"block",fontSize:11,fontWeight:700,color:"#607b9c",margin:"12px 0 7px"}}>PHONE NUMBER OR EMAIL</label>
           <input style={inputStyle} value={identifier} onChange={e=>setIdentifier(e.target.value)} placeholder="+91 9876543210 or name@example.com" autoComplete="username"/>
           <label style={{display:"block",fontSize:11,fontWeight:700,color:"#607b9c",margin:"12px 0 7px"}}>PASSWORD</label>
