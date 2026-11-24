@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const rawPhone = typeof body.phone === "string" ? body.phone.trim() : "";
     const normalized = rawPhone.replace(/[\s()-]/g, "");
-    const phone = normalized.startsWith("+") ? normalized : \`+\${normalized}\`;
+    const phone = normalized.startsWith("+") ? normalized : "+" + normalized;
     if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
       return NextResponse.json({ error: "Enter a valid phone number with country code." }, { status: 400 });
     }
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Sri Amirthaa ID Core is not configured for this deployment." }, { status: 503 });
     }
 
-    const response = await fetch(\`\${supabaseUrl}/functions/v1/check-contact\`, {
+    const response = await fetch(supabaseUrl + "/functions/v1/check-contact", {
       method: "POST",
       cache: "no-store",
       headers: { "Content-Type": "application/json", apikey: publishableKey },
