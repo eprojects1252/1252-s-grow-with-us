@@ -66,7 +66,7 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
     const checked = await check.json().catch(()=>({}));
     if (!check.ok) throw new Error(checked.error==="INVALID_CREDENTIALS"?"Phone/email or password is incorrect.":checked.error==="IDENTITY_NOT_FOUND"?"No Sri Amirthaa ID was found for this phone/email.":checked.error==="ACCOUNT_NOT_ACTIVE"?"This account is inactive.": "Unable to verify your Sri Amirthaa ID. Please try again.");
     const credential = await signInWithEmailAndPassword(auth,checked.email || normalized,password);
-    await startCentralSession(await credential.user.getIdToken(true));
+    const token = await credential.user.getIdToken(true);\n    const emailValue = credential.user.email?.trim().toLowerCase() || "";\n    if (!emailValue) throw new Error("This provider did not return an email address. Use phone/email sign-up instead.");\n    const provision = await fetch("/api/auth/phone-signup",{method:"POST",headers:{"Content-Type":"application/json"},cache:"no-store",body:JSON.stringify({firebaseIdToken:token,email:emailValue,fullName:credential.user.displayName || emailValue.split("@")[0]})});\n    const provisionResult = await provision.json().catch(()=>({}));\n    if (!provision.ok) throw new Error(provisionResult.error || "Unable to connect this provider to your Sri Amirthaa account.");\n    await startCentralSession(token);
     void supabase;
   }
 
@@ -144,7 +144,7 @@ export default function UnifiedIdentityLogin({ initialMode = "login" }: Props) {
     container.replaceChildren();
     const verifier = new RecaptchaVerifier(auth,container,{size:"invisible"});
     await verifier.render();
-    const verificationId = await new PhoneAuthProvider(auth).verifyPhoneNumber({phoneNumber:e164,session:verifier},verifier);
+    const verificationId = await new PhoneAuthProvider(auth).verifyPhoneNumber(e164,verifier);
     setProviderVerificationId(verificationId);
     setShowOtp(true);
     setNotice("OTP sent. Verify your number to link it to your Google/Apple account.");
