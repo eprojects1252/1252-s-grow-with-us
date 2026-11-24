@@ -56,7 +56,11 @@ export default function AdminDemo(){
  const canOrders=["super_admin","owner","admin","order_manager","support"].includes(role);
  const canAudit=["super_admin","owner","admin"].includes(role);
  const canTeam=["super_admin","owner"].includes(role);
- const nav=[["overview","Overview",ChartNoAxesCombined],...(canCatalog?[["products","Products & Stock",Package],["categories","Categories",Layers3]] as const:[]),...(canOrders?[["orders","Orders",ClipboardList]] as const:[]),["stores","Other Stores",Store],...(canAudit?[["activity","Admin Activity",Activity]] as const:[]),...(canTeam?[["team","Admin & Staff",Users]] as const:[])] as const;
+ const nav: [string,string,any][] = [["overview","Overview",ChartNoAxesCombined],["stores","Other Stores",Store]];
+ if(canCatalog) nav.push(["products","Products & Stock",Package],["categories","Categories",Layers3]);
+ if(canOrders) nav.push(["orders","Orders",ClipboardList]);
+ if(canAudit) nav.push(["activity","Admin Activity",Activity]);
+ if(canTeam) nav.push(["team","Admin & Staff",Users]);
  return <main style={{minHeight:"100vh",background:"#f5f8f6",color:"#183b30",fontFamily:"Inter,ui-sans-serif,system-ui,sans-serif"}}>
  <header style={{height:64,background:"#fff",borderBottom:"1px solid #e4ece7",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 clamp(14px,4vw,42px)",position:"sticky",top:0,zIndex:10}}><Link href="/" style={{display:"flex",alignItems:"center",gap:8,color:"#315b49",textDecoration:"none",fontSize:13}}><ArrowLeft size={17}/> Storefront</Link><b style={{letterSpacing:".12em",fontSize:12,color:"#176b4d"}}>SRI AMIRTHAA · ADMIN</b><span style={{fontSize:12,color:"#6b8075",display:"flex",gap:6,alignItems:"center"}}><ShieldCheck size={15}/> {data.admin.role||"Verified Admin"}</span></header>
  <div style={{maxWidth:1440,margin:"0 auto",padding:"28px clamp(14px,3vw,34px)",display:"grid",gridTemplateColumns:"220px minmax(0,1fr)",gap:24}}>
