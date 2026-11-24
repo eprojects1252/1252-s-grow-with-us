@@ -70,7 +70,7 @@ export async function PATCH(request: Request) {
   if (!body || typeof body.id !== "string") return NextResponse.json({ error: "Product ID is required." }, { status: 400 });
   const updates: Record<string, unknown> = {};
   for (const key of ["name","sku","brand","hsn_code","category_id","price","compare_at_price","gst_rate","is_active","is_featured"]) {
-    if (key in body) updates[key] = body[key];
+    if (key in body) updates[key] = key === "category_id" && body[key] === "" ? null : body[key];
   }
   if ("stock_quantity" in body) {
     const stock = Number(body.stock_quantity);
@@ -84,7 +84,7 @@ export async function PATCH(request: Request) {
   if (!before) return NextResponse.json({ error: "Product not found." }, { status: 404 });
   const { data, error } = await admin.from("products").update(updates).eq("id", body.id).select().single();
   if (error) return NextResponse.json({ error: "Could not update product." }, { status: 400 });
-  await admin.from("audit_logs").insert({ actor_user_id: userId, action: "product.updated", entity_type: "product", entity_id: data.id, details: { before, changes: updates } });
+  await admin.from("audit_logs").insert({ actor_user_id: userId, action: "stock_quantity" in updates ? "stock.adjusted" : "product.updated", entity_type: "product", entity_id: data.id, details: { before, changes: updates, reason: typeof body.stock_reason === "string" ? body.stock_reason : null } });
   return NextResponse.json({ product: data });
 }
 
