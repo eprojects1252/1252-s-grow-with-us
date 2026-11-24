@@ -120,9 +120,28 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
   const tone=PASSWORD_TONES[score];
 
-  // Customer authentication uses the single universal Sri Amirthaa ID phone-first flow.
-  // Keep the legacy email/password form only for the separate Admin entry point.
-  if (!adminMode) return <PhoneOtpLogin />;
+  // Customer login offers exactly one Google option and one phone OTP option.
+  // The phone flow is shown only after the user selects Continue with Phone.
+  if (!adminMode) return (
+    <main style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:"28px 18px",background:"linear-gradient(135deg,#f7fbff 0%,#f0f8f5 55%,#fff7ef 100%)",color:"#17243b",fontFamily:"Inter,ui-sans-serif,system-ui,sans-serif"}}>
+      <section style={{width:"min(100%,440px)",padding:"34px",border:"1px solid #dbe6f1",borderRadius:24,background:"#ffffffed",boxShadow:"0 24px 70px #567aa51c"}}>
+        <div style={{textAlign:"center",marginBottom:26}}>
+          <Image src="/images/sri-amirthaa-groups-1252.png" alt="Sri Amirthaa Groups" width={190} height={76} priority style={{objectFit:"contain",margin:"0 auto"}} />
+          <h1 style={{fontSize:27,margin:"18px 0 8px",color:"#1d3151"}}>Welcome to Sri Amirthaa</h1>
+          <p style={{fontSize:13,lineHeight:1.7,color:"#62748e",margin:0}}>Choose one way to continue to your account.</p>
+        </div>
+        <button type="button" onClick={googleSignIn} disabled={busy} style={{width:"100%",height:52,border:"1px solid #d5e2ef",borderRadius:12,background:"#fff",color:"#263b57",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:11,marginBottom:13,cursor:"pointer",opacity:busy?.6:1}}>
+          <svg aria-hidden="true" viewBox="0 0 48 48" width="20" height="20"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.9 6-15z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.7-5.1c-1.8 1.2-4 1.9-6.8 1.9-5.2 0-9.6-3.5-11.2-8.2H5.9v5.3A20 20 0 0 0 24 44z"/><path fill="#FBBC05" d="M12.8 27.7a12 12 0 0 1 0-7.4V15H5.9a20 20 0 0 0 0 17.9z"/><path fill="#EA4335" d="M24 12.1c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.1 29.5 4 24 4A20 20 0 0 0 5.9 15l6.9 5.3c1.6-4.7 6-8.2 11.2-8.2z"/></svg>
+          {busy ? "Please wait…" : "Continue with Google"}
+        </button>
+        <button type="button" onClick={()=>setShowPhoneOtp(true)} style={{width:"100%",height:52,border:0,borderRadius:12,background:"linear-gradient(100deg,#d9f3eb,#dcecff)",color:"#23416b",fontWeight:800,cursor:"pointer"}}>
+          Continue with Phone
+        </button>
+        {notice && <p role="status" style={{fontSize:12,color:"#b44d4a",marginTop:14,textAlign:"center"}}>{notice}</p>}
+      </section>
+    </main>
+  );
+  if (showPhoneOtp) return <div><button type="button" onClick={()=>setShowPhoneOtp(false)} style={{position:"fixed",zIndex:20,top:14,left:14,padding:"9px 13px",border:"1px solid #d5e2ef",borderRadius:10,background:"#fff",color:"#315a7c"}}>← Back</button><PhoneOtpLogin /></div>;
 
   return (
     <main className="auth-page">
