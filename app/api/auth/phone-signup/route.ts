@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomBytes } from "node:crypto";
 import { getApps, initializeApp, type Credential } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { ExternalAccountClient } from "google-auth-library";
@@ -44,14 +45,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const firebaseIdToken = typeof body.firebaseIdToken === "string" ? body.firebaseIdToken : "";
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-    const password = typeof body.password === "string" ? body.password : "";
-    const fullName = typeof body.fullName === "string" ? body.fullName.trim() : "";
     if (!firebaseIdToken) return NextResponse.json({ error: "Verify your phone number first." }, { status: 401 });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
-    if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^\w\s]/.test(password)) {
-      return NextResponse.json({ error: "Password must contain 8 characters, a capital letter, a number and a symbol." }, { status: 400 });
-    }
-    if (!fullName) return NextResponse.json({ error: "Enter your full name." }, { status: 400 });
 
     const decoded = await getFirebaseAdminAuth().verifyIdToken(firebaseIdToken, true);
     if (!decoded.uid || !decoded.phone_number) return NextResponse.json({ error: "Verified Firebase phone details are missing." }, { status: 400 });
@@ -71,15 +66,20 @@ export async function POST(request: Request) {
     if (emailProfileError) throw emailProfileError;
     if (emailProfile) return NextResponse.json({ error: "Email already registered. Please sign in." }, { status: 409 });
 
-    const { data: userPages, error: usersError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    if (usersError) throw usersError;
-    if (userPages.users.some(user => user.email?.trim().toLowerCase() === email)) {
-      return NextResponse.json({ error: "Email already registered. Please sign in." }, { status: 409 });
+    for (let page = 1; ; page += 1) {
+      const { data: userPage, error: usersError } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (usersError) throw usersError;
+      if (userPage.users.some(user => user.email?.trim().toLowerCase() === email)) {
+        return NextResponse.json({ error: "Email already registered. Please sign in." }, { status: 409 });
+      }
+      if (userPage.users.length < 1000) break;
     }
 
+    // Password is never shown to the customer; phone OTP + central OIDC is the login method.
+    const internalPassword = randomBytes(48).toString("base64url");
     const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email, password, email_confirm: false,
-      user_metadata: { full_name: fullName, phone_e164: decoded.phone_number, firebase_uid: decoded.uid }
+      email, password: internalPassword, email_confirm: false,
+      user_metadata: { phone_e164: decoded.phone_number }
     });
     if (createError) throw createError;
     createdUserId = created.user.id;
@@ -87,8 +87,7 @@ export async function POST(request: Request) {
     const { error: saveError } = await admin.from("profiles").upsert({
       supabase_user_id: created.user.id,
       phone_e164: decoded.phone_number,
-      email,
-      full_name: fullName
+      email
     }, { onConflict: "supabase_user_id" });
     if (saveError) throw saveError;
 
