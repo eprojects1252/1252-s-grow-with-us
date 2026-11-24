@@ -92,14 +92,40 @@ export async function PATCH(request: Request) {
   for (const key of ["name", "sku", "brand", "hsn_code", "category_id", "price", "compare_at_price", "gst_rate", "is_active", "is_featured"]) {
     if (key in body) updates[key] = key === "category_id" && body[key] === "" ? null : body[key];
   }
-  if ("stock_quantity" in body) {
+
+  const textLimits: Record<string, number> = { name: 180, sku: 100, brand: 100, hsn_code: 20 };
+  for (const [key, max] of Object.entries(textLimits)) {
+    if (key in updates && updates[key] !== null && (typeof updates[key] !== "string" || (updates[key] as string).trim().length > max)) {
+      return NextResponse.json({ error: `Invalid ${key.replace("_", " ")} value (maximum ${max} characters).` }, { status: 400 });
+    }
+    if (key in updates && typeof updates[key] === "string") updates[key] = (updates[key] as string).trim() || null;
+  }
+  if ("name" in updates && !updates.name) return NextResponse.json({ error: "Product name cannot be empty." }, { status: 400 });
+  if ("category_id" in updates && updates.category_id !== null && (typeof updates.category_id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(updates.category_id))) {
+    return NextResponse.json({ error: "Invalid category selection." }, { status: 400 });
+  }
+  for (const key of ["price", "compare_at_price"]) {
+    if (key in updates && updates[key] !== null && updates[key] !== "") {
+      const value = Number(updates[key]);
+      if (!Number.isFinite(value) || value < 0) return NextResponse.json({ error: "Price values must be zero or greater." }, { status: 400 });
+      updates[key] = value;
+    } else if (key === "compare_at_price" && key in updates) updates[key] = null;
+  }
+  if ("gst_rate" in updates) {
+    const value = Number(updates.gst_rate);
+    if (!Number.isFinite(value) || value < 0 || value > 100) return NextResponse.json({ error: "GST rate must be between 0 and 100." }, { status: 400 });
+    updates.gst_rate = value;
+  }
+  for (const key of ["is_active", "is_featured"]) {
+    if (key in updates && typeof updates[key] !== "boolean") return NextResponse.json({ error: `${key.replace("_", " ")} must be true or false.` }, { status: 400 });
+  }
+  if ("stock_quantity" in body && ("stock_quantity" in updates)) {
     const stock = Number(body.stock_quantity);
     if (!Number.isInteger(stock) || stock < 0) return NextResponse.json({ error: "Stock must be a non-negative whole number." }, { status: 400 });
     updates.stock_quantity = stock;
     updates.stock_status = stock > 0 ? "in_stock" : "out_of_stock";
   }
   if (!Object.keys(updates).length) return NextResponse.json({ error: "No valid product changes were supplied." }, { status: 400 });
-  if (typeof updates.name === "string" && !updates.name.trim()) return NextResponse.json({ error: "Product name cannot be empty." }, { status: 400 });
   if ("stock_quantity" in updates && (typeof body.stock_reason !== "string" || !body.stock_reason.trim())) {
     return NextResponse.json({ error: "A stock adjustment reason is required." }, { status: 400 });
   }
