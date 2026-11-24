@@ -86,7 +86,6 @@ export async function POST(request: Request) {
 
     const { error: saveError } = await admin.from("profiles").upsert({
       supabase_user_id: created.user.id,
-      firebase_uid: decoded.uid,
       phone_e164: decoded.phone_number,
       email,
       full_name: fullName
