@@ -30,7 +30,7 @@ The public JWKS endpoint must publish only the public portion of the signing key
 1. Review Core migration `0003_oidc_provider.sql` for the Core Supabase project.
 2. Review E-Commerce migration `20261123000100_link_sri_amirthaa_id.sql` for the E-Commerce Supabase project.
 3. Confirm the Core OAuth client ID is `sri-amirthaa-ecommerce`, active, and allows scopes `openid profile email phone`.
-4. Confirm the exact registered callback URI is `https://1252-s-grow-with-us.vercel.app/auth/sri-amirthaa/callback`.
+4. Register both callback URIs in the Core OAuth client `sri-amirthaa-ecommerce` before testing each environment:\n   - Production: `https://1252-s-grow-with-us.vercel.app/auth/sri-amirthaa/callback`\n   - Preview branch: `https://1252-s-grow-with-us-git-feature-sri-amirth-a1a305-eprojects1252.vercel.app/auth/sri-amirthaa/callback`\n\nThe application derives the callback from the current deployment origin. The Core OAuth client currently has only the Production callback registered, so Preview OIDC will be rejected until the Preview callback is added to its allowlist.
 
 Do not apply migrations to a live database until the target project and SQL have been reviewed. The E-Commerce profile migration is additive and links an existing profile to the immutable Core subject; it must not merge accounts based on email alone.
 
