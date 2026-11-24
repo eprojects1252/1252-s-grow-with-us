@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-type AdminContext = { admin: SupabaseClient; userId: string; role: string };
+export type AdminContext = { admin: SupabaseClient; userId: string; role: string };
 
 export async function requireAdmin(request: Request): Promise<AdminContext | NextResponse> {
   const authorization = request.headers.get("authorization") || "";
@@ -25,4 +25,11 @@ export async function requireAdmin(request: Request): Promise<AdminContext | Nex
 
 export function isAdminContext(value: AdminContext | NextResponse): value is AdminContext {
   return !(value instanceof NextResponse);
+}
+
+export function requireRoles(context: AdminContext, allowed: readonly string[]): NextResponse | null {
+  if (!allowed.includes(context.role)) {
+    return NextResponse.json({ error: "Your Admin role does not have permission for this action." }, { status: 403 });
+  }
+  return null;
 }
