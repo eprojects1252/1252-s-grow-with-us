@@ -66,7 +66,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
       if(missing){setNotice("Please add "+missing.label+" to your password.");formRef.current?.dispatchEvent(new Event("runaway:wobble"));return;}
       if(password!==confirmPassword){setNotice("Passwords do not match.");return;}
     }
-    const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const url=adminMode?process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL:process.env.NEXT_PUBLIC_SUPABASE_URL;\n    const key=adminMode?process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_PUBLISHABLE_KEY:process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     if(!url||!key){setNotice("Authentication setup is incomplete. Configure the Supabase URL and publishable key.");return;}
     setBusy(true);
     try{
