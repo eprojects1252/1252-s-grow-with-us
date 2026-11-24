@@ -11,8 +11,8 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     let active = true;
     async function completeSignIn() {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+      const url = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_ECOMMERCE_PUBLISHABLE_KEY;
       if (!url || !key) {
         setMessage("Authentication configuration is missing. Please contact support.");
         return;

@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, Clock3, CreditCard, FileText, Lightbulb, Phone, RadioTower, ReceiptText, ShieldCheck, Smartphone, Tv, Wifi, Droplets, Flame, Zap } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, Clock3, CreditCard, FileText, Lightbulb, ReceiptText, ShieldCheck, Smartphone, Tv, Wifi, Droplets, Flame } from "lucide-react";
 
 type Service = "Mobile" | "DTH" | "Electricity" | "Water" | "Gas" | "Broadband";
 type Tx = { id: string; service: Service; account: string; amount: number; status: "Success (Demo)" };
@@ -35,20 +35,19 @@ export default function RechargeBillsDemo(){
   const [transactions,setTransactions]=useState<Tx[]>([]);
   const [error,setError]=useState("");
   const [lastTx,setLastTx]=useState<Tx|null>(null);
+  const [ref,setRef]=useState("DEMO-PENDING");
   const [showHistory,setShowHistory]=useState(false);
   const isRecharge=service==="Mobile"||service==="DTH";
-  const selectedService=services.find(x=>x.name===service)!;
   const amountNumber=Number(amount);
-  const ref=useMemo(()=> "DEMO"+Date.now().toString().slice(-8),[step==="payment"]);
   function chooseService(next:Service){setService(next);setOperator(operators[next][0]);setAccount("");setAmount(next==="Mobile"?"149":"");setStep("details");setError("");}
   function continueFlow(){
     setError("");
     if(!account.trim()){setError(isRecharge?"Enter a mobile number or subscriber ID.":"Enter your consumer / account number.");return;}
     if(isRecharge && account.replace(/\D/g,"").length<8){setError("Please enter a valid number or subscriber ID.");return;}
-    if(isRecharge){if(!amountNumber||amountNumber<10){setError("Choose a valid recharge amount.");return;}setStep("payment");}
+    if(isRecharge){if(!amountNumber||amountNumber<10){setError("Choose a valid recharge amount.");return;}setRef("DEMO"+Date.now().toString().slice(-8));setStep("payment");}
     else {setBillName("Demo Customer");setStep("bill");}
   }
-  function confirmBill(){setStep("payment");}
+  function confirmBill(){setRef("DEMO"+Date.now().toString().slice(-8));setStep("payment");}
   function payDemo(){
     const value=isRecharge?amountNumber:Number(billAmount);
     const tx:Tx={id:ref,service,account,amount:value,status:"Success (Demo)"};

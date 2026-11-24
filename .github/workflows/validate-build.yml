@@ -2,7 +2,9 @@ name: Validate Next.js build
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - feature/sri-amirthaa-id-oidc
   pull_request:
 
 permissions:
@@ -20,6 +22,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Lint
+        run: npm run lint
       - name: Type-check
         run: npx tsc --noEmit
       - name: Build

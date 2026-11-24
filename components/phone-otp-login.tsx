@@ -1,23 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeftRight, Eye, EyeOff, Mail, ShieldCheck, Smartphone } from "lucide-react";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
 import { firebaseApp } from "@/lib/firebase";
-import { createClient } from "@supabase/supabase-js";
 
-type Props = { onAuthenticated: () => void; onClose: () => void };
-type Phase = "phone" | "password" | "email" | "otp" | "orbit" | "verified";
+type Phase = "phone" | "existing" | "email" | "review" | "otp" | "orbit" | "verified";
 const DIGITS = 6;
 const validEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
-export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
+export default function PhoneOtpLogin() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [confirmation, setConfirmation] = useState<ConfirmationResult | null>(null);
   const [phase, setPhase] = useState<Phase>("phone");
@@ -25,8 +18,6 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
   const [message, setMessage] = useState("");
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
   const [emailChecking, setEmailChecking] = useState(false);
-  const [existingEmail, setExistingEmail] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const verifier = useRef<RecaptchaVerifier | null>(null);
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -50,13 +41,9 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
       if (!response.ok) throw new Error(result.error || "Unable to check this phone number.");
       setPhone(e164);
       if (result.registered) {
-        if (!result.canPasswordLogin || !result.email) {
-          throw new Error("This phone number is already registered but its account needs secure recovery. Please contact support.");
-        }
-        setExistingEmail(result.email);
-        setEmail(result.email);
-        setPhase("password");
-        setMessage("Existing account found. Sign in with your password.");
+        setEmail("");
+        setPhase("existing");
+        setMessage("Existing account found. Verify your phone number to continue.");
       } else {
         setPhase("email");
         setMessage("New phone number. Enter an email address to continue signup.");
@@ -79,6 +66,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
       if (!response.ok) throw new Error(result.error || "Unable to check this email.");
       setEmailAvailable(Boolean(result.available));
       setMessage(result.message || (result.available ? "Email is available." : "Email already registered."));
+      if (result.available) setPhase("review");
     } catch (error) {
       setEmailAvailable(null);
       setMessage(error instanceof Error ? error.message : "Unable to check this email.");
@@ -87,15 +75,7 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
 
   async function sendCode() {
     setMessage("");
-    if (phase === "email") {
-      if (emailAvailable !== true) { setMessage("Check that this email address is available before requesting OTP."); return; }
-      if (!fullName.trim()) { setMessage("Enter your full name."); return; }
-      if (password !== confirmPassword) { setMessage("Passwords do not match."); return; }
-      if (!acceptedTerms) { setMessage("Please accept the Terms and Privacy Policy."); return; }
-      if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^\w\s]/.test(password)) {
-        setMessage("Password must contain 8 characters, a capital letter, a number and a symbol."); return;
-      }
-    }
+    if (phase === "review" && emailAvailable !== true) { setMessage("Check that this email address is available before requesting OTP."); return; }
     setBusy(true);
     try {
       const auth = getAuth(firebaseApp);
@@ -121,42 +101,6 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
     } finally { setBusy(false); }
   }
 
-  async function resetExistingPassword() {
-    setMessage("");
-    try {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-      if (!url || !key) throw new Error("Password recovery is not configured.");
-      const supabase = createClient(url, key);
-      const { error } = await supabase.auth.resetPasswordForEmail(existingEmail, {
-        redirectTo: window.location.origin + "/auth/reset-password"
-      });
-      if (error) throw error;
-      setMessage("If password recovery is available, a reset link has been sent to your registered email.");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to send a password reset link.");
-    }
-  }
-
-  async function signInWithPhonePassword() {
-    if (!password) { setMessage("Enter your password."); return; }
-    if (!validEmail(existingEmail)) { setMessage("The account email is unavailable. Please contact support."); return; }
-    setBusy(true); setMessage("");
-    try {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-      if (!url || !key) throw new Error("Authentication setup is incomplete.");
-      const supabase = createClient(url, key);
-      const { error } = await supabase.auth.signInWithPassword({ email: existingEmail, password });
-      if (error) throw error;
-      setPhase("verified");
-      setMessage("Signed in successfully. Opening your account…");
-      window.setTimeout(onAuthenticated, 700);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to sign in. Check your password.");
-    } finally { setBusy(false); }
-  }
-
   async function verifyCode() {
     if (!confirmation || code.length !== DIGITS) { setMessage("Enter the 6-digit OTP."); return; }
     setBusy(true); setMessage("");
@@ -167,16 +111,20 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
       if (emailAvailable === true) {
         const response = await fetch("/api/auth/phone-signup", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ firebaseIdToken, email: email.trim(), password, fullName })
+          body: JSON.stringify({ firebaseIdToken, email: email.trim() })
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Unable to create your account.");
         setPhase("verified");
         setMessage("Phone verified. Check your email to confirm your new account before signing in.");
       } else {
-        setPhase("verified");
-        setMessage("Phone verified. Opening your account…");
-        window.setTimeout(onAuthenticated, 800);
+        const response = await fetch("/api/auth/sri-amirthaa/start", {
+          method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", cache: "no-store",
+          body: JSON.stringify({ firebaseIdToken })
+        });
+        const result = await response.json();
+        if (!response.ok || typeof result.authorizationUrl !== "string") throw new Error(result.error || "Secure sign-in could not start.");
+        window.location.assign(result.authorizationUrl);
       }
     } catch (error) {
       setPhase("otp");
@@ -186,83 +134,64 @@ export default function PhoneOtpLogin({ onAuthenticated, onClose }: Props) {
 
   function resetPhone() {
     verifier.current?.clear(); verifier.current = null; recaptchaContainerRef.current?.replaceChildren();
-    setPhase("phone"); setConfirmation(null); setCode(""); setPassword(""); setConfirmPassword(""); setAcceptedTerms(false); setEmail(""); setEmailAvailable(null);
-    setExistingEmail(""); setMessage("");
+    setPhase("phone"); setConfirmation(null); setCode(""); setEmail(""); setEmailAvailable(null); setMessage("");
   }
 
   return (
-    <section className="phone-otp-inline phone-otp-panel" aria-label="Phone sign in and signup">
-      <style jsx>{`
-        .phone-otp-inline{position:relative;width:100%;margin:18px 0 0;padding:0;border:0;border-radius:0;background:transparent;color:#234632;display:grid;gap:14px;font-family:inherit}
-        .otp-back{justify-self:start;padding:0;border:0;background:transparent;color:#28784b;font-size:10px;font-weight:800;cursor:pointer}
-        .otp-kicker{font:700 10px/1.4 ui-monospace,monospace;letter-spacing:2px;color:#168363;text-align:center}
-        .otp-title{text-align:center;font-size:19px;font-weight:700;color:#12352b}.otp-copy{text-align:center;font-size:12px;line-height:1.6;color:#607b70}
-        .otp-field{display:grid;gap:7px;font-size:12px;color:#45634f;font-weight:650}
-        .otp-field input{width:100%;height:46px;border:1px solid rgba(20,110,78,.22);border-radius:11px;background:rgba(255,255,255,.78);color:#12352b;padding:0 13px;outline:none}
-        .otp-field input:focus{border-color:#168363;box-shadow:0 0 0 3px rgba(22,131,99,.12)}
-        .otp-action{height:44px;border:0;border-radius:11px;background:linear-gradient(110deg,#167a5b,#24ad83);color:white;font-weight:800;cursor:pointer}
-        .otp-action:disabled{opacity:.45;cursor:not-allowed}
-        .otp-secondary{height:40px;border:1px solid rgba(37,132,81,.2);border-radius:11px;background:rgba(255,255,255,.7);color:#28784b;font-size:11px;font-weight:750}
-        .otp-boxes{display:flex;justify-content:center;gap:clamp(4px,2vw,10px)}
-        .otp-digit{width:clamp(35px,10vw,44px);height:52px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(20,110,78,.22);background:rgba(255,255,255,.8);color:#168363;font-size:22px;font-weight:800}
-        .otp-digit.filled{background:#e1f6ed;border-color:#168363}
-        .otp-hidden{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-        .otp-message{font-size:12px;text-align:center;color:#168363;overflow-wrap:anywhere}
-        .otp-message.error{color:#b43f3b}.otp-change-number{justify-self:center;display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border:1px solid rgba(37,132,81,.2);border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(229,248,236,.8));color:#28784b;font-size:11px;font-weight:750}
-        .otp-arena{width:220px;height:220px;position:relative;margin:auto;isolation:isolate}
-        .otp-orbit-digit{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#f5fff8,#d9f5e3);border:1px solid rgba(22,131,99,.5);color:#168363;font-weight:850;animation:orbit 1.6s cubic-bezier(.65,0,.35,1) both;box-shadow:0 0 10px 3px rgba(38,190,111,.22),0 0 24px 7px rgba(38,190,111,.16),inset 0 1px 0 rgba(255,255,255,.95)}
-        .otp-orbit-digit:before{content:"";position:absolute;inset:-8px;border-radius:14px;background:radial-gradient(circle,rgba(57,220,133,.32),rgba(57,220,133,0) 72%);filter:blur(5px);z-index:-1;animation:tileGlow .8s ease-in-out infinite alternate}
-        @keyframes tileGlow{from{opacity:.35;transform:scale(.82)}to{opacity:1;transform:scale(1.16)}}
-        .otp-orbit-digit:nth-child(2){animation-delay:-.08s}.otp-orbit-digit:nth-child(3){animation-delay:-.16s}.otp-orbit-digit:nth-child(4){animation-delay:-.24s}.otp-orbit-digit:nth-child(5){animation-delay:-.32s}.otp-orbit-digit:nth-child(6){animation-delay:-.4s}
-        @keyframes orbit{from{transform:rotate(var(--start)) translateX(76px) rotate(var(--counter-start))}to{transform:rotate(calc(var(--start) + 360deg)) translateX(76px) rotate(calc(var(--counter-start) - 360deg))}}
-        .otp-success{display:grid;justify-items:center;gap:10px;padding:16px 0}.otp-check{width:72px;height:72px;border:2px solid #168363;border-radius:18px;background:#e1f6ed;display:grid;place-items:center;color:#168363;font-size:36px}
-        .otp-success strong{font-size:19px;letter-spacing:3px;color:#20a879}
-        @media(prefers-reduced-motion:reduce){.otp-orbit-digit{animation:none}}
+    <main className="core-login-shell" aria-label="Sri Amirthaa secure phone login">
+      <style jsx global>{`
+        .core-login-shell{min-height:100vh;margin:0;padding:0 22px 22px;background:radial-gradient(ellipse at 12% 20%,#dff5ed 0%,transparent 38%),radial-gradient(ellipse at 88% 12%,#e9e4ff 0%,transparent 35%),linear-gradient(135deg,#f7fbff,#f0f8f5 55%,#fff7ef);color:#17243b;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;display:flex;flex-direction:column;overflow:hidden}
+        .core-login-shell *{box-sizing:border-box}
+        .core-login-top{height:82px;display:flex;align-items:center;justify-content:space-between;max-width:1180px;width:100%;margin:0 auto;border-bottom:1px solid #dce7f3}
+        .core-login-brand{display:flex;align-items:center;gap:12px;color:#17243b;text-decoration:none;font-size:12px;letter-spacing:.14em;font-weight:800}
+        .core-login-mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#d9f7ec,#b8d8ff);color:#23416b;font-weight:900;box-shadow:0 7px 22px #8db5ed35}
+        .core-login-secure{border:1px solid #c8d9f1;background:#ffffffb8;color:#496a91;padding:8px 12px;border-radius:30px;font-size:10px;letter-spacing:.12em}
+        .core-login-layout{max-width:1120px;width:100%;margin:auto;display:grid;grid-template-columns:1fr 440px;gap:80px;align-items:center;flex:1;padding:40px 0}
+        .core-login-intro{padding:35px 0;position:relative}.core-login-eyebrow{color:#5276a6;font-size:11px;letter-spacing:.2em;font-weight:700}
+        .core-login-intro h1{font-size:clamp(48px,6vw,76px);line-height:1.04;letter-spacing:-.055em;margin:25px 0 18px;font-weight:650;color:#1d3151}
+        .core-login-intro h1 em{font-style:normal;background:linear-gradient(90deg,#4b9fe8,#9274e8,#54bf9b,#f39a61);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .core-login-intro p{max-width:440px;color:#62748e;font-size:15px;line-height:1.9}
+        .core-login-trust{display:flex;gap:24px;margin-top:28px;color:#627b99;font-size:12px}
+        .core-login-card{width:100%;padding:34px;border:1px solid #dbe6f1;border-radius:25px;background:#ffffffd9;box-shadow:0 25px 75px #567aa51c,inset 0 1px #fff;backdrop-filter:blur(24px)}
+        .core-login-cardtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+        .core-login-mini{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#d9f7ec,#b8d8ff);color:#23416b;display:grid;place-items:center;font-size:12px;font-weight:800}
+        .core-login-step{font-size:9px;letter-spacing:.2em;color:#5276a6;font-weight:700}
+        .core-login-card h2{font-size:25px;letter-spacing:-.035em;margin:0 0 8px;color:#1d3151}
+        .core-login-sub{color:#6d7e96;font-size:13px;line-height:1.7;margin:0 0 23px}
+        .core-login-label{display:block;color:#607b9c;font-size:9px;letter-spacing:.17em;font-weight:700;margin:16px 0 9px}
+        .core-login-input{width:100%;height:54px;border:1px solid #d5e2ef;border-radius:13px;background:#f7faff;color:#1d3151;padding:0 14px;outline:0;font-size:15px}
+        .core-login-input::placeholder{color:#9aabc0}.core-login-input:focus{border-color:#62aee7;box-shadow:0 0 0 3px #62aee71c}
+        .core-login-btn{width:100%;min-height:52px;border:0;border-radius:13px;margin-top:18px;background:linear-gradient(100deg,#bce9ff,#d9d0ff 48%,#c5f1d9);color:#213b5b;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 9px 28px #7cabea30}
+        .core-login-btn:disabled{opacity:.5;cursor:not-allowed}
+        .core-login-back,.core-login-link{border:0;background:transparent;color:#568cc0;font-size:11px;font-weight:700;cursor:pointer;padding:0;margin:0 0 18px}
+        .core-login-summary{border:1px solid #d8e8f1;background:linear-gradient(120deg,#f0f8ff,#f1fbf6);border-radius:12px;padding:14px;display:grid;gap:7px;margin:14px 0}
+        .core-login-summary small{color:#7892aa;font-size:9px;letter-spacing:.16em}.core-login-summary strong{color:#315a7c;font-size:13px;overflow-wrap:anywhere;margin-bottom:8px}
+        .core-login-message{font-size:12px;line-height:1.6;color:#477d61;overflow-wrap:anywhere;margin:13px 0 0}
+        .core-login-message.error{color:#b44d4a}.core-login-check{display:flex;align-items:flex-start;gap:8px;color:#62748e;font-size:11px;line-height:1.5;margin-top:14px}
+        .core-login-otp{letter-spacing:.35em;text-align:center;font-size:22px}.core-login-footer{max-width:1180px;width:100%;margin:15px auto 0;padding:18px 0 8px;border-top:1px solid #dce7f3;display:flex;justify-content:space-between;color:#8b9db2;font-size:9px;letter-spacing:.1em}
+        .core-login-recaptcha{min-height:1px}
+        @media(max-width:900px){.core-login-layout{grid-template-columns:1fr 420px;gap:25px}.core-login-intro h1{font-size:52px}}
+        @media(max-width:700px){.core-login-shell{padding:0 17px 15px}.core-login-top{height:70px}.core-login-layout{display:flex;flex-direction:column;align-items:stretch;gap:25px;padding:34px 0 38px;flex:unset}.core-login-intro{padding:0}.core-login-intro h1{font-size:43px;margin:15px 0 10px}.core-login-intro p{font-size:12px;margin:0}.core-login-trust{margin-top:15px;gap:15px;font-size:10px}.core-login-card{padding:25px 21px;border-radius:21px}.core-login-footer{font-size:8px;gap:10px;flex-wrap:wrap}}
+        @media(max-width:380px){.core-login-card{padding:22px 16px}.core-login-intro h1{font-size:38px}.core-login-secure{letter-spacing:.05em}}
       `}</style>
-      <button type="button" className="otp-back" onClick={onClose}>← Back to sign-in options</button>
-      <div className="otp-kicker">SRI AMIRTHAA ID · SECURE ACCESS</div>
-
-      {phase === "phone" && <>
-        <div><h3 className="otp-title">Continue with phone</h3><p className="otp-copy">Enter your mobile number. We’ll check whether you already have an account.</p></div>
-        <label className="otp-field"><span>Mobile number</span><input type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+91 9876543210"/></label>
-        <button className="otp-action" type="button" onClick={checkPhone} disabled={busy}>{busy ? "Checking…" : "Continue"}</button>
-      </>}
-
-      {phase === "password" && <>
-        <div><h3 className="otp-title">Welcome back</h3><p className="otp-copy">Existing account found for {phone}. Sign in with your password.</p></div>
-        <label className="otp-field"><span>Email address</span><input type="email" value={existingEmail} readOnly/></label>
-        <label className="otp-field"><span>Password</span><div style={{position:"relative"}}><input type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} autoComplete="current-password" placeholder="Enter your password"/><button type="button" aria-label={showPassword?"Hide password":"Show password"} onClick={()=>setShowPassword(v=>!v)} style={{position:"absolute",right:12,top:13,border:0,background:"transparent",color:"#28784b"}}>{showPassword?<EyeOff size={18}/>:<Eye size={18}/>}</button></div></label>
-        <button className="otp-action" type="button" onClick={signInWithPhonePassword} disabled={busy}>{busy?"Signing in…":"Sign in"}</button>
-        <button type="button" className="otp-back" onClick={resetExistingPassword}>Forgot password?</button>
-        <button className="otp-change-number" type="button" onClick={resetPhone}><ArrowLeftRight size={15}/> Change number</button>
-      </>}
-
-      {phase === "email" && <>
-        <div><h3 className="otp-title">Create your account</h3><p className="otp-copy">New phone number detected. Check your email before sending OTP.</p></div>
-        <label className="otp-field"><span>Email address</span><input type="email" value={email} onChange={e=>{setEmail(e.target.value);setEmailAvailable(null);setMessage("");}} placeholder="name@example.com" autoComplete="email"/></label>
-        <button className="otp-secondary" type="button" onClick={checkEmail} disabled={emailChecking||!validEmail(email)}>{emailChecking?"Checking email…":"Check email availability"}</button>
-        {emailAvailable===true && <>
-          <label className="otp-field"><span>Full name</span><input value={fullName} onChange={e=>setFullName(e.target.value)} autoComplete="name" placeholder="Your full name"/></label>
-          <label className="otp-field"><span>Create password</span><input type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)} autoComplete="new-password" placeholder="8+ characters, capital, number & symbol"/></label>
-          <label className="otp-field"><span>Confirm password</span><input type={showPassword?"text":"password"} value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} autoComplete="new-password" placeholder="Re-enter your password"/></label>
-          <label style={{display:"flex",alignItems:"flex-start",gap:8,fontSize:11,color:"#607b70",lineHeight:1.5}}><input type="checkbox" checked={acceptedTerms} onChange={e=>setAcceptedTerms(e.target.checked)} style={{marginTop:2}}/><span>I agree to the Terms and Privacy Policy.</span></label>
-        </>}
-        <button className="otp-action" type="button" onClick={sendCode} disabled={busy||emailAvailable!==true||!fullName.trim()||password.length<8||password!==confirmPassword||!acceptedTerms}>{busy?"Sending OTP…":"Send OTP"}</button>
-        {emailAvailable===false && <p className="otp-message error">Email already registered. OTP cannot be sent. Please sign in with your existing account.</p>}
-      </>}
-
-      {phase === "otp" && <>
-        <div><h3 className="otp-title">Enter your OTP</h3><p className="otp-copy">Enter the 6-digit code sent to {phone}.</p></div>
-        <div className="otp-boxes" onClick={()=>inputRef.current?.focus()}>{Array.from({length:DIGITS},(_,i)=><div className={`otp-digit ${code[i]?"filled":""}`} key={i}>{code[i]||(i===code.length?"•":"")}</div>)}</div>
-        <input ref={inputRef} className="otp-hidden" type="tel" inputMode="numeric" autoComplete="one-time-code" maxLength={DIGITS} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,DIGITS))} aria-label="6-digit OTP"/>
-        <button className="otp-action" type="button" onClick={verifyCode} disabled={busy||code.length!==DIGITS}>{busy?"Verifying…":"Verify OTP"}</button>
-        <button type="button" className="otp-change-number" onClick={resetPhone}><ArrowLeftRight size={15}/> Change number</button>
-      </>}
-
-      {phase === "orbit" && <><div className="otp-arena">{code.split("").map((digit,i)=><span key={i} className="otp-orbit-digit" style={{"--start":`${i*60-90}deg`,"--counter-start":`${90-i*60}deg`} as React.CSSProperties}>{digit}</span>)}</div><p className="otp-kicker">VERIFYING SECURELY…</p></>}
-      {phase === "verified" && <div className="otp-success"><div className="otp-check">✓</div><strong>VERIFIED</strong><p className="otp-copy">{message}</p></div>}
-      {message && phase!=="verified" && <p role="status" className={`otp-message ${/already registered|error|unable|invalid|incorrect|already|not configured|contact support/i.test(message)?"error":""}`}>{message}</p>}
-      <div ref={recaptchaContainerRef}/>
-    </section>
+      <header className="core-login-top"><div className="core-login-brand"><span className="core-login-mark">SA</span><span>SRI AMIRTHAA<small style={{display:"block",fontSize:8,color:"#71c9a7",letterSpacing:".3em",marginTop:3}}>SECURE ACCESS</small></span></div><span className="core-login-secure">SECURE IDENTITY</span></header>
+      <section className="core-login-layout">
+        <div className="core-login-intro"><span className="core-login-eyebrow">✦ ONE ID. EVERY CONNECTION.</span><h1>Your world,<br/><em>one identity.</em></h1><p>ஒரே Sri Amirthaa account மூலம் இணைக்கப்பட்ட அனைத்து சேவைகளையும் பாதுகாப்பாக அணுகுங்கள்.</p><div className="core-login-trust"><span>◈ Verified identity</span><span>▣ Encrypted access</span></div></div>
+        <section className="core-login-card">
+          <div className="core-login-cardtop"><span className="core-login-mini">SA</span><span className="core-login-step">{phase==="phone"?"PHONE CHECK":phase==="email"?"NEW ACCOUNT • EMAIL":phase==="review"?"CONFIRM DETAILS":phase==="existing"?"EXISTING ACCOUNT":phase==="otp"?"PHONE VERIFICATION":phase==="orbit"?"SECURE CHECK":"ACCOUNT STATUS"}</span></div>
+          {phase==="phone" && <><h2>Continue with Phone</h2><p className="core-login-sub">உங்கள் மொபைல் எண்ணை உள்ளிடுங்கள். ஏற்கெனவே கணக்கு உள்ளதா எனச் சரிபார்க்கிறோம்.</p><label className="core-login-label">PHONE NUMBER</label><input className="core-login-input" type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+91 9876543210"/><button className="core-login-btn" type="button" onClick={checkPhone} disabled={busy}>{busy?"Checking…":"Continue"}</button></>}
+          {phase==="existing" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change phone number</button><h2>Welcome back</h2><p className="core-login-sub">இந்த Phone Number ஏற்கெனவே பதிவு செய்யப்பட்டுள்ளது. OTP மூலம் உறுதிப்படுத்துங்கள்.</p><div className="core-login-summary"><small>SRI USER ID</small><strong>{phone}</strong></div><button className="core-login-btn" type="button" onClick={sendCode} disabled={busy}>{busy?"Sending…":"Verify phone & Send OTP"}</button></>}
+          {phase==="email" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change phone number</button><h2>Welcome, New User!</h2><p className="core-login-sub">புதிய கணக்கிற்காக உங்கள் Email ID-ஐ உள்ளிட்டு சரிபார்க்கவும்.</p><label className="core-login-label">EMAIL ADDRESS</label><input className="core-login-input" type="email" autoComplete="email" value={email} onChange={e=>{setEmail(e.target.value);setEmailAvailable(null);setMessage("");}} placeholder="you@example.com"/><button className="core-login-btn" type="button" onClick={checkEmail} disabled={emailChecking||!validEmail(email)}>{emailChecking?"Checking…":"Check Email"}</button></>}
+          {phase==="review" && <><button className="core-login-back" type="button" onClick={()=>{setPhase("email");setMessage("");}}>← Change email</button><h2>Confirm your details</h2><p className="core-login-sub">OTP அனுப்புவதற்கு முன் விவரங்களைச் சரிபார்க்கவும்.</p><div className="core-login-summary"><small>EMAIL AVAILABILITY</small><strong>✓ AVAILABLE — CHECKED</strong><small>SRI USER ID</small><strong>{phone}</strong><small>REGISTERED PHONE</small><strong>{phone}</strong><small>EMAIL ADDRESS</small><strong>{email.trim().toLowerCase()}</strong></div><button className="core-login-btn" type="button" onClick={sendCode} disabled={busy||emailAvailable!==true}>{busy?"Sending OTP…":"Verify phone & Send OTP"}</button></>}
+          {phase==="otp" && <><button className="core-login-back" type="button" onClick={resetPhone}>← Change number</button><h2>Verify your number</h2><p className="core-login-sub">இந்த எண்ணிற்கு அனுப்பிய 6 இலக்க OTP-ஐ உள்ளிடுங்கள்.</p><div className="core-login-summary"><small>OTP SENT TO</small><strong>{phone}</strong></div><label className="core-login-label">6-DIGIT VERIFICATION CODE</label><input ref={inputRef} className="core-login-input core-login-otp" type="tel" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="••••••"/><button className="core-login-btn" type="button" onClick={verifyCode} disabled={busy||code.length!==6}>{busy?"Verifying securely…":"Verify OTP"}</button></>}
+          {phase==="orbit" && <><h2>Verifying securely…</h2><p className="core-login-sub">உங்கள் கணக்கை பாதுகாப்பாக இணைக்கிறோம்.</p></>}
+          {phase==="verified" && <><h2>Account status</h2><p className="core-login-sub">{message}</p></>}
+          {message && phase!=="verified" && <p role="status" className={`core-login-message ${/already registered|error|unable|invalid|incorrect|not configured|contact support/i.test(message)?"error":""}`}>{message}</p>}
+          <div ref={recaptchaContainerRef} className="core-login-recaptcha"/>
+          <p className="core-login-message" style={{fontSize:10,color:"#729b87"}}>By continuing, you agree to Sri Amirthaa’s Terms & Privacy Policy.</p>
+        </section>
+      </section>
+      <footer className="core-login-footer"><span>© 2026 Sri Amirthaa Groups</span><span>IDENTITY • PRIVACY • SECURITY</span></footer>
+    </main>
   );
 }

@@ -17,7 +17,7 @@ const pages: Record<string, PageInfo> = {
   account: { title: "My Account", description: "Manage your profile, saved addresses and account preferences.", section: "Account" },
   offers: { title: "Offers & Deals", description: "Explore coupons, vouchers and rewards in one place.", section: "Explore" },
   settings: { title: "Settings", description: "Manage your website preferences, account security and support options.", section: "Preferences" },
-  about: { title: "About Us", description: "Learn about 1252's grow with us and our promise to customers.", section: "Information" },
+  about: { title: "About Us", description: "Learn about 1252&apos;s grow with us and our promise to customers.", section: "Information" },
   contact: { title: "Contact Us", description: "Find the right way to contact our customer support team.", section: "Information" },
   faq: { title: "Frequently Asked Questions", description: "Find answers about shopping, orders, payments, wallet and recharge.", section: "Help" },
   terms: { title: "Terms & Conditions", description: "Read the terms that apply when using this website.", section: "Policies" },
@@ -56,7 +56,7 @@ export default async function StructurePage({ params }: { params: Promise<{ slug
     <main style={{ minHeight: "100vh", background: "linear-gradient(145deg, #f1fff7 0%, #f7fbf8 55%, #eaf8f0 100%)", padding: "28px 18px", color: "#172033" }}>
       <div style={{ maxWidth: 980, margin: "0 auto" }}>
         <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap", padding: "10px 0 30px" }}>
-          <Link href="/" style={{ fontWeight: 800, letterSpacing: ".04em" }}>1252's grow with us</Link>
+          <Link href="/" style={{ fontWeight: 800, letterSpacing: ".04em" }}>1252&#39;s grow with us</Link>
           <Link href="/" style={{ color: "#23804a", fontWeight: 700, fontSize: 14 }}>← Back to Home</Link>
         </header>
         <section style={{ background: "#ffffffdf", border: "1px solid #dcefe3", borderRadius: 24, padding: "clamp(24px, 6vw, 48px)", boxShadow: "0 22px 60px rgba(37,75,50,.08)" }}>
