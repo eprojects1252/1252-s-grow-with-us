@@ -38,8 +38,8 @@ Do not apply migrations to a live database until the target project and SQL have
 
 1. Customer enters a phone number in the single **Continue with Phone** flow.
 2. The app checks whether the phone belongs to an existing E-Commerce account.
-3. For a new customer, the app collects and checks email availability, then displays the confirmation details (Sri User ID = phone number, phone, email, and name).
-4. The customer verifies the phone using Firebase OTP. New E-Commerce account creation then sends an email confirmation; the customer must confirm that email before the E-Commerce account can be used.
+3. For a new customer, the app collects and checks email availability, then displays the confirmation details (Sri User ID = phone number, phone, and email).
+4. The customer verifies the phone using Firebase OTP. The E-Commerce server asks the Core API to validate the Firebase token and create/sync the central phone identity, then creates a passwordless E-Commerce Auth account with a server-generated credential and sends an email confirmation. The customer must confirm that email before the E-Commerce account can be used.
 5. For an existing customer, the verified Firebase phone identity is sent server-to-server to Core. Firebase ID tokens are never placed in a URL.
 6. Core validates the Firebase token and issues a short-lived, single-use authorization code using PKCE S256.
 7. E-Commerce exchanges the code and validates the ES256 ID token signature, issuer, audience, and nonce.
