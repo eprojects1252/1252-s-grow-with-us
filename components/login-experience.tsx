@@ -73,8 +73,23 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
         const {data,error}=await supabase.auth.signInWithPassword({email:email.trim(),password});
         if(error)throw error;
         if(adminMode){
-          if(data.user?.app_metadata?.role!=="admin"){await supabase.auth.signOut();throw new Error("This account does not have Admin access.");}
-          setSuccess(true);formRef.current?.dispatchEvent(new Event("auth:success"));setNotice("Admin access verified.");onAuthenticated?.();
+          // Admin access is granted only by an active server-managed membership row.
+          // Never trust editable user_metadata or a client-provided role claim.
+          const { data: membership, error: membershipError } = await supabase
+            .from("admin_members")
+            .select("role,is_active")
+            .eq("user_id", data.user.id)
+            .maybeSingle();
+          if (membershipError) {
+            await supabase.auth.signOut();
+            throw new Error("Unable to verify Admin permissions. Please try again.");
+          }
+          if (!membership?.is_active) {
+            await supabase.auth.signOut();
+            throw new Error("This account has not been approved for Admin access.");
+          }
+          setSuccess(true);formRef.current?.dispatchEvent(new Event("auth:success"));
+          setNotice(`Admin access verified (${membership.role}).`);onAuthenticated?.();
         }else{setSuccess(true);formRef.current?.dispatchEvent(new Event("auth:success"));setNotice("You're signed in. Opening your account…");await new Promise(resolve=>window.setTimeout(resolve,1250));window.location.assign("/account");}
       }
     }catch(error){if(!signup)setNotice(error instanceof Error?error.message:"Unable to complete sign-in. Please try again.");setSuccess(false);}
