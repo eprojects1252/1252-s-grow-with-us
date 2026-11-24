@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Sri Amirthaa ID Core is not configured for this deployment." }, { status: 503 });
     }
 
-    const response = await fetch(\`\${supabaseUrl}/functions/v1/check-contact\`, {
+    const response = await fetch(supabaseUrl + "/functions/v1/check-contact", {
       method: "POST",
       cache: "no-store",
       headers: { "Content-Type": "application/json", apikey: publishableKey },
