@@ -80,7 +80,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
         // identity and then complete the same Core OIDC flow as phone sign-in.
         const firebaseApiKey=process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
         if(!firebaseApiKey)throw new Error("Sri Amirthaa ID email sign-in is not configured.");
-        const coreCheck=await fetch(url.replace(/\\/+$/,"")+"/functions/v1/identifier-login",{
+        const coreCheck=await fetch((url.endsWith("/")?url.slice(0,-1):url)+"/functions/v1/identifier-login",{
           method:"POST",headers:{"Content-Type":"application/json",apikey:key},
           body:JSON.stringify({identifier:email.trim().toLowerCase(),password,firebaseApiKey})
         });
