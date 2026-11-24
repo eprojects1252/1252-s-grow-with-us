@@ -38,9 +38,9 @@ export async function POST(request: Request) {
     const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
     const { data: existingProfile, error: profileError } = await admin.from("profiles")
-      .select("id, supabase_user_id, phone_e164, firebase_uid").eq("phone_e164", verifiedPhone).maybeSingle();
+      .select("id, supabase_user_id, phone_e164, firebase_uid, email").eq("phone_e164", verifiedPhone).maybeSingle();
     if (profileError) throw profileError;
-    if (existingProfile?.supabase_user_id) {\n      if (existingProfile.firebase_uid === firebaseUid) return NextResponse.json({ success: true, alreadyExists: true });\n      return NextResponse.json({ error: "Phone number already registered to another Sri Amirthaa ID." }, { status: 409 });\n    }
+    if (existingProfile?.supabase_user_id) {\n      if (existingProfile.firebase_uid === firebaseUid) return NextResponse.json({ success: true, alreadyExists: true });\n      if (!existingProfile.firebase_uid && existingProfile.email?.trim().toLowerCase() === email) {\n        const { error: linkExistingError } = await admin.from("profiles").update({ firebase_uid: firebaseUid }).eq("id", existingProfile.id);\n        if (linkExistingError) throw linkExistingError;\n        return NextResponse.json({ success: true, alreadyExists: true });\n      }\n      return NextResponse.json({ error: "Phone number already registered to another Sri Amirthaa ID." }, { status: 409 });\n    }
 
     const { data: emailProfile, error: emailProfileError } = await admin.from("profiles")
       .select("id").ilike("email", email).limit(1).maybeSingle();
