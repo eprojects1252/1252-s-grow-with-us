@@ -131,7 +131,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
           <h1 style={{fontSize:27,margin:"18px 0 8px",color:"#1d3151"}}>Welcome to Sri Amirthaa</h1>
           <p style={{fontSize:13,lineHeight:1.7,color:"#62748e",margin:0}}>Choose one way to continue to your account.</p>
         </div>
-        <button type="button" onClick={googleSignIn} disabled={busy} style={{width:"100%",height:52,border:"1px solid #d5e2ef",borderRadius:12,background:"#fff",color:"#263b57",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:11,marginBottom:13,cursor:"pointer",opacity:busy?.6:1}}>
+        <button type="button" onClick={googleSignIn} disabled={busy} style={{width:"100%",height:52,border:"1px solid #d5e2ef",borderRadius:12,background:"#fff",color:"#263b57",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:11,marginBottom:13,cursor:"pointer",opacity:busy ? 0.6 : 1}}>
           <svg aria-hidden="true" viewBox="0 0 48 48" width="20" height="20"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.9 6-15z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.7-5.1c-1.8 1.2-4 1.9-6.8 1.9-5.2 0-9.6-3.5-11.2-8.2H5.9v5.3A20 20 0 0 0 24 44z"/><path fill="#FBBC05" d="M12.8 27.7a12 12 0 0 1 0-7.4V15H5.9a20 20 0 0 0 0 17.9z"/><path fill="#EA4335" d="M24 12.1c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.1 29.5 4 24 4A20 20 0 0 0 5.9 15l6.9 5.3c1.6-4.7 6-8.2 11.2-8.2z"/></svg>
           {busy ? "Please wait…" : "Continue with Google"}
         </button>
