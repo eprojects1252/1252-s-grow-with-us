@@ -51,7 +51,7 @@ export default function WalletPage() {
       const coreUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       if (!coreUrl) throw new Error("Sri Amirthaa Wallet is not configured.");
       const idToken = await currentUser.getIdToken(true);
-      const response = await fetch(coreUrl.replace(/\\/+$/, "") + "/functions/v1/customer-portal", {
+      const response = await fetch(coreUrl.replace(/\/+$/, "") + "/functions/v1/customer-portal", {
         method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store",
         body: JSON.stringify({ idToken, action: "request_topup", amount: Number(amount), paymentReference: utr.trim(), paymentNote: "UPI top-up request" })
       });
