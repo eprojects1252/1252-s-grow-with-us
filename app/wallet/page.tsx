@@ -64,7 +64,7 @@ export default function WalletPage() {
             if (!response.ok) throw new Error(result.error || "Unable to load your central wallet.");
             if (!active) return;
             setWalletBalance(Number(result.wallet?.balance ?? 0));
-            setWalletCurrency(typeof result.wallet?.currency_code === "string" ? result.wallet.currency_code : "INR");
+            setWalletCurrency(typeof result.wallet?.currency_code === "string" ? result.wallet.currency_code : "SRI");
             setWalletTransactions(Array.isArray(result.transactions) ? result.transactions : []);
             setWalletTopups(Array.isArray(result.topups) ? result.topups : []);
             setWalletError("");
