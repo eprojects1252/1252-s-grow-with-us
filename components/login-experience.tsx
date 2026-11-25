@@ -164,7 +164,7 @@ export default function LoginExperience({ initialMode = "login", adminMode = fal
   const missing=PASSWORD_RULES.find(rule=>!rule.test.test(password));
   const tone=PASSWORD_TONES[score];
 
-  return <UnifiedIdentityLogin initialMode={initialMode} />;
+  if (!adminMode) return <UnifiedIdentityLogin initialMode={initialMode} />;
 
   // Customer sign-in chooser: exactly four providers, all presented in a light theme.
   if (!adminMode && showPhoneOtp) return <div><button type="button" onClick={()=>setShowPhoneOtp(false)} style={{position:"fixed",zIndex:20,top:14,left:14,padding:"9px 13px",border:"1px solid #d5e2ef",borderRadius:10,background:"#fff",color:"#315a7c"}}>← Back</button><PhoneOtpLogin /></div>;
