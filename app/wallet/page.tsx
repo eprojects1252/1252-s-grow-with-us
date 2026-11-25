@@ -12,7 +12,7 @@ export default function WalletPage() {
   const [utr, setUtr] = useState("");
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState("");
-  const validAmount = /^\d+$/.test(amount) && Number(amount) >= 1 && Number(amount) <= 100000;
+  const validAmount = /^\d+$/.test(amount) && Number(amount) >= 10 && Number(amount) <= 100000;
   const reference = `SRI${useId().replace(/[^a-zA-Z0-9]/g, "").slice(-8).toUpperCase()}`;
   const upiUri = useMemo(() => {
     if (!validAmount) return "";
@@ -40,9 +40,28 @@ export default function WalletPage() {
     }
   }
 
-  function submitProof(event: React.FormEvent<HTMLFormElement>) {
+  async function submitProof(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setNotice("Your UTR has been entered. Payment submission will be enabled after the secure wallet backend and Admin verification are connected. No coins have been credited.");
+    setNotice("");
+    try {
+      const { getAuth } = await import("firebase/auth");
+      const { firebaseApp } = await import("@/lib/firebase");
+      const currentUser = getAuth(firebaseApp).currentUser;
+      if (!currentUser) throw new Error("Please sign in with your Sri Amirthaa ID first.");
+      const coreUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (!coreUrl) throw new Error("Sri Amirthaa Wallet is not configured.");
+      const idToken = await currentUser.getIdToken(true);
+      const response = await fetch(coreUrl.replace(/\\/+$/, "") + "/functions/v1/customer-portal", {
+        method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store",
+        body: JSON.stringify({ idToken, action: "request_topup", amount: Number(amount), paymentReference: utr.trim(), paymentNote: "UPI top-up request" })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "Unable to submit your wallet top-up request.");
+      setNotice("Payment reference submitted for Admin verification. Your wallet has NOT been credited yet.");
+      setUtr("");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Unable to submit your payment reference.");
+    }
   }
 
   return (
@@ -58,10 +77,10 @@ export default function WalletPage() {
           <div className="amc-card amc-amount-card">
             <div className="amc-section-title"><span className="amc-step">01</span><div><h2>Choose top-up amount</h2><p>₹1 = 1 Sri</p></div></div>
             <label className="amc-label" htmlFor="amc-amount">Amount in INR</label>
-            <div className="amc-amount-input"><span>₹</span><input id="amc-amount" inputMode="numeric" type="number" min="1" max="100000" step="1" value={amount} onChange={(event) => { setAmount(event.target.value); setNotice(""); }} placeholder="Enter amount"/></div>
+            <div className="amc-amount-input"><span>₹</span><input id="amc-amount" inputMode="numeric" type="number" min="10" max="100000" step="1" value={amount} onChange={(event) => { setAmount(event.target.value); setNotice(""); }} placeholder="Enter amount"/></div>
             <div className="amc-presets">{[100, 250, 500, 1000].map((value) => <button type="button" key={value} className={amount === String(value) ? "selected" : ""} onClick={() => { setAmount(String(value)); setNotice(""); }}>₹{value.toLocaleString("en-IN")}</button>)}</div>
             <div className="amc-credit-preview"><div><span>You will receive</span><small>After Admin confirms the payment</small></div><strong>{validAmount ? `${formatINR(Number(amount))} Sri` : "— Sri"}</strong></div>
-            {!validAmount && <p className="amc-validation">Enter a whole amount between ₹1 and ₹1,00,000.</p>}
+            {!validAmount && <p className="amc-validation">Enter a whole amount between ₹10 and ₹1,00,000.</p>}
           </div>
 
           <div className="amc-card amc-pay-card">
