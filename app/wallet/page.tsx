@@ -109,7 +109,7 @@ export default function WalletPage() {
           {notice && <p className="amc-notice" role="status"><Info size={16}/>{notice}</p>}
           <div className="amc-security-note"><ShieldCheck size={18}/><span>Coins are not credited just because a QR is scanned or a UTR is entered. Admin must verify the actual bank credit first.</span></div>
         </section>
-        <p className="amc-disclaimer">Preview stage: this page creates a UPI QR and opens UPI apps. Payment records, screenshot uploads, Admin approval and wallet credit are not connected yet.</p>
+        <p className="amc-disclaimer">UPI payment references are recorded in your central Sri Amirthaa ID account for Admin review. Wallet credits are added only after the payment is verified; automatic bank verification is not enabled.</p>
       </div>
       <style jsx>{`
         .amc-page{min-height:100vh;padding:34px 24px 70px;background:radial-gradient(circle at 12% 4%,#eeeaff 0,transparent 30%),radial-gradient(circle at 92% 25%,#e4faf3 0,transparent 27%),#f7f8fc;color:#20283b}
