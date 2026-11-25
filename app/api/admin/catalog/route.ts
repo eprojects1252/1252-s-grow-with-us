@@ -28,9 +28,19 @@ export async function GET(request: Request) {
 
   const failure = products.error || categories.error || orders.error || logs.error || team.error;
   if (failure) return NextResponse.json({ error: "Unable to load the Admin workspace data." }, { status: 500 });
+  const teamRows = team.data ?? [];
+  const teamIds = teamRows.map(member => member.user_id);
+  const { data: teamProfiles, error: teamProfilesError } = teamIds.length
+    ? await context.admin.from("profiles").select("supabase_user_id,email,full_name").in("supabase_user_id", teamIds)
+    : { data: [], error: null };
+  if (teamProfilesError) return NextResponse.json({ error: "Unable to load Admin member profiles." }, { status: 500 });
+  const profileByUser = new Map((teamProfiles ?? []).map(profile => [profile.supabase_user_id, profile]));
   return NextResponse.json({
     products: products.data ?? [], categories: categories.data ?? [], orders: orders.data ?? [],
-    activity: logs.data ?? [], team: team.data ?? [], admin: { role: context.role }
+    activity: logs.data ?? [], team: teamRows.map(member => ({
+      ...member, email: profileByUser.get(member.user_id)?.email ?? null,
+      full_name: profileByUser.get(member.user_id)?.full_name ?? null
+    })), admin: { role: context.role }
   });
 }
 
