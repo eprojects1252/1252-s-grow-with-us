@@ -3,7 +3,7 @@ import { requireAdmin, isAdminContext, requireRoles } from "@/lib/admin-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-const OWNER_ROLES = ["super_admin", "owner"] as const;
+const OWNER_ROLES = ["chief_admin"] as const;
 
 export async function GET(request: Request) {
   const context = await requireAdmin(request);
