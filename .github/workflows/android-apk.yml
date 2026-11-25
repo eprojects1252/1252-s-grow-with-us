@@ -2,6 +2,13 @@ name: Build Sri Amirthaa Android APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - work/admin-functionalization
+    paths:
+      - package.json
+      - capacitor.config.ts
+      - .github/workflows/android-apk.yml
 
 permissions:
   contents: read
