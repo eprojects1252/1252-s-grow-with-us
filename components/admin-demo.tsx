@@ -39,7 +39,7 @@ export default function AdminDemo(){
  const accessToken=useCallback(async()=>{if(!supabase)throw new Error("E-Commerce Supabase client is not configured.");const {data,error}=await supabase.auth.getSession();if(error||!data.session?.access_token)throw new Error("Admin session expired. Please sign in again.");return data.session.access_token;},[]);
  const request=useCallback(async(path:string,init:RequestInit={})=>{const token=await accessToken();const response=await fetch(path,{...init,headers:{"Content-Type":"application/json",Authorization:"Bearer "+token,...(init.headers||{})},cache:"no-store"});const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||"Admin request failed.");return body;},[accessToken]);
  const load=useCallback(async()=>{setLoading(true);setError("");try{const result=await request("/api/admin/catalog");setData(result);}catch(e){setError(e instanceof Error?e.message:"Unable to load Admin data.");}finally{setLoading(false);}},[request]);
- useEffect(()=>{if(authorized)void load();},[authorized,load]);
+ useEffect(()=>{let active=true;(async()=>{try{const result=await request("/api/admin/catalog");if(!active)return;setData(result);setAuthorized(true);setError("");}catch(e){if(!active)return;setError(e instanceof Error?e.message:"Unable to verify Admin access.");}})();return()=>{active=false;};},[request]);
  const activeProducts=data.products.filter(p=>p.is_active);
  const lowStock=activeProducts.filter(p=>p.stock_quantity>0&&p.stock_quantity<=5);
  const outStock=activeProducts.filter(p=>p.stock_quantity<=0);
