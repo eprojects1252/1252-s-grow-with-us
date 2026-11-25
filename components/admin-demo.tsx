@@ -77,7 +77,8 @@ export default function AdminDemo(){
  const canOrders=["super_admin","owner","admin","order_manager","support"].includes(role);
  const canAudit=["super_admin","owner","admin"].includes(role);
  const canTeam=["super_admin","owner"].includes(role);
- const nav: [string,string,any][] = [["overview","Overview",ChartNoAxesCombined],["stores","Partner Stores",Store]];
+ const nav: [string,string,any][] = [["overview","Overview",ChartNoAxesCombined]];
+ if(canTeam) nav.push(["stores","Partner Stores",Store]);
  if(canCatalog) nav.push(["products","Products & Stock",Package],["categories","Categories",Layers3]);
  if(canOrders) nav.push(["orders","Orders",ClipboardList]);
  if(canAudit) nav.push(["activity","Admin Activity",Activity]);
