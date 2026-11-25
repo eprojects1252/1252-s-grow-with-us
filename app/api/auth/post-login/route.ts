@@ -46,7 +46,15 @@ export async function POST(request: Request) {
     });
   }
 
-  const { data: storeMemberships, error: storeError } = await admin.from("partner_store_members")\n    .select("store_id,partner_stores!inner(status)")\n    .eq("user_id", authData.user.id).eq("is_active", true).eq("partner_stores.status", "active").limit(1);\n  if (storeError) return NextResponse.json({ error: "Unable to verify Store access. Please try again." }, { status: 503 });\n  if (storeMemberships?.length) return NextResponse.json({ destination: "/store", role: "partner_store" }, {\n    headers: { "Cache-Control": "no-store, max-age=0" }\n  });\n\n  return NextResponse.json({ destination: "/account", role: "customer" }, {
+  const { data: storeMemberships, error: storeError } = await admin.from("partner_store_members")
+    .select("store_id,partner_stores!inner(status)")
+    .eq("user_id", authData.user.id).eq("is_active", true).eq("partner_stores.status", "active").limit(1);
+  if (storeError) return NextResponse.json({ error: "Unable to verify Store access. Please try again." }, { status: 503 });
+  if (storeMemberships?.length) return NextResponse.json({ destination: "/store", role: "partner_store" }, {
+    headers: { "Cache-Control": "no-store, max-age=0" }
+  });
+
+  return NextResponse.json({ destination: "/account", role: "customer" }, {
     headers: { "Cache-Control": "no-store, max-age=0" }
   });
 }
