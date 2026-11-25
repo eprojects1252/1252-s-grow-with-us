@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { ArrowLeft, UserRound, MapPin, Wallet, ReceiptText, RefreshCw, ShieldCheck } from "lucide-react";
@@ -36,9 +37,9 @@ export default function AccountPage() {
   async function load(current: User) {
     setLoading(true); setError("");
     try {
-      const issuer = process.env.NEXT_PUBLIC_SRI_AMIRTHAA_ID_ISSUER || "";
-      if (!issuer) throw new Error("Sri Amirthaa ID connection is not configured.");
-      const endpoint = issuer.replace(/\\/+$/, "").replace(/\\/[^/]+$/, "/customer-portal");
+      const coreUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+      if (!coreUrl) throw new Error("Sri Amirthaa ID connection is not configured.");
+      const endpoint = coreUrl.replace(/[/]+$/, "") + "/functions/v1/customer-portal";
       const idToken = await current.getIdToken(true);
       const response = await fetch(endpoint, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -84,7 +85,7 @@ export default function AccountPage() {
   );
 }
 
-const card: React.CSSProperties = { background: "#fff", border: "1px solid #e7ebf2", borderRadius: 20, padding: 22, marginBottom: 16, boxShadow: "0 12px 35px #17203308" };
+const card: CSSProperties = { background: "#fff", border: "1px solid #e7ebf2", borderRadius: 20, padding: 22, marginBottom: 16, boxShadow: "0 12px 35px #17203308" };
 const muted: React.CSSProperties = { color: "#8490a3", fontSize: 13, lineHeight: 1.6 };
 const eyebrow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 7, color: "#7467cf", fontSize: 10, fontWeight: 850, letterSpacing: 1.2 };
 const heading: React.CSSProperties = { fontSize: 20, margin: "12px 0 5px" };
