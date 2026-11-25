@@ -24,6 +24,7 @@ export default function PartnerStorePage() {
   const [stock,setStock] = useState("0");
   const [loading,setLoading] = useState(true);
   const [inventoryLoading,setInventoryLoading] = useState(false);
+  const [refreshKey,setRefreshKey] = useState(0);
   const [saving,setSaving] = useState(false);
   const [error,setError] = useState("");
   const [notice,setNotice] = useState("");
@@ -66,7 +67,7 @@ export default function PartnerStorePage() {
       finally { if (active) setInventoryLoading(false); }
     })();
     return () => { active = false; };
-  },[selectedStoreId]);
+  },[selectedStoreId,refreshKey]);
 
   const currentStore = stores.find(s=>s.id===selectedStoreId);
   const canManage = currentStore ? ["owner","admin"].includes(currentStore.role) : false;
@@ -129,7 +130,7 @@ export default function PartnerStorePage() {
         {error&&<p role="alert" style={{padding:12,background:"#fff0ed",borderRadius:10,color:"#a13d34",fontSize:12}}>{error}</p>}
         {notice&&<p role="status" style={{padding:12,background:"#eaf5ee",borderRadius:10,color:"#23744e",fontSize:12}}>{notice}</p>}
         <section style={{background:"#fff",border:"1px solid #e4ece7",borderRadius:16,padding:18}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:12}}><h2 style={{fontSize:17,margin:0,display:"flex",alignItems:"center",gap:8}}><Package size={18}/> Store Inventory</h2><button onClick={()=>setSelectedStoreId(id=>id)} style={{height:34,padding:"0 10px",border:"1px solid #dce7e0",borderRadius:8,background:"#fff",color:"#315b49",display:"flex",alignItems:"center",gap:6}}><RefreshCw size={14}/> Refresh</button></div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:12}}><h2 style={{fontSize:17,margin:0,display:"flex",alignItems:"center",gap:8}}><Package size={18}/> Store Inventory</h2><button onClick={()=>setRefreshKey(value=>value+1)} style={{height:34,padding:"0 10px",border:"1px solid #dce7e0",borderRadius:8,background:"#fff",color:"#315b49",display:"flex",alignItems:"center",gap:6}}><RefreshCw size={14}/> Refresh</button></div>
           {inventoryLoading?<p style={{fontSize:12,color:"#71847a"}}>Loading inventory…</p>:inventory.length===0?<p style={{fontSize:12,color:"#71847a"}}>No products have been assigned to this Store yet. Choose products from the central catalogue above.</p>:<div style={{display:"grid",gap:9}}>{inventory.map(item=><article key={item.id} style={{border:"1px solid #edf1ee",borderRadius:12,padding:13,display:"flex",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}><div><b style={{fontSize:13}}>{item.products?.name||"Product"}</b><div style={{fontSize:11,color:"#71847a",marginTop:4}}>SKU: {item.store_sku||item.products?.sku||"—"} · GST: {item.products?.gst_rate??0}%</div></div><div style={{textAlign:"right"}}><b style={{fontSize:13}}>₹{Number(item.price).toLocaleString("en-IN",{maximumFractionDigits:2})}</b><div style={{fontSize:11,color:Number(item.stock_quantity)>0?"#23744e":"#a13d34",marginTop:4}}>Stock: {item.stock_quantity}</div></div></article>)}</div>}
         </section>
         <footer style={{marginTop:22,fontSize:12,color:"#87968e"}}><Link href="/account">Customer Account</Link> · Store inventory is isolated by Store ID. Order checkout integration will use the selected Store once storefront tenancy is enabled.</footer>
