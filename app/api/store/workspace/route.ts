@@ -18,7 +18,11 @@ export async function GET(request: Request) {
     .select("role,is_active,partner_stores!inner(id,store_code,store_name,status,created_at)")
     .eq("user_id", auth.user.id).eq("is_active", true).eq("partner_stores.status", "active");
   if (error) return NextResponse.json({ error: "Unable to load your Store access." }, { status: 503 });
-  const stores = (memberships ?? []).map((m) => ({ ...(m.partner_stores as Record<string, unknown>), role: m.role }));
+  const stores = (members ?? []).flatMap((m) => {
+    const related = m.partner_stores as unknown as Array<Record<string, unknown>>;
+    const store = related?.[0];
+    return store ? [{ ...store, role: m.role }] : [];
+  });
   if (!stores.length) return NextResponse.json({ error: "No active Partner Store is assigned to this account." }, { status: 403 });
   return NextResponse.json({ stores }, { headers: { "Cache-Control": "no-store, max-age=0" } });
 }
