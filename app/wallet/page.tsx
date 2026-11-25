@@ -15,7 +15,7 @@ export default function WalletPage() {
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState("");
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
-  const [walletCurrency, setWalletCurrency] = useState("INR");
+  const [walletCurrency, setWalletCurrency] = useState("SRI");
   const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]);
   const [walletTopups, setWalletTopups] = useState<WalletTopup[]>([]);
   const [walletLoading, setWalletLoading] = useState(true);
