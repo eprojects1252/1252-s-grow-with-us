@@ -4,7 +4,7 @@ import { useRef, useState, type CSSProperties } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Search, WalletCards, ReceiptText,
-  UserRound, BadgePercent, Heart, ClipboardList, SlidersHorizontal, Store
+  UserRound, BadgePercent, Heart, ClipboardList, SlidersHorizontal, Store, ShieldCheck
 } from "lucide-react";
 
 
@@ -66,6 +66,7 @@ const items = [
   { label: "Affiliate Program", icon: AffiliateNetworkIcon, href: "/#affiliate" },
   { label: "Settings", icon: SlidersHorizontal, href: "/settings" },
   { label: "Stores", icon: StoresNetworkIcon, href: "/stores" },
+  { label: "Admin", icon: ShieldCheck, href: "/admin" },
 ];
 
 export default function SiteSidebar() {
