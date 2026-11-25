@@ -48,12 +48,12 @@ export default function SriAmirthaaCallbackPage() {
           cache: "no-store"
         });
         const destination = await destinationResponse.json().catch(() => ({}));
-        if (!destinationResponse.ok || !["/admin", "/account"].includes(destination.destination)) {
+        if (!destinationResponse.ok || !["/admin", "/account", "/store"].includes(destination.destination)) {
           throw new Error(destination.error || "Unable to verify your account access.");
         }
         if (!active) return;
         window.history.replaceState({}, "", "/auth/sri-amirthaa/callback");
-        setMessage(destination.destination === "/admin" ? "Admin access verified. Opening Admin Dashboard..." : "Sign-in successful. Opening your account...");
+        setMessage(destination.destination === "/admin" ? "Admin access verified. Opening Admin Dashboard..." : destination.destination === "/store" ? "Store access verified. Opening your Partner Store..." : "Sign-in successful. Opening your account...");
         router.replace(destination.destination);
       } catch (error) {
         if (active) setMessage(error instanceof Error ? error.message : "Sri Amirthaa ID sign-in failed.");
