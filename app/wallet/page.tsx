@@ -56,7 +56,7 @@ export default function WalletPage() {
             const idToken = await user.getIdToken();
             const coreUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
             if (!coreUrl) throw new Error("Sri Amirthaa Wallet is not configured.");
-            const response = await fetch(coreUrl.replace(/\\/+$/, "") + "/functions/v1/customer-portal", {
+            const response = await fetch(coreUrl.replace(/\/+$/, "") + "/functions/v1/customer-portal", {
               method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store",
               body: JSON.stringify({ idToken, action: "load" })
             });
