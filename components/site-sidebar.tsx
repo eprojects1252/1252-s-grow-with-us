@@ -57,7 +57,7 @@ const items = [
   { label: "All Categories", icon: CategoryOrbitIcon, href: "/#categories" },
   { label: "UPI & Wallet", icon: WalletCards, href: "/wallet" },
   { label: "Bills & Recharges", icon: ReceiptText, href: "/recharge-bills" },
-  { label: "My Account", icon: UserRound, href: "/login" },
+  { label: "My Account", icon: UserRound, href: "/account" },
   { label: "Offers", icon: BadgePercent, href: "/offers" },
   { label: "Favorite", icon: Heart, href: "/#favorites" },
   { label: "Orders", icon: ClipboardList, href: "/login" },
