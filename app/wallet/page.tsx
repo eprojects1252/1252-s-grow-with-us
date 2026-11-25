@@ -127,12 +127,12 @@ export default function WalletPage() {
 
         <section className="amc-wallet-summary">
           <div><span className="amc-wallet-eyebrow">YOUR CENTRAL SRI AMIRTHAA WALLET</span><h2>Wallet balance</h2><p>Same balance and ledger across connected Sri Amirthaa stores.</p></div>
-          <strong>{walletLoading ? "Loading…" : walletBalance === null ? "Sign in to view" : new Intl.NumberFormat("en-IN",{style:"currency",currency:walletCurrency,maximumFractionDigits:2}).format(walletBalance)}</strong>
+          <strong>{walletLoading ? "Loading…" : walletBalance === null ? "Sign in to view" : `${formatINR(walletBalance)} ${walletCurrency}`}</strong>
           {walletError && <p className="amc-wallet-error">{walletError}</p>}
         </section>
         {!walletLoading && walletBalance !== null && <section className="amc-card amc-ledger-card">
           <div className="amc-section-title"><span className="amc-step">↻</span><div><h2>Shared wallet ledger</h2><p>Transactions made from any connected store appear here.</p></div></div>
-          {walletTransactions.length === 0 ? <p className="amc-empty-ledger">No wallet transactions yet.</p> : <div className="amc-ledger-list">{walletTransactions.map((item) => <div className="amc-ledger-row" key={item.id}><div><b>{item.description || item.transaction_type.replaceAll("_"," ")}</b><small>{new Date(item.created_at).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}</small></div><div><strong className={Number(item.amount)>=0?"credit":"debit"}>{Number(item.amount)>=0?"+":"−"}{new Intl.NumberFormat("en-IN",{style:"currency",currency:walletCurrency,maximumFractionDigits:2}).format(Math.abs(Number(item.amount)))}</strong><small>Balance: {new Intl.NumberFormat("en-IN",{style:"currency",currency:walletCurrency,maximumFractionDigits:2}).format(Number(item.balance_after))}</small></div></div>)}</div>}
+          {walletTransactions.length === 0 ? <p className="amc-empty-ledger">No wallet transactions yet.</p> : <div className="amc-ledger-list">{walletTransactions.map((item) => <div className="amc-ledger-row" key={item.id}><div><b>{item.description || item.transaction_type.replaceAll("_"," ")}</b><small>{new Date(item.created_at).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}</small></div><div><strong className={Number(item.amount)>=0?"credit":"debit"}>{Number(item.amount)>=0?"+":"−"}{`${formatINR(Math.abs(Number(item.amount)))} ${walletCurrency}`}</strong><small>Balance: {`${formatINR(Number(item.balance_after))} ${walletCurrency}`}</small></div></div>)}</div>}
           {walletTopups.length>0 && <div className="amc-pending-list"><b>Recent top-up requests</b>{walletTopups.slice(0,5).map((item)=><div key={item.id}><span>₹{formatINR(Number(item.amount))} · {item.payment_reference}</span><strong>{item.status.replaceAll("_"," ")}</strong></div>)}</div>}
         </section>}
         <section className="amc-layout">
