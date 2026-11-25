@@ -4,10 +4,10 @@ import { requireAdmin, isAdminContext, requireRoles } from "@/lib/admin-server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const CATALOG_ROLES = ["super_admin", "owner", "admin", "catalog_manager"] as const;
-const ORDER_ROLES = ["super_admin", "owner", "admin", "order_manager", "support"] as const;
-const AUDIT_ROLES = ["super_admin", "owner", "admin"] as const;
-const TEAM_ROLES = ["super_admin", "owner"] as const;
+const CATALOG_ROLES = ["chief_admin", "sub_admin"] as const;
+const ORDER_ROLES = ["chief_admin", "sub_admin"] as const;
+const AUDIT_ROLES = ["chief_admin"] as const;
+const TEAM_ROLES = ["chief_admin"] as const;
 
 export async function GET(request: Request) {
   const context = await requireAdmin(request);
