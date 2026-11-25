@@ -23,6 +23,8 @@ type PortalData = {
   addresses: Address[];
   wallet: { balance: number; currency_code: string; updated_at?: string } | null;
   transactions: Transaction[];
+  topups?: { id: string; amount: number; payment_reference: string; status: string; created_at: string }[];
+  activities?: { id: string; app_client_id: string; activity_type: string; description?: string | null; created_at: string }[];
 };
 
 const auth = getAuth(firebaseApp);
@@ -74,6 +76,12 @@ export default function AccountPage() {
           </section>
           <section style={card}><div style={eyebrow}><MapPin size={15}/> SAVED ADDRESSES · CORE ID</div>
             {data.addresses.length ? data.addresses.map(a => <article key={a.id} style={{ padding: "15px 0", borderBottom: "1px solid #edf0f5" }}><div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}><b>{a.label || "Address"}</b>{a.is_default && <span style={tag}>Default</span>}</div><p style={{ ...muted, color: "#46536a", lineHeight: 1.7 }}>{a.recipient_name}<br/>{a.address_line1}{a.address_line2 ? ", "+a.address_line2 : ""}{a.landmark ? ", "+a.landmark : ""}<br/>{a.city}, {a.state} - {a.postal_code}<br/>{a.country || "India"}{a.phone_e164 ? " · "+a.phone_e164 : ""}</p></article>) : <p style={muted}>No saved address is linked to this Sri Amirthaa ID yet.</p>}
+          </section>
+          <section style={card}><div style={eyebrow}><ReceiptText size={15}/> TOP-UP REQUESTS</div>
+            {data.topups?.length ? data.topups.map(t => <article key={t.id} style={{display:"flex",justifyContent:"space-between",gap:12,flexWrap:"wrap",padding:"12px 0",borderBottom:"1px solid #edf0f5"}}><div><b>{inr(Number(t.amount))}</b><p style={muted}>UTR: {t.payment_reference} · {new Date(t.created_at).toLocaleString("en-IN")}</p></div><span style={{fontSize:11,fontWeight:800,color:t.status==="approved"?"#16845b":t.status==="rejected"?"#b42318":"#9a6700"}}>{t.status.toUpperCase()}</span></article>) : <p style={muted}>No top-up requests yet.</p>}
+          </section>
+          <section style={card}><div style={eyebrow}><ShieldCheck size={15}/> CONNECTED WEBSITE ACTIVITY</div>
+            {data.activities?.length ? data.activities.map(a => <article key={a.id} style={{padding:"11px 0",borderBottom:"1px solid #edf0f5"}}><b>{a.description || a.activity_type}</b><p style={muted}>{a.app_client_id} · {new Date(a.created_at).toLocaleString("en-IN")}</p></article>) : <p style={muted}>No connected-site activity recorded yet.</p>}
           </section>
           <section style={card}><div style={eyebrow}><ReceiptText size={15}/> WALLET LEDGER · LATEST TRANSACTIONS</div>
             {data.transactions.length ? <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse", minWidth: 520 }}><thead><tr>{["Date","Description","Type","Amount","Balance after"].map(x=><th key={x} style={th}>{x}</th>)}</tr></thead><tbody>{data.transactions.map(t=><tr key={t.id}><td style={td}>{new Date(t.created_at).toLocaleString("en-IN")}</td><td style={td}>{t.description || t.reference_type || "Wallet transaction"}</td><td style={td}>{t.transaction_type}</td><td style={td}>{inr(Number(t.amount))}</td><td style={td}>{inr(Number(t.balance_after))}</td></tr>)}</tbody></table></div> : <p style={muted}>No wallet transactions yet. Your balance is {inr(Number(data.wallet?.balance || 0))}.</p>}
